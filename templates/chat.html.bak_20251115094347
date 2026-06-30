@@ -1,0 +1,3596 @@
+ <!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chat — Care Companion</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+  :root{
+    --blue-900:#0b3b66;
+    --blue-700:#1066a3;
+    --blue-500:#2b9bd6;
+    --bg:#f6fbff;
+    --muted:#6b7280;
+    --glass: rgba(255,255,255,0.85);
+    --radius:12px;
+    --shadow: 0 6px 30px rgba(8,30,60,0.08);
+    --danger: #ef4444;
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+  }
+  html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg),#ffffff);-webkit-font-smoothing:antialiased}
+  .container{max-width:1200px;margin:26px auto;display:grid;grid-template-columns:84px 320px 1fr;gap:18px;min-height:74vh;padding:12px;}
+  /* LEFT NAV (narrow) */
+  .nav {
+    background:var(--glass);border-radius:12px;padding:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:14px;align-items:center;
+  }
+  .nav .logo{width:44px;height:44px;border-radius:10px;background:linear-gradient(90deg,var(--blue-700),var(--blue-500));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800; cursor:pointer}
+  .nav a{display:flex;flex-direction:column;align-items:center;gap:6px;text-decoration:none;color:var(--muted);font-size:13px;padding:8px;border-radius:10px;width:100%;justify-content:center}
+  .nav a.active, .nav a:hover{background:rgba(11,66,160,0.06);color:var(--blue-900)}
+  .nav i{font-size:18px}
+  .nav .small{font-size:11px;color:var(--muted);}
+
+  /* MIDDLE: conversations list */
+  .conversations {
+    background:white;border-radius:12px;padding:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;
+  }
+  .conversations header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}
+  .conversations .title{font-weight:700}
+  .conversations .search{display:flex;gap:8px}
+  .conversations .search input{padding:8px 10px;border-radius:10px;border:1px solid rgba(10,25,47,0.04);width:100%}
+  .conv-list{overflow:auto;border-radius:8px;padding-right:6px}
+  .conv-item{display:flex;gap:10px;align-items:center;padding:10px;border-radius:10px;cursor:pointer}
+  .conv-item:hover{background:rgba(11,66,160,0.03)}
+  .conv-item .avatar{width:44px;height:44px;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center}
+  .conv-item .avatar img{width:44px;height:44px;object-fit:cover;display:block;margin:0 auto}
+  .conv-item .meta{flex:1;min-width:0}
+  .conv-item .name{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .conv-item .snippet{font-size:13px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .conv-item .time{font-size:12px;color:var(--muted);min-width:70px;text-align:right}
+  .empty-convos{padding:38px;text-align:center;color:var(--muted)}
+
+  /* Selected and unread styles */
+  .conv-item.selected { background: rgba(11,66,160,0.06); outline: 1px solid rgba(11,66,160,0.04); }
+  .conv-item.unread .name { font-weight: 800; }
+  .conv-item .badge {
+    background: var(--blue-500);
+    color: white;
+    padding: 6px 8px;
+    border-radius: 999px;
+    font-size: 12px;
+    margin-left: 8px;
+    min-width: 22px;
+    text-align: center;
+  }
+
+  /* RIGHT: chat area (main) */
+  .chat {
+    background:white;border-radius:12px;padding:12px;box-shadow:var(--shadow);display:flex;flex-direction:column;
+  }
+  .chat .header{display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border-bottom:1px solid rgba(10,25,47,0.04)}
+  .chat .header .left{display:flex;gap:12px;align-items:center}
+  .avatar-sm{width:46px;height:46px;border-radius:10px;overflow:hidden}
+  .avatar-sm img{width:100%;height:100%;object-fit:cover}
+  .chat .title{font-weight:700}
+  .chat .sub{font-size:13px;color:var(--muted)}
+  .messages{flex:1;overflow:auto;padding:18px 12px;display:flex;flex-direction:column;gap:10px;position:relative}
+  .msg-row{display:flex;gap:10px;align-items:flex-end;max-width:75%;position:relative;transition: background .12s}
+  .msg-row.me{margin-left:auto;flex-direction:row-reverse}
+  .bubble{padding:10px 12px;border-radius:12px;background:linear-gradient(180deg,var(--blue-500),var(--blue-700));color:#fff}
+  .bubble.me{background:linear-gradient(180deg,#e9f6ff,#d4f0ff);color:var(--blue-900);border:1px solid rgba(10,25,47,0.06)}
+  .meta-time{font-size:12px;color:var(--muted);margin-top:6px}
+  .composer{display:flex;gap:8px;align-items:center;padding:10px;border-top:1px solid rgba(10,25,47,0.04)}
+  .composer textarea{flex:1;padding:12px;border-radius:10px;border:1px solid rgba(10,25,47,0.04);outline:none;resize:none;height:44px}
+  .btn{padding:9px 12px;border-radius:10px;border:0;background:var(--blue-700);color:white;cursor:pointer}
+  .btn.secondary{background:transparent;border:1px solid rgba(10,25,47,0.06);color:var(--blue-900)}
+
+  /* Info dropdown (placed near header actions) and context menu */
+  .info-menu, .ctx-menu {
+    position: absolute;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 6px 24px rgba(8,30,60,0.12);
+    padding: 8px;
+    min-width: 200px;
+    z-index: 1200;
+    font-size: 14px;
+  }
+  .info-menu button, .ctx-menu button {
+    display: flex;
+    width:100%;
+    text-align:left;
+    padding:8px 10px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    border-radius:6px;
+    align-items:center;
+    gap:8px;
+  }
+  .info-menu button:hover, .ctx-menu button:hover { background: rgba(11,66,160,0.05); }
+
+  .info-menu button i, .ctx-menu button i { width:18px; display:inline-block; text-align:center; margin-right:10px; font-size:14px; }
+
+  .danger { color: var(--danger); }
+  .ctx-menu button.danger:hover, .info-menu button.danger:hover { background: rgba(239,68,68,0.06); }
+
+  /* msg toolbar (when clicking the dot) - STACKED / VERTICAL layout */
+  .msg-toolbar {
+    position: absolute;
+    display:flex;
+    flex-direction: column;           /* make toolbar vertical */
+    align-items: stretch;
+    gap: 6px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(8,30,60,0.12);
+    padding:6px;
+    z-index:1400 !important; /* raised so toolbar sits above emoji pickers */
+    font-size:13px;
+    min-width: 160px;                /* reasonable minimum width for vertical stack */
+  }
+  /* toolbar buttons stacked and fill width */
+  .msg-toolbar button {
+    border:0;
+    background:transparent;
+    padding:8px 10px;
+    border-radius:6px;
+    cursor:pointer;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    width:100%;                      /* full width so buttons are vertical and aligned */
+    justify-content:flex-start;
+    text-align:left;
+  }
+  .msg-toolbar button .fa { margin-right:6px; width:18px; text-align:center; }
+  .msg-toolbar button.danger { color: var(--danger); }
+  .msg-toolbar button:hover { background: rgba(11,66,160,0.03); }
+
+  /* Invisible hotspot that sits beside each bubble.
+     Hovering it reveals the visible three-dot and react buttons.
+  */
+  .msg-actions-hotspot {
+    position: absolute;
+    width:70px;   /* widened to cover both buttons side-by-side */
+    height:36px;
+    border-radius:50%;
+    background: transparent;
+    cursor: pointer;
+    z-index: 800;
+  }
+
+  /* The visible controls wrapper we show when the hotspot is hovered (or the controls itself is hovered).
+     Hidden by default.
+  */
+  .msg-actions-wrap {
+    position: absolute;
+    display:flex;
+    gap:8px;
+    align-items:center;
+    background: transparent;
+    z-index: 900;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity .12s ease, transform .12s ease;
+    pointer-events: none;
+  }
+
+  .msg-actions-wrap.visible { opacity:1; visibility:visible; transform:scale(1); pointer-events: auto; }
+
+  .msg-actions-button, .react-button {
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background: rgba(0,0,0,0.03);
+    border: none;
+    font-size:14px;
+    cursor:pointer;
+  }
+
+  /* icons color - use muted color to match three dots look */
+  .msg-actions-button .fa, .react-button .fa { color: rgba(0,0,0,0.55); }
+
+  /* emoji-picker popup */
+  .emoji-picker {
+    position: absolute;
+    background: white;
+    border-radius:8px;
+    box-shadow: 0 8px 30px rgba(8,30,60,0.12);
+    padding:8px;
+    display:flex;
+    gap:6px;
+    flex-wrap:wrap;
+    z-index:1300;
+    min-width:160px;
+    max-width:320px;
+    user-select: none;
+  }
+  .emoji-picker.full { max-width:420px; padding:10px; grid-auto-rows:28px; display:grid; grid-template-columns: repeat(auto-fill, 36px); gap:6px; justify-content:start; }
+  .emoji-picker button {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding:6px;
+    font-size:18px;
+    border-radius:6px;
+    line-height:1;
+  }
+  .emoji-picker button:hover { background: rgba(11,66,160,0.04); }
+
+  /* quick "more" button style */
+  .emoji-more-btn { font-size:18px; padding:6px 10px; border-radius:6px; background: rgba(0,0,0,0.03); }
+
+  /* reply snippet inside message bubble */
+  .reply-snippet {
+    background: rgba(255,255,255,0.12);
+    color: rgba(255,255,255,0.9);
+    padding:6px 8px;
+    border-radius:8px;
+    font-size:13px;
+    margin-bottom:8px;
+    max-width: 320px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .bubble.me .reply-snippet { background: rgba(10,25,47,0.04); color: var(--muted); }
+
+  /* reactions row shown under each message */
+  .reactions-row {
+    display:flex;
+    gap:8px;
+    margin-top:8px;
+    align-items:center;
+    font-size:13px;
+  }
+  .reaction-pill {
+    display:inline-flex;
+    gap:6px;
+    align-items:center;
+    padding:6px 8px;
+    background: rgba(0,0,0,0.04);
+    border-radius:999px;
+    cursor:pointer;
+  }
+
+  /* composer reply preview */
+  .composer-reply {
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:8px;
+    border-top:1px solid rgba(0,0,0,0.04);
+    border-bottom:1px solid rgba(0,0,0,0.04);
+    background: rgba(250,250,250,0.6);
+    font-size:13px;
+  }
+  .composer-reply .reply-text { color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+  .composer-reply .reply-cancel { background:transparent; border:0; cursor:pointer; color:var(--muted) }
+
+  /* make room for center controls so bubble doesn't overlap them */
+  .msg-row { padding-left: 12px; padding-right: 12px; }
+  .msg-row.me { padding-left: 48px; padding-right: 12px; }
+  .msg-row:not(.me) { padding-right: 48px; padding-left: 12px; }
+
+  /* Forward modal */
+  .forward-modal-backdrop{
+    position:fixed; inset:0; background: rgba(0,0,0,0.35); display:flex; align-items:center; justify-content:center; z-index:1600;
+  }
+  .forward-modal {
+    width:92%;
+    max-width:860px;
+    background:#fff;
+    border-radius:12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.18);
+    overflow:hidden;
+    display:flex;
+    gap:0;
+  }
+  .forward-left { width: 360px; border-right:1px solid rgba(0,0,0,0.04); padding:14px; }
+  .forward-right { flex:1; padding:14px; }
+  .forward-title { font-weight:700; margin-bottom:8px; }
+  .forward-quick { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px; }
+  .forward-quick button { display:flex; align-items:center; gap:8px; padding:8px 10px; border-radius:8px; border:1px solid rgba(0,0,0,0.06); background:transparent; cursor:pointer; transition: transform .06s ease, box-shadow .12s ease; }
+  .forward-quick button:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(8,30,60,0.08); }
+  .forward-quick .icon { width:22px; text-align:center; display:inline-flex; align-items:center; justify-content:center; }
+  .forward-quick button .fa { font-size:16px; line-height:1; }
+
+  /* App-specific quick button color styling */
+  /* Icons and text inherit the color, border uses a soft tint */
+  .forward-quick button { color: #333; }
+  .forward-quick button .icon { color: inherit; }
+  .forward-quick .app-email { border-color: rgba(0,0,0,0.12); color: #4b5563; }
+  .forward-quick .app-whatsapp { border-color: #25D366; color: #0b8a4a; }
+  .forward-quick .app-facebook { border-color: #1877F2; color: #1877F2; }
+  .forward-quick .app-instagram { border-color: #E4405F; color: #E4405F; }
+  .forward-quick .app-tiktok { border-color: #000000; color: #010101; }
+  .forward-quick .app-x { border-color: #1DA1F2; color: #1DA1F2; }
+  .forward-quick .app-telegram { border-color: #2AABEE; color: #2AABEE; }
+  .forward-quick .app-copy { border-color: rgba(0,0,0,0.12); color: #374151; }
+
+  /* subtle rounded icon background for stronger brand recognition (optional) */
+  .forward-quick button .icon { width:22px; height:22px; border-radius:6px; display:inline-flex; align-items:center; justify-content:center; }
+
+  .forward-list { max-height:420px; overflow:auto; margin-top:8px; }
+  .forward-item { display:flex; gap:10px; align-items:center; padding:8px; border-radius:8px; cursor:pointer; }
+  .forward-item:hover { background: rgba(11,66,160,0.03); }
+  .forward-item .avatar { width:40px; height:40px; border-radius:8px; overflow:hidden; display:flex; align-items:center; justify-content:center; }
+  .forward-item .meta { flex:1; min-width:0; }
+  .forward-actions { display:flex; gap:8px; margin-top:10px; }
+  .small-muted { font-size:13px; color:var(--muted); }
+
+  @media (max-width:1000px){
+    .container{grid-template-columns:64px 1fr; grid-auto-rows:auto}
+    .conversations{display:none}
+    .forward-left{ display:none; }
+    .forward-modal { max-width: 95%; flex-direction:column; }
+  }
+
+  /* Block-banner styling (drop into existing <style>) */
+.blocked-banner {
+  display: none;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fff1f0; /* light red */
+  border: 1px solid rgba(239,68,68,0.12);
+  color: #7f1d1d;
+  font-size: 14px;
+  margin: 8px 12px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.blocked-banner .msg { flex: 1; }
+.blocked-banner button { margin-left: 12px; padding:6px 10px; border-radius:8px; border:0; cursor:pointer; background:#ef4444; color:white; }
+.blocked-banner .muted-btn { background: transparent; border: 1px solid rgba(0,0,0,0.06); color: #374151; }
+ 
+
+  /* Slight tweaks for report modal to look modern */
+#reportModalBackdrop .forward-modal { gap: 12px; }
+#reportQuickReasons button { padding:8px 10px; border-radius:8px; border:1px solid rgba(0,0,0,0.06); background:transparent; cursor:pointer; }
+#reportQuickReasons button:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(8,30,60,0.06); }
+#reportSelectedReason { font-weight:600; }
+ 
+
+
+/* composer icon sizing */
+.composer .btn.secondary { width:44px; height:44px; display:inline-flex; justify-content:center; align-items:center; padding:0; }
+.composer textarea { min-height:44px; max-height:160px; overflow:auto; }
+
+/* Emoji Panel (vertical, tall, scrollable) */
+.emoji-panel {
+  position: absolute;
+  bottom: 84px; /* above composer */
+  right: 26px;
+  width: 340px;
+  max-height: 520px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 12px 48px rgba(8,30,60,0.16);
+  overflow-y: auto;
+  padding: 10px;
+  z-index: 2000;
+  display: none;
+}
+
+/* emoji grid - many columns but overall vertical list feel */
+.emoji-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap:6px; align-items:center; justify-items:center; }
+.emoji-grid button { border:0; background:transparent; font-size:20px; width:36px; height:36px; border-radius:6px; cursor:pointer; }
+.emoji-grid button:hover { background: rgba(11,66,160,0.04); transform: translateY(-2px); }
+
+/* emoji category header (optional) */
+.emoji-category { font-weight:700; margin:8px 4px; color:var(--muted); }
+
+/* narrow screens tweak */
+@media (max-width:1000px){
+  .emoji-panel { right: 8px; left: 8px; width: auto; bottom: 80px; max-height: 46vh; }
+}
+
+/* attachments inside message bubbles */
+.message-attachments { margin-top:8px; display:flex; gap:8px; flex-wrap:wrap; align-items:flex-start; }
+.message-attachments .att-img { max-width:320px; max-height:220px; border-radius:10px; object-fit:cover; border:1px solid rgba(0,0,0,0.06); display:block; }
+.message-attachments .att-thumb { width:120px; height:80px; object-fit:cover; border-radius:8px; }
+.message-attachments a.att-link { display:inline-block; text-decoration:none; color:inherit; }
+
+
+/* ---------- Centered boxed image viewer (fits image into a box) ---------- */
+
+.image-viewer-overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  background: rgba(0,0,0,0.45);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+.image-viewer-overlay.visible { display: flex; }
+
+/* The box that contains the image (centered, not fullscreen) */
+.image-viewer-inner {
+  width: min(900px, 90vw);    /* desktop max width 900px, responsive */
+  height: min(600px, 70vh);   /* desktop max height 600px, responsive */
+  max-width: 90vw;
+  max-height: 70vh;
+  background: #0b1220;        /* subtle dark frame */
+  border-radius: 10px;
+  padding: 12px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;        /* center vertically */
+  justify-content: center;    /* center horizontally */
+  position: relative;
+  box-shadow: 0 12px 48px rgba(2,6,23,0.48);
+}
+
+/* framing area inside the box (keeps caption/close layered) */
+.image-viewer-frame {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Image: always fully visible inside the box */
+.image-viewer-frame img.viewer-img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;           /* show entire image, preserve ratio */
+  object-position: center center;
+  border-radius: 6px;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.45);
+  background: rgba(255,255,255,0.02);
+}
+
+/* Close button top-right of the box */
+.image-viewer-close {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  z-index: 12;
+  border: 0;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: #fff;
+  background: rgba(0,0,0,0.35);
+  font-weight: 700;
+}
+
+/* Caption bottom-left inside the box */
+.image-viewer-caption {
+  position: absolute;
+  left: 12px;
+  bottom: 10px;
+  z-index: 11;
+  color: #fff;
+  font-size: 13px;
+  max-width: calc(100% - 48px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Mobile tweaks: slightly smaller box */
+@media (max-width:600px){
+  .image-viewer-inner { width: min(92vw, 92vw); height: min(56vh, 56vh); padding: 8px; }
+  .image-viewer-frame img.viewer-img { max-width: 100%; max-height: 100%; }
+  .image-viewer-close { right: 8px; top: 8px; padding:6px 8px; }
+  .image-viewer-caption { left: 8px; bottom: 8px; font-size:12px; }
+}
+
+
+
+
+
+</style>
+ 
+  
+</head>
+<body>
+  <div class="container" role="application">
+
+    <!-- LEFT NAV (permanent) -->
+    <nav class="nav" aria-label="main navigation">
+      <div class="logo" id="ccLogo">CC</div>
+
+      <a href="{{ url_for('home') }}" title="Home"><i class="fa fa-house"></i><div class="small">Home</div></a>
+      <a href="{{ url_for('find_caregiver') }}" title="Find caregivers"><i class="fa fa-users"></i><div class="small">Find</div></a>
+      <a class="active" href="{{ url_for('chat_page', other_id=0) | replace('/0','') }}" title="Messages"><i class="fa fa-envelope"></i><div class="small">Messages</div></a>
+      <a href="{{ url_for('profile_setup') }}" title="Profile"><i class="fa fa-user"></i><div class="small">Profile</div></a>
+
+      <div style="flex:1"></div>
+      <div style="font-size:12px;color:var(--muted);text-align:center">Care Companion</div>
+    </nav>
+
+    <!-- MIDDLE: Conversations list (only actual conversations are shown) -->
+    <section class="conversations" aria-label="conversations">
+      <header>
+        <div>
+          <div class="title">Messages</div>
+          <div class="small" style="color:var(--muted)">Direct messages</div>
+        </div>
+        <div class="search" style="width:160px">
+          <input id="searchInput" placeholder="Search" />
+        </div>
+      </header>
+
+      <div class="conv-list" id="convList" aria-live="polite" role="list">
+        <!-- conversation items injected here -->
+      </div>
+
+      <div id="noConvos" class="empty-convos" style="display:none">
+        <div style="font-weight:700;font-size:15px">No conversations yet</div>
+        <div style="margin-top:8px;color:var(--muted)">Start a chat from the Connections page or search for a user.</div>
+      </div>
+    </section>
+
+    <!-- RIGHT: Chat / Profile / Content -->
+    <main class="chat" aria-label="chat window">
+      <div class="header">
+        <div class="left">
+          <div class="avatar-sm"><img id="otherAvatar" src="{{ url_for('static', filename='default-avatar.png') }}" alt=""></div>
+          <div>
+            <div class="title" id="otherName">No conversation selected</div>
+            <div class="sub" id="otherSub">Select a conversation to start</div>
+          </div>
+        </div>
+        <div>
+          <!-- Info button: opens the Report / Block / Clear UI (common place on many sites) -->
+          <button class="btn secondary" id="infoBtn" title="Conversation menu"><i class="fa fa-ellipsis-vertical"></i></button>
+        </div>
+      </div>
+
+      <div class="messages" id="messages">
+        <div id="emptyHint" style="text-align:center;color:var(--muted);padding:20px">Choose a conversation from the middle column to view messages.</div>
+      </div>
+
+      <!-- composer reply preview will be injected here when replying -->
+      <div id="composerReplyHolder" style="display:none"></div>
+
+    <!-- Composer: media + emoji + textarea + send -->
+     <div class="composer" role="form" aria-label="message composer">
+       <input id="msgFileInput" type="file" accept="image/*" style="display:none" />
+       <button id="mediaBtn" class="btn secondary" title="Send photo" aria-label="Send photo" type="button" style="display:flex;align-items:center;gap:8px;">
+         <i class="fa fa-paperclip" aria-hidden="true"></i>
+       </button>
+
+       <button id="emojiBtn" class="btn secondary" title="Emoji" aria-label="Emoji" type="button" style="display:flex;align-items:center;gap:8px;">
+         <i class="fa fa-face-smile" aria-hidden="true"></i>
+       </button>
+
+       <textarea id="msgInput" placeholder="Start a new message…" rows="1" aria-label="Message text"></textarea>
+       <button id="sendBtn" class="btn" title="Send" aria-label="Send message"><i class="fa fa-paper-plane"></i></button>
+     </div>
+ 
+
+
+     <!-- Report Modal (insert once in the page) -->
+<div id="reportModalBackdrop" class="forward-modal-backdrop" style="display:none; z-index:1700;">
+  <div class="forward-modal" role="dialog" aria-modal="true" aria-label="Report user" style="max-width:720px;">
+    <div class="forward-left" style="width:360px;">
+      <div style="font-weight:700; margin-bottom:8px;">Report user</div>
+      <div class="small-muted">We take reports seriously. Describe the issue and we'll review it.</div>
+
+      <div style="margin-top:12px; font-weight:600;">Why are you reporting?</div>
+      <div class="forward-quick" id="reportQuickReasons" style="margin-top:8px;">
+        <!-- Quick reason buttons injected by JS -->
+      </div>
+
+      <div style="margin-top:12px;">
+        <div style="font-weight:600; margin-bottom:6px;">Additional details (optional)</div>
+        <textarea id="reportDetails" placeholder="Add anything that helps (examples, timestamps, links)..." style="width:100%;height:160px;padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,0.06);"></textarea>
+      </div>
+    </div>
+
+    <div class="forward-right">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-weight:700">Preview & submit</div>
+        <div><button id="reportCloseBtn" class="btn secondary">Close</button></div>
+      </div>
+
+      <div id="reportPreview" style="margin-top:12px;border-radius:8px;padding:12px;background:rgba(0,0,0,0.02);min-height:120px;">
+        <div style="font-weight:600" id="reportTargetTitle">Reporting user</div>
+        <div id="reportSelectedReason" style="color:var(--muted);margin-top:6px"></div>
+        <div id="reportPreviewDetails" style="margin-top:10px;white-space:pre-wrap;color:#111"></div>
+      </div>
+
+      <div class="forward-actions" style="justify-content:flex-end;margin-top:12px;">
+        <button id="reportSubmit" class="btn" style="min-width:120px;">Send report</button>
+        <button id="reportCancel" class="btn secondary" style="margin-left:8px;">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+ 
+<!-- Emoji panel (created inline; initially hidden) -->
+<div id="emojiPanel" class="emoji-panel" aria-hidden="true" role="dialog" aria-label="Emoji picker">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+    <div style="font-weight:700">Emojis</div>
+    <div style="font-size:13px;color:var(--muted)">Click to insert</div>
+  </div>
+  <div id="emojiContent" class="emoji-grid" role="list"></div>
+</div>
+
+
+<script>
+
+/* ---- Boot variables ---- */
+const INIT_OTHER_ID = {{ other_id|tojson }};
+
+/* ---- Socket (graceful) ---- */
+const socket = (typeof io !== 'undefined') ? io() : null;
+
+/* ---- Elements ---- */
+const convList = document.getElementById('convList');
+const noConvos = document.getElementById('noConvos');
+const searchInput = document.getElementById('searchInput');
+let messagesEl = document.getElementById('messages'); // declared once
+const otherName = document.getElementById('otherName');
+const otherSub = document.getElementById('otherSub');
+const otherAvatar = document.getElementById('otherAvatar');
+const msgInput = document.getElementById('msgInput');
+const sendBtn = document.getElementById('sendBtn');
+const infoBtnEl = document.getElementById('infoBtn');
+const ccLogo = document.getElementById('ccLogo');
+const composerReplyHolder = document.getElementById('composerReplyHolder');
+
+let currentUser = null;
+let conversationId = null;
+let activeOtherId = null;
+let conversations = []; // array of contact objects from /api/contacts that represent actual conversations
+
+// guard so we only auto-open init id once
+let hasAutoOpened = false;
+
+/* toolbar / reaction state */
+let replyTo = null;          // { messageId, senderName, textPreview }
+
+/* picker globals */
+let quickPicker = null;
+let fullPicker = null;
+
+/* ---- Utilities ---- */
+function escapeHtml(s){ return String(s||'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+function humanTime(ts){ if(!ts) return ''; try{ const d=new Date(ts); return isNaN(d.getTime())?ts:d.toLocaleString(); }catch(e){return ts} }
+
+function makeAvatarUrl(u){
+  const DEFAULT = '{{ url_for("static", filename="default-avatar.png") }}';
+  if(!u) return DEFAULT;
+  if(typeof u === 'object'){
+    if(u.avatar_url) return makeAvatarUrl(u.avatar_url);
+    return DEFAULT;
+  }
+  const s = String(u||'').trim();
+  if(!s) return DEFAULT;
+  if(s.startsWith('http://') || s.startsWith('https://') || s.startsWith('/')) return s;
+  return '/uploads/' + s;
+}
+
+/* ---- Load me + contacts ---- */
+async function loadData(){
+  try{
+    const meRes = await fetch('/api/me');
+    if(!meRes.ok) throw new Error('unauth');
+    currentUser = await meRes.json();
+
+    const contactsRes = await fetch('/api/contacts');
+    let contacts = contactsRes.ok ? await contactsRes.json() : [];
+
+    // Keep all contacts returned by server (these should represent users you've chatted with).
+    // Defensive: remove clearly empty entries and sort newest-first by last message / activity.
+    conversations = Array.isArray(contacts) ? contacts.filter(Boolean) : [];
+
+    conversations.sort((a, b) => {
+      const ta = (a && a.last_message && a.last_message.created_at) || a.last_activity || a.last_seen || a.updated_at || '';
+      const tb = (b && b.last_message && b.last_message.created_at) || b.last_activity || b.last_seen || b.updated_at || '';
+      const da = isNaN(new Date(ta).getTime()) ? 0 : new Date(ta).getTime();
+      const db = isNaN(new Date(tb).getTime()) ? 0 : new Date(tb).getTime();
+      return db - da;
+    });
+ 
+
+    renderConversationList(conversations);
+
+    // only auto-open on first load
+    if(!hasAutoOpened){
+      hasAutoOpened = true;
+      if(INIT_OTHER_ID !== null && INIT_OTHER_ID !== undefined && Number(INIT_OTHER_ID) !== 0){
+        openConversation(Number(INIT_OTHER_ID));
+        return;
+      }
+    }
+
+    highlightSelected();
+  }catch(err){
+    console.error('loadData', err);
+  }
+}
+loadData();
+
+// ----------------- socket listeners for hides/deletes -----------------
+if (socket) {
+  // Global delete: remove message for everyone
+  socket.on('message_deleted', (payload) => {
+    try {
+      if (!payload) return;
+      const el = document.querySelector(`.msg-row[data-msgid="${payload.message_id}"]`);
+      if (el) {
+        if (typeof el._cleanupControls === 'function') el._cleanupControls();
+        el.remove();
+      }
+      cleanupOrphanControls();
+    } catch (e) {
+      console.error('message_deleted handler error', e);
+    }
+  });
+
+  // Per-user hide: the server includes user_id so only the targeted user removes it locally
+  socket.on('message_hidden', (payload) => {
+    try {
+      if (!payload) return;
+      if (!currentUser) return; // we haven't loaded current user yet
+      if (Number(payload.user_id) !== Number(currentUser.id)) return;
+      const el = document.querySelector(`.msg-row[data-msgid="${payload.message_id}"]`);
+      if (el) {
+        if (typeof el._cleanupControls === 'function') el._cleanupControls();
+        el.remove();
+      }
+      cleanupOrphanControls();
+    } catch (e) {
+      console.error('message_hidden handler error', e);
+    }
+  });
+}
+
+if (ccLogo) {
+  ccLogo.addEventListener('click', () => {
+    window.location.href = "{{ url_for('home') }}";
+  });
+}
+
+function highlightSelected() {
+  convList.querySelectorAll('.conv-item.selected').forEach(e => e.classList.remove('selected'));
+  if (!activeOtherId) return;
+  const el = convList.querySelector(`[data-id="${activeOtherId}"]`);
+  if (el) {
+    el.classList.add('selected');
+    try { el.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } catch (e) { }
+  }
+}
+
+function renderConversationList(items) {
+  const prevActive = activeOtherId ? Number(activeOtherId) : null;
+  convList.innerHTML = '';
+  if (!items.length) {
+    noConvos.style.display = 'block';
+    return;
+  }
+  noConvos.style.display = 'none';
+
+  items.forEach(it => {
+    const lastText = it.last_message ? (typeof it.last_message === 'string' ? it.last_message : (it.last_message.text || '')) : '';
+    const lastAt = it.last_message && (it.last_message.created_at || '') ? humanTime(it.last_message.created_at) : '';
+    const unreadCount = (it.unread && Number(it.unread) > 0) ? Number(it.unread) : 0;
+
+    let el = document.createElement('div');
+    el.className = 'conv-item' + (unreadCount ? ' unread' : '');
+    el.dataset.id = it.id;
+    el.innerHTML = `
+      <div class="avatar"><img src="${escapeHtml(makeAvatarUrl(it.avatar_url || it))}" alt=""></div>
+      <div class="meta">
+        <div class="name">${escapeHtml(it.name || 'Unknown')}</div>
+        <div class="snippet">${escapeHtml(lastText)}</div>
+      </div>
+      <div class="time">${escapeHtml(lastAt)}</div>
+      ${unreadCount ? `<div class="badge" title="${unreadCount} unread">${unreadCount}</div>` : ''}
+    `;
+    el.addEventListener('click', () => openConversation(it.id));
+    convList.appendChild(el);
+  });
+
+  if (prevActive) {
+    activeOtherId = prevActive;
+    highlightSelected();
+  } else {
+    highlightSelected();
+  }
+}
+
+async function openConversation(otherId){
+  activeOtherId = otherId;
+  const r = await fetch(`/api/conversations/${otherId}`);
+  if(!r.ok){ alert('Failed to open conversation'); return; }
+  const data = await r.json();
+  conversationId = data.conversation_id;
+  otherName.textContent = data.other.name || 'Conversation';
+  otherSub.textContent = data.other.last_seen ? 'Last seen: ' + humanTime(data.other.last_seen) : 'Online';
+  otherAvatar.src = makeAvatarUrl(data.other.avatar_url || data.other);
+
+  renderMessages(data.messages || []);
+
+  if(socket) socket.emit('join_room',{conversation_id:conversationId});
+  if(socket) socket.emit('message_read',{conversation_id:conversationId});
+
+  const convEl = convList.querySelector(`[data-id="${otherId}"]`);
+  if(convEl){
+    convEl.classList.remove('unread');
+    const badge = convEl.querySelector('.badge');
+    if(badge) badge.remove();
+    convList.querySelectorAll('.conv-item.selected').forEach(e => e.classList.remove('selected'));
+    convEl.classList.add('selected');
+    try{ convEl.scrollIntoView({ block: 'nearest', inline: 'nearest' }); }catch(e){}
+  }
+
+  // Refresh blocked cache & UI when opening a conversation
+  blockedCache = null;
+  await loadBlockedCache();
+  applyBlockedUIForActive();
+}
+
+/* ---- Cleanup helpers ---- */
+
+/* Remove any orphaned hotspot/wrap elements that don't have a matching .msg-row[data-msgid] */
+function cleanupOrphanControls(){
+  try{
+    // Remove any hotspot or wrap where dataset.for doesn't match an existing .msg-row
+    document.querySelectorAll('.msg-actions-hotspot, .msg-actions-wrap').forEach(el => {
+      const fid = el.dataset && el.dataset.for ? String(el.dataset.for) : null;
+      if(!fid) {
+        // if there's no data-for, remove it (defensive)
+        try{ el.remove(); }catch(e){}
+        return;
+      }
+      const row = document.querySelector(`.msg-row[data-msgid="${fid}"]`);
+      if(!row){
+        try{ el.remove(); }catch(e){}
+      }
+    });
+  }catch(e){ console.debug('cleanupOrphanControls failed', e); }
+}
+
+/* When removing messages (eg after delete) cleanup hotspots/wrappers */
+function cleanupDeletedRows(){
+  // iterate all known rows; if any are removed from DOM, call their cleanup
+  try{
+    const rows = Array.from(document.querySelectorAll('.msg-row'));
+    rows.forEach(r => {
+      // If row is not attached to the messages container (or document), run cleanup and remove
+      if(!document.body.contains(r)){
+        if(typeof r._cleanupControls === 'function') r._cleanupControls();
+      }
+    });
+    // also run orphan control cleanup
+    cleanupOrphanControls();
+  }catch(e){ console.debug('cleanupDeletedRows', e); }
+}
+
+/* ---- Render messages ---- */
+function renderMessages(messages){
+  // Clean up existing rows and associated controls before re-rendering
+  try{
+    // call _cleanupControls for rows that will be removed
+    document.querySelectorAll('.msg-row').forEach(r => {
+      try{ if(typeof r._cleanupControls === 'function') r._cleanupControls(); }catch(e){}
+    });
+    // clear messages container
+    messagesEl.innerHTML = '';
+    // remove any lingering pickers/toolbars to avoid duplicates
+    cleanupOrphanControls();
+    document.querySelectorAll('.emoji-picker, .msg-toolbar').forEach(n => { try{ n.remove(); }catch(e){} });
+  }catch(e){
+    console.debug('renderMessages cleanup error', e);
+  }
+
+  if(!messages || !messages.length){
+    const hint = document.createElement('div');
+    hint.id = 'emptyHint';
+    hint.style.textAlign = 'center';
+    hint.style.color = 'var(--muted)';
+    hint.style.padding = '20px';
+    hint.textContent = 'No messages yet. Send the first message!';
+    messagesEl.appendChild(hint);
+    return;
+  }
+  messages.forEach(m => addMessage(m));
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+
+  // Defensive cleanup after rendering
+  cleanupOrphanControls();
+}
+
+/* ---- Add single message to DOM ----
+   We'll create two elements per-message to support the hotspot:
+   - hotspot: invisible clickable area placed directly beside the bubble
+   - visible controls wrapper: shows up only when hovering hotspot/wrapper (contains three-dots + react heart)
+*/
+function addMessage(m){
+  if(!m) return;
+  const msgId = m.id;
+  // Prevent duplicate rows (very defensive: check both attribute and dataset)
+  if(document.querySelector(`.msg-row[data-msgid="${msgId}"]`) || document.querySelector(`[data-msgid="${msgId}"]`)) return;
+
+  const senderId = m.sender_id || (m.sender && m.sender.id);
+  const senderObj = (m.sender && typeof m.sender === 'object') ? m.sender : (Number(senderId) === Number(currentUser.id) ? currentUser : null);
+  const isMe = Number(senderId) === Number(currentUser.id);
+
+  const row = document.createElement('div');
+  row.className = 'msg-row ' + (isMe ? 'me' : '');
+  row.dataset.msgid = msgId;
+  row.dataset.senderId = senderId;
+
+  const avatarHtml = `<div class="avatar-sm"><img src="${escapeHtml(makeAvatarUrl(isMe ? currentUser : (senderObj || m))) }" alt=""></div>`;
+
+  // --- replyHtml stays the same (you already have this) ---
+  let replyHtml = '';
+  if(m.reply_to && m.reply_to.text){
+    const preview = escapeHtml(String(m.reply_to.text || '')).slice(0, 240);
+    replyHtml = `<div class="reply-snippet" title="${preview}">${escapeHtml(preview)}</div>`;
+  }
+
+  // --- attachments renderer (small helper) ---
+  function renderAttachmentsHTML(atts){
+    try{
+      if(!atts || !atts.length) return '';
+      // support both array of strings (urls) or objects [{url, type, filename}]
+      const parts = atts.map(a => {
+        const obj = (typeof a === 'string') ? { url: a } : (a || {});
+        const url = (obj.url || obj.file || obj.path || '').toString();
+        if(!url) return '';
+        const safeUrl = escapeHtml(String(url));
+        // render image thumbnails for image types, fallback to link
+        if((obj.type && String(obj.type).startsWith('image')) || /\.(jpe?g|png|gif|webp|bmp|svg)$/i.test(url)){
+          return `<a class="att-link" href="${safeUrl}" target="_blank" rel="noopener noreferrer"><img class="att-img" src="${safeUrl}" alt="attachment"/></a>`;
+        }
+        return `<a class="att-link" href="${safeUrl}" target="_blank" rel="noopener noreferrer">${safeUrl}</a>`;
+      }).filter(Boolean);
+      if(!parts.length) return '';
+      return `<div class="message-attachments">${parts.join('')}</div>`;
+    }catch(e){
+      console.error('renderAttachmentsHTML', e);
+      return '';
+    }
+  }
+
+  // Debug: helpful when images don't appear
+  console.debug('addMessage payload', m);
+
+  // build attachments HTML (if any)
+  const attachmentsHtml = renderAttachmentsHTML(m.attachments || []);
+
+  // Build the bubble HTML (text + attachments + meta + reactions)
+  const bubbleHtml = `
+    <div class="bubble ${isMe ? 'me' : ''}">
+      ${replyHtml}
+      <div>${escapeHtml(m.text || '')}</div>
+      ${attachmentsHtml}
+      <div class="meta-time">${humanTime(m.created_at)} ${m.status ? ' · ' + escapeHtml(m.status) : ''}</div>
+      ${renderReactionsInline(m.reactions || [])}
+    </div>
+  `;
+
+  // finally attach to the row
+  row.innerHTML = avatarHtml + bubbleHtml;
+
+  // create hotspot + visible controls wrapper and position them beside the bubble
+  const hotspot = document.createElement('div');
+  hotspot.className = 'msg-actions-hotspot';
+  hotspot.setAttribute('aria-hidden','false');
+  hotspot.dataset.for = String(msgId);
+
+  const wrap = document.createElement('div');
+  wrap.className = 'msg-actions-wrap';
+  wrap.setAttribute('aria-hidden','true');
+  wrap.dataset.for = String(msgId);
+
+  // create three-dot button
+  const dotBtn = document.createElement('button');
+  dotBtn.className = 'msg-actions-button';
+  dotBtn.setAttribute('title','Message actions');
+  dotBtn.innerHTML = '<i class="fa fa-ellipsis-vertical" aria-hidden="true"></i>';
+
+  // create react (love) button (muted color like dots)
+  const reactBtn = document.createElement('button');
+  reactBtn.className = 'react-button';
+  reactBtn.setAttribute('title', 'React');
+  reactBtn.innerHTML = '<i class="fa fa-heart" aria-hidden="true"></i>';
+
+  // append buttons to wrapper
+  wrap.appendChild(dotBtn);
+  wrap.appendChild(reactBtn);
+
+  // append wrapper and hotspot to document body (absolute positioning)
+  // Defensive: remove any existing elements for this msgId first to avoid duplicates
+  try{
+    document.querySelectorAll(`.msg-actions-hotspot[data-for="${msgId}"], .msg-actions-wrap[data-for="${msgId}"]`).forEach(n => { try{ n.remove(); }catch(e){} });
+  }catch(e){}
+  document.body.appendChild(hotspot);
+  document.body.appendChild(wrap);
+
+  // emoji-picker references (per message)
+  let localQuick = null;
+  let localFull = null;
+
+  // helper to compute placement: based on bubble rect (so it's right beside the bubble)
+  function positionControls(){
+    try{
+      const rowRect = row.getBoundingClientRect();
+      const bubbleEl = row.querySelector('.bubble');
+      if(!bubbleEl) return;
+      const bubbleRect = bubbleEl.getBoundingClientRect();
+      const wrapW = wrap.offsetWidth || 76; // two buttons + gap (~76)
+      const hsW = hotspot.offsetWidth || 70;
+      let left;
+      // place to the right of incoming bubble, to the left of own bubble
+      if(isMe){
+        // left of the bubble (small gap)
+        left = Math.round(bubbleRect.left - wrapW - 8);
+      } else {
+        // right of the bubble
+        left = Math.round(bubbleRect.right + 8);
+      }
+      // ensure within viewport
+      if(left < 6) left = 6;
+      if(left + wrapW > window.innerWidth - 6) left = window.innerWidth - wrapW - 6;
+
+      const top = Math.round(bubbleRect.top + (bubbleRect.height/2) - (wrap.offsetHeight/2));
+
+      wrap.style.left = (left + window.scrollX) + 'px';
+      wrap.style.top = (top + window.scrollY) + 'px';
+
+      // hotspot positioned to cover the wrapper area (centered)
+      const hsLeft = Math.round(left + (wrapW/2) - (hsW/2));
+      const hsTop = Math.round(bubbleRect.top + (bubbleRect.height/2) - (hotspot.offsetHeight/2));
+      hotspot.style.left = (hsLeft + window.scrollX) + 'px';
+      hotspot.style.top = (hsTop + window.scrollY) + 'px';
+
+      // position any open pickers close to anchor
+      if(localQuick) positionPickerNearAnchor(localQuick, reactBtn);
+      if(localFull) positionPickerNearAnchor(localFull, reactBtn);
+    }catch(e){ console.debug('positionControls error', e); }
+  }
+
+  // show/hide logic: show when hotspot hovered OR wrapper hovered; hide otherwise
+  function showWrap(){
+    wrap.classList.add('visible');
+    wrap.setAttribute('aria-hidden','false');
+  }
+  function hideWrap(){
+    // delay to allow entering picker; don't remove immediately if pickers hovered
+    setTimeout(()=> {
+      const pickHovered = (localQuick && localQuick.matches(':hover')) || (localFull && localFull.matches(':hover'));
+      if(pickHovered) return; // keep open
+      wrap.classList.remove('visible');
+      wrap.setAttribute('aria-hidden','true');
+      removeLocalQuick();
+      removeLocalFull();
+    }, 80);
+  }
+
+  // Attach event listeners to hotspot and wrapper so it behaves like hover hotspot
+  hotspot.addEventListener('mouseenter', (e) => { showWrap(); });
+  hotspot.addEventListener('mouseleave', (e) => { setTimeout(()=> { if(!wrap.matches(':hover')) hideWrap(); }, 80); });
+  wrap.addEventListener('mouseenter', ()=> { showWrap(); });
+  wrap.addEventListener('mouseleave', ()=> { setTimeout(()=> { if(!hotspot.matches(':hover')) hideWrap(); }, 80); });
+
+  // clicking the dot opens the message toolbar
+  dotBtn.addEventListener('click', (ev) => {
+    ev.stopPropagation();
+    showMessageToolbar(row, m, dotBtn);
+  });
+
+  // clicking the react heart opens an emoji quick-picker (five) or toggles it closed
+  reactBtn.addEventListener('click', (ev) => {
+    ev.stopPropagation();
+    if(localQuick || localFull){
+      // toggle off
+      removeLocalQuick();
+      removeLocalFull();
+      hideWrap();
+      return;
+    }
+    showLocalQuick(reactBtn, row, m);
+  });
+
+  /* ------------ picker helpers (per message) ------------- */
+
+  // list for the small quick row (5) and the big full grid (many)
+  const QUICK_EMOJIS = ['❤','👍','😂','😮','😢'];
+  const ALL_EMOJIS = [
+    '❤','🧡','💛','💚','💙','💜','🤎','🖤','🤍',
+    '👍','👎','👌','👏','🙌','🤝',
+    '😂','🤣','😊','😅','😁','🙂','🤗','☺️',
+    '😮','😲','😳','🤯',
+    '😢','😭','😞','😔','😕','😤','😠','😡',
+    '😇','🥰','😍','😘','😋','🤤','😎','🤩',
+    '🤔','🤨','😐','😑','😶',
+    '🙃','🤪','😴','🥱','🤤','🤠','🥳','🤡',
+    '🔥','💯','⭐','✨','🎉','🙏','🫶','🤍'
+  ];
+
+  function positionPickerNearAnchor(pickerEl, anchorEl){
+    try{
+      const rect = anchorEl.getBoundingClientRect();
+      const pw = pickerEl.offsetWidth || Math.min(320, window.innerWidth - 32);
+      let left = rect.left + window.scrollX - Math.round((pw - rect.width) / 2);
+      let top = rect.top + window.scrollY - pickerEl.offsetHeight - 8;
+      if(left < 8) left = 8;
+      if(left + pw > window.innerWidth - 8) left = window.innerWidth - pw - 8;
+      if(top < 8) top = rect.bottom + window.scrollY + 8;
+      pickerEl.style.left = left + 'px';
+      pickerEl.style.top = top + 'px';
+    }catch(e){ console.debug('positionPicker error', e); }
+  }
+
+  function removeLocalQuick(){
+    if(localQuick){
+      try{ localQuick.remove(); }catch(e){}
+      localQuick = null;
+    }
+  }
+  function removeLocalFull(){
+    if(localFull){
+      try{ localFull.remove(); }catch(e){}
+      localFull = null;
+    }
+  }
+
+  function showLocalQuick(anchorEl, rowEl, messageObj){
+    removeLocalQuick();
+    removeLocalFull();
+
+    localQuick = document.createElement('div');
+    localQuick.className = 'emoji-picker';
+    localQuick.style.display = 'flex';
+    localQuick.style.flexWrap = 'nowrap';
+    localQuick.style.alignItems = 'center';
+    localQuick.style.padding = '6px';
+
+    // quick 5
+    QUICK_EMOJIS.forEach(e => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = e;
+      b.title = e;
+      b.addEventListener('click', async (ev) => {
+        ev.stopPropagation();
+        await sendReaction(messageObj.id, e);
+        removeLocalQuick();
+        hideWrap();
+      });
+      localQuick.appendChild(b);
+    });
+
+    // more button (three dot)
+    const more = document.createElement('button');
+    more.type = 'button';
+    more.className = 'emoji-more-btn';
+    more.textContent = '⋯';
+    more.title = 'More reactions';
+    more.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      showLocalFull(anchorEl, rowEl, messageObj);
+    });
+    localQuick.appendChild(more);
+
+    document.body.appendChild(localQuick);
+    positionPickerNearAnchor(localQuick, anchorEl);
+
+    // keep wrap visible while hovering the quick picker
+    localQuick.addEventListener('mouseenter', ()=> { showWrap(); });
+    localQuick.addEventListener('mouseleave', ()=> { setTimeout(()=> { if(!wrap.matches(':hover')) { removeLocalQuick(); hideWrap(); } }, 80); });
+  }
+
+  function showLocalFull(anchorEl, rowEl, messageObj){
+    removeLocalFull();
+    removeLocalQuick();
+
+    localFull = document.createElement('div');
+    localFull.className = 'emoji-picker full';
+
+    // build all emoji buttons (grid)
+    ALL_EMOJIS.forEach(e => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = e;
+      b.title = e;
+      b.addEventListener('click', async (ev) => {
+        ev.stopPropagation();
+        await sendReaction(messageObj.id, e);
+        removeLocalFull();
+        hideWrap();
+      });
+      localFull.appendChild(b);
+    });
+
+    // optional: a small "close" pill
+    const closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.textContent = '✕';
+    closeBtn.title = 'Close';
+    closeBtn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      removeLocalFull();
+      hideWrap();
+    });
+    // style close to be in the grid as a pill (append at end)
+    const wrapperClose = document.createElement('div');
+    wrapperClose.style.gridColumn = 'span 2';
+    wrapperClose.appendChild(closeBtn);
+    localFull.appendChild(wrapperClose);
+
+    document.body.appendChild(localFull);
+    positionPickerNearAnchor(localFull, anchorEl);
+
+    // keep wrap visible while hovering the full picker
+    localFull.addEventListener('mouseenter', ()=> { showWrap(); });
+    localFull.addEventListener('mouseleave', ()=> { setTimeout(()=> { if(!wrap.matches(':hover')) { removeLocalFull(); hideWrap(); } }, 80); });
+  }
+
+  // helper to send reaction toggle to server
+  async function sendReaction(msgIdLocal, emoji){
+    try{
+      const res = await fetch(`/api/messages/${encodeURIComponent(msgIdLocal)}/react`, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ emoji })
+      });
+      const j = await res.json();
+      if(res.ok && j.success){
+        // update inline reactions display for this message
+        updateMessageReactions(msgIdLocal, j.reactions || []);
+      } else {
+        console.warn('react failed', j);
+      }
+    }catch(e){
+      console.error('sendReaction failed', e);
+    }
+  }
+
+  // compute initial position after next frame
+  requestAnimationFrame(positionControls);
+  // re-position on window resize/scroll so it stays aligned
+  const onResizeOrScroll = () => positionControls();
+  window.addEventListener('resize', onResizeOrScroll);
+  window.addEventListener('scroll', onResizeOrScroll, true);
+
+  // when row is removed later, also remove hotspot/wrap & pickers & listeners
+  row._cleanupControls = () => {
+    try{ hotspot.remove(); }catch(e){}
+    try{ wrap.remove(); }catch(e){}
+    try{ removeLocalQuick(); }catch(e){}
+    try{ removeLocalFull(); }catch(e){}
+    try{
+      window.removeEventListener('resize', onResizeOrScroll);
+      window.removeEventListener('scroll', onResizeOrScroll, true);
+    }catch(e){}
+  };
+
+  // clicking the row should remove the toolbar/pickers (but not toggle the dot)
+  row.addEventListener('click', (ev) => {
+    removeMessageToolbar();
+    hideWrap();
+  });
+
+  // append row to messages list
+  messagesEl.appendChild(row);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+/* render reactions inline HTML */
+function renderReactionsInline(reactions){
+  if(!reactions || !reactions.length) return '';
+  // build small pills
+  return `<div class="reactions-row">${reactions.map(r => `<div class="reaction-pill" data-emoji="${escapeHtml(r.emoji)}">${escapeHtml(r.emoji)} <span>${escapeHtml(String(r.count||0))}</span></div>`).join('')}</div>`;
+}
+
+/* update the rendered reactions for a message */
+function updateMessageReactions(msgId, reactions){
+  const el = document.querySelector(`.msg-row[data-msgid="${msgId}"]`);
+  if(!el) return;
+  const bubble = el.querySelector('.bubble');
+  if(!bubble) return;
+  // remove any existing reactions-row
+  const existing = bubble.querySelector('.reactions-row');
+  if(existing) existing.remove();
+  bubble.insertAdjacentHTML('beforeend', renderReactionsInline(reactions));
+  // attach click handlers to reaction pills so local user can toggle by clicking pill
+  const newPills = bubble.querySelectorAll('.reaction-pill');
+  newPills.forEach(p => {
+    // remove existing listener guard (avoid duplicates)
+    if(p._attached) return;
+    p._attached = true;
+    p.addEventListener('click', async (ev) => {
+      const emoji = p.dataset.emoji;
+      await fetch(`/api/messages/${encodeURIComponent(msgId)}/react`, {
+        method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ emoji })
+      }).then(r=>r.json()).then(j => {
+        if(j && j.success) updateMessageReactions(msgId, j.reactions || []);
+      }).catch(e=>console.error(e));
+    });
+  });
+}
+
+/* When removing messages (eg after delete) cleanup hotspots/wrappers */
+function cleanupDeletedRows(){
+  document.querySelectorAll('.msg-row').forEach(r => {
+    if(!document.body.contains(r)){
+      if(typeof r._cleanupControls === 'function') r._cleanupControls();
+    }
+  });
+  cleanupOrphanControls();
+}
+
+/* ---- Find temp message that matches server message (heuristic) ---- */
+function findMatchingTempFor(serverMsg){
+  const temps = document.querySelectorAll('[data-msgid^="temp_"]');
+  for(const t of temps){
+    try{
+      const bubble = t.querySelector('.bubble > div:not(.reply-snippet)');
+      const text = bubble ? bubble.textContent.trim() : '';
+      if(text && String(text) === String(serverMsg.text || '').trim()){
+        return t;
+      }
+    }catch(e){}
+  }
+  return null;
+}
+
+/* ---- Sending messages ---- */
+sendBtn.addEventListener('click', sendMessage);
+msgInput.addEventListener('keydown', (e)=>{ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); } else { if(socket && conversationId) socket.emit('typing',{conversation_id:conversationId, typing:true}); }});
+msgInput.addEventListener('blur', ()=> { if(socket && conversationId) socket.emit('typing',{conversation_id:conversationId, typing:false}); });
+
+/* composer reply preview UI */
+function renderComposerReply(){
+  if(!replyTo){
+    composerReplyHolder.style.display = 'none';
+    composerReplyHolder.innerHTML = '';
+    return;
+  }
+  const div = document.createElement('div');
+  div.className = 'composer-reply';
+  div.innerHTML = `<div style="font-weight:600">Replying to</div><div class="reply-text">${escapeHtml(replyTo.senderName || '')}: ${escapeHtml(String(replyTo.textPreview || '')).slice(0,120)}</div><button class="reply-cancel" title="Cancel reply">✕</button>`;
+  composerReplyHolder.innerHTML = '';
+  composerReplyHolder.appendChild(div);
+  composerReplyHolder.style.display = '';
+  const cancel = composerReplyHolder.querySelector('.reply-cancel');
+  cancel.addEventListener('click', ()=> { replyTo = null; renderComposerReply(); msgInput.focus(); });
+}
+
+
+// --- Add this helper (paste before sendMessage) ---
+function markTempFailed(tempId, reason) {
+  try {
+    const tempEl = document.querySelector(`[data-msgid="${tempId}"]`);
+    if(!tempEl) return;
+    const bubble = tempEl.querySelector('.bubble');
+    if(!bubble) return;
+
+    // update meta-time to show "Failed"
+    let meta = bubble.querySelector('.meta-time');
+    if(meta) {
+      meta.textContent = humanTime(new Date().toISOString()) + ' · Failed';
+    } else {
+      const m = document.createElement('div');
+      m.className = 'meta-time';
+      m.textContent = humanTime(new Date().toISOString()) + ' · Failed';
+      bubble.appendChild(m);
+    }
+
+    // visually mark as failed
+    bubble.style.border = '1px solid var(--danger)';
+    bubble.dataset.failed = 'true';
+
+    // add or update a small failure note
+    let note = bubble.querySelector('.failed-note');
+    if(!note) {
+      note = document.createElement('div');
+      note.className = 'failed-note';
+      note.style.color = 'var(--danger)';
+      note.style.marginTop = '6px';
+      note.style.fontSize = '13px';
+      bubble.appendChild(note);
+    }
+    note.textContent = reason || 'Failed to send';
+  } catch (e) {
+    console.error('markTempFailed error', e);
+  }
+}
+
+// --- Replace your existing sendMessage() function with this updated version ---
+function sendMessage(){
+  if(!conversationId){ alert('Open a conversation first'); return; }
+  let text = msgInput.value.trim();
+  if(!text) return;
+
+  // If replying, include reply_to id in payload; we still keep prefixed @ as optional UX
+  const reply_to_id = replyTo ? replyTo.messageId : null;
+
+  if(replyTo && replyTo.senderName){
+    // Maintain a lightweight mention to help UX but do not rely on it server-side
+    if(!text.startsWith(`@${replyTo.senderName}`)){
+      text = `@${replyTo.senderName} ${text}`;
+    }
+  }
+
+  const tempId = 'temp_' + Date.now();
+  const tempMsg = {
+    id: tempId,
+    conversation_id: conversationId,
+    sender_id: currentUser.id,
+    text: text,
+    created_at: new Date().toISOString(),
+    status: 'sending',
+    sender: currentUser,
+    reply_to: reply_to_id ? { id: reply_to_id, text: replyTo ? (replyTo.textPreview || '') : '' } : null,
+    reactions: []
+  };
+  addMessage(tempMsg);
+  msgInput.value = '';
+  // keep replyTo until server ack or user cancels
+  // but clear composer preview
+  replyTo = replyTo; // unchanged
+  renderComposerReply();
+
+  // Helper to produce a readable reason from server ack/json
+  function reasonFromServerPayload(p) {
+    if(!p) return 'Failed to send message';
+    if(p.error === 'blocked') return (p.message || 'This user has blocked you');
+    if(p.message && typeof p.message === 'string') return p.message;
+    if(p.error && typeof p.error === 'string') return p.error;
+    return 'Failed to send message';
+  }
+
+  if(socket){
+    socket.emit('send_message',{conversation_id:conversationId, text, attachments:[], reply_to: reply_to_id}, (ack) => {
+      try {
+        if(ack && ack.success && ack.message){
+          const serverMsg = ack.message;
+          const serverEl = document.querySelector(`.msg-row[data-msgid="${serverMsg.id}"]`);
+          const tempEl = document.querySelector(`.msg-row[data-msgid="${tempId}"]`);
+          if(serverEl && tempEl){
+            // remove temp
+            if(typeof tempEl._cleanupControls === 'function') tempEl._cleanupControls();
+            tempEl.remove();
+          } else if(!serverEl && tempEl){
+            // update temp element to server id and update contents
+            tempEl.dataset.msgid = serverMsg.id;
+            // ensure hotspot/wrap dataset.for updated to new id (if they exist)
+            document.querySelectorAll(`.msg-actions-hotspot[data-for="${tempId}"], .msg-actions-wrap[data-for="${tempId}"]`).forEach(el => { el.dataset.for = String(serverMsg.id); });
+            const bubble = tempEl.querySelector('.bubble');
+            if(bubble){
+              const txtNode = bubble.querySelector('div:not(.reply-snippet)');
+              if(txtNode) txtNode.innerHTML = escapeHtml(serverMsg.text || '');
+              const meta = bubble.querySelector('.meta-time');
+              if(meta) meta.textContent = humanTime(serverMsg.created_at) + ' · ' + (serverMsg.status || 'Delivered');
+              // update reply snippet if server provided one
+              if(serverMsg.reply_to && serverMsg.reply_to.text){
+                let rs = bubble.querySelector('.reply-snippet');
+                if(!rs){
+                  // insert at top of bubble
+                  bubble.insertAdjacentHTML('afterbegin', `<div class="reply-snippet">${escapeHtml(serverMsg.reply_to.text.slice(0,240))}</div>`);
+                } else {
+                  rs.textContent = serverMsg.reply_to.text.slice(0,240);
+                }
+              }
+              // update reactions
+              if(serverMsg.reactions) updateMessageReactions(serverMsg.id, serverMsg.reactions || []);
+            }
+          } else if(!serverEl && !tempEl){
+            // nothing matched, just append server message
+            addMessage(serverMsg);
+          }
+          // after successful send, clear replyTo & composer preview
+          replyTo = null;
+          renderComposerReply();
+          loadData();
+          return;
+        }
+
+        // Not successful: mark temp failed and show specific message if the server provided one
+        const reason = reasonFromServerPayload(ack);
+        markTempFailed(tempId, reason);
+        alert(reason);
+      } catch(e){
+        console.error('socket send_message ack handling error', e);
+        // defensive fallback: mark as failed
+        markTempFailed(tempId, 'Failed to send message');
+        alert('Failed to send message');
+      }
+    });
+  } else {
+    fetch('/api/send_message',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({conversation_id:conversationId,text,reply_to:reply_to_id})})
+      .then(r => r.json().catch(()=>({})))
+      .then(j => {
+        try {
+          if(j && j.success && j.message){
+            // remove temp if present and append server message
+            const tempEl = document.querySelector(`.msg-row[data-msgid="${tempId}"]`);
+            if(tempEl){
+              if(typeof tempEl._cleanupControls === 'function') tempEl._cleanupControls();
+              tempEl.remove();
+            }
+            addMessage(j.message);
+            loadData();
+            replyTo = null;
+            renderComposerReply();
+            return;
+          }
+          // failure: display better reason when blocked
+          const reason = reasonFromServerPayload(j);
+          markTempFailed(tempId, reason);
+          alert(reason);
+        } catch(e){
+          console.error('sendMessage fallback handler error', e);
+          markTempFailed(tempId, 'Failed to send message');
+          alert('Failed to send message');
+        }
+      }).catch(err=>{
+        console.error('sendMessage fallback failed', err);
+        markTempFailed(tempId, 'Failed to send message');
+        alert('Failed to send message');
+      });
+  }
+}
+
+
+/* ---- Moderation helpers ---- */
+async function deleteMessage(msgId){
+  // confirm
+  if(!confirm('Delete this message? This cannot be undone.')) return;
+
+  try{
+    // find the row to know who sent it
+    const row = document.querySelector(`.msg-row[data-msgid="${msgId}"]`);
+    const senderId = row && row.dataset && row.dataset.senderId ? String(row.dataset.senderId) : null;
+    const isMe = (senderId && currentUser && String(currentUser.id) && String(senderId) === String(currentUser.id));
+
+    // If the current user is NOT the sender, prefer a local-only hide (so only their view is affected)
+    const local_only = !isMe;
+
+    const payload = local_only ? { local_only: true } : {};
+
+    const res = await fetch('/api/messages/' + encodeURIComponent(msgId), {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: Object.keys(payload).length ? JSON.stringify(payload) : null
+    });
+
+    let j = null;
+    try { j = await res.json(); } catch(e){ /* not JSON */ }
+
+    if(res.ok && j && j.success){
+      // If server responded OK (either hidden or deleted), remove local row
+      const el = document.querySelector(`.msg-row[data-msgid="${msgId}"]`);
+      if(el){
+        if(typeof el._cleanupControls === 'function') el._cleanupControls();
+        el.remove();
+      }
+      cleanupOrphanControls();
+      return;
+    }
+
+    // Not OK - show helpful message
+    const errText = (j && (j.error || j.message)) ? (j.error || j.message) : (j ? JSON.stringify(j) : ('HTTP ' + res.status));
+    // If it's a forbidden action (403) and we tried global delete, suggest local hide
+    if(res.status === 403 && !local_only){
+      alert('You are not allowed to delete this message for everyone. Will attempt to hide locally instead.');
+      // try local-only hide as fallback
+      await fetch('/api/messages/' + encodeURIComponent(msgId) + '?', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ local_only: true })
+      }).then(async (r2) => {
+        try {
+          const j2 = await r2.json();
+          if(r2.ok && j2 && j2.success) {
+            const el2 = document.querySelector(`.msg-row[data-msgid="${msgId}"]`);
+            if(el2){ if(typeof el2._cleanupControls === 'function') el2._cleanupControls(); el2.remove(); }
+            cleanupOrphanControls();
+            return;
+          } else {
+            alert('Hide locally failed: ' + (j2 && (j2.error || j2.message) || r2.status));
+          }
+        } catch(e){
+          alert('Hide locally: unexpected server response');
+        }
+      }).catch(e => {
+        console.error(e);
+        alert('Hide locally failed - see console.');
+      });
+      return;
+    }
+
+    // generic failure
+    alert('Delete failed: ' + errText);
+    console.warn('deleteMessage failed', res.status, j);
+  }catch(e){
+    console.error(e);
+    alert('Delete request failed (see console)');
+  }
+}
+
+
+async function editMessage(msgId){
+  const el = document.querySelector(`.msg-row[data-msgid="${msgId}"]`);
+  if(!el) { alert('Message not found'); return; }
+  const bubble = el.querySelector('.bubble > div:not(.reply-snippet)');
+  const old = bubble ? bubble.textContent.trim() : '';
+  const newText = prompt('Edit message:', old);
+  if(newText === null) return; // cancelled
+  if(String(newText).trim() === String(old).trim()) return;
+  try{
+    const res = await fetch(`/api/messages/${msgId}/edit`, {
+      method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ text: newText })
+    });
+    const j = await res.json();
+    if(res.ok && j.success && j.message){
+      if(bubble) bubble.textContent = j.message.text;
+      const meta = el.querySelector('.meta-time');
+      if(meta) meta.textContent = new Date(j.message.created_at).toLocaleString() + ' · ' + (j.message.status || 'edited');
+    } else {
+      alert('Edit failed: ' + (j.error || 'unknown'));
+    }
+  }catch(e){
+    console.error(e);
+    alert('Edit failed');
+  }
+}
+
+/* ---- Floating toolbar (anchored to button if provided) ---- */
+/* DROP-IN replacement: robust, safe, and ensures observer cleanup. */
+function showMessageToolbar(rowEl, messageObj, anchorEl = null){
+  try {
+    // close any existing toolbars first
+    removeMessageToolbar();
+
+    // basic defensive checks
+    if(!rowEl && (!messageObj || !messageObj.id)){
+      console.warn('showMessageToolbar called without a row element or message id', { rowEl, messageObj });
+      return;
+    }
+
+    const toolbar = document.createElement('div');
+    toolbar.className = 'msg-toolbar';
+
+    // Prefer live dataset if available, fallback to messageObj.id
+    const initialMid = (rowEl && rowEl.dataset && rowEl.dataset.msgid) ? rowEl.dataset.msgid : (messageObj && messageObj.id ? messageObj.id : null);
+    toolbar.dataset.for = initialMid || '';
+
+    // helper to read freshest ids/text at click time
+    function currentIds(){
+      const mid = (toolbar.dataset && toolbar.dataset.for) ? toolbar.dataset.for : (rowEl && rowEl.dataset && rowEl.dataset.msgid) ? rowEl.dataset.msgid : (messageObj && messageObj.id ? messageObj.id : null);
+      const senderId = (rowEl && rowEl.dataset && rowEl.dataset.senderId) ? rowEl.dataset.senderId : (messageObj && messageObj.sender_id ? messageObj.sender_id : null);
+      const bubbleTextEl = rowEl ? rowEl.querySelector('.bubble > div:not(.reply-snippet)') : null;
+      const bubbleText = bubbleTextEl ? (bubbleTextEl.textContent || '').trim() : (messageObj && messageObj.text ? String(messageObj.text) : '');
+      return { mid, senderId, bubbleText };
+    }
+
+    // Buttons and their handlers (use freshest id from currentIds())
+    const replyBtn = document.createElement('button');
+    replyBtn.title = 'Reply';
+    replyBtn.innerHTML = '<i class="fa fa-reply"></i> Reply';
+    replyBtn.addEventListener('click', () => {
+      try {
+        const { mid, bubbleText } = currentIds();
+        if(!mid){ alert('Unable to locate message to reply to.'); return; }
+        const pseudoMsg = { id: mid, text: bubbleText, sender: messageObj && messageObj.sender ? messageObj.sender : {} };
+        replyToMessage(mid, pseudoMsg);
+      } catch (e){ console.error('reply error', e); }
+      removeMessageToolbar();
+    });
+
+    const forwardBtn = document.createElement('button');
+    forwardBtn.title = 'Forward';
+    forwardBtn.innerHTML = '<i class="fa fa-share"></i> Forward';
+    forwardBtn.addEventListener('click', () => {
+      try {
+        const { mid } = currentIds();
+        if(!mid){ alert('Unable to locate message to forward.'); return; }
+        showForwardModal(mid);
+      } catch (e){ console.error('forward error', e); }
+      removeMessageToolbar();
+    });
+
+    const copyBtn = document.createElement('button');
+    copyBtn.title = 'Copy';
+    copyBtn.innerHTML = '<i class="fa fa-copy"></i> Copy';
+    copyBtn.addEventListener('click', () => {
+      try {
+        const { mid } = currentIds();
+        if(!mid){ alert('Unable to locate message to copy.'); return; }
+        copyMessageToClipboard(mid);
+      } catch (e){ console.error('copy error', e); }
+      removeMessageToolbar();
+    });
+
+    const editBtn = document.createElement('button');
+    editBtn.title = 'Edit';
+    editBtn.innerHTML = '<i class="fa fa-pen"></i> Edit';
+    editBtn.addEventListener('click', async () => {
+      try {
+        const { mid } = currentIds();
+        if(!mid){ alert('Unable to locate message to edit.'); return; }
+        await editMessage(mid);
+      } catch (e){ console.error('edit error', e); }
+      removeMessageToolbar();
+    });
+
+    const delBtn = document.createElement('button');
+    delBtn.title = 'Delete';
+    delBtn.innerHTML = '<i class="fa fa-trash"></i> Delete';
+    delBtn.className = 'danger';
+    delBtn.addEventListener('click', async () => {
+      try {
+        const { mid } = currentIds();
+        if(!mid){ alert('Could not determine message id to delete.'); removeMessageToolbar(); return; }
+        await deleteMessage(mid);
+      } catch (e) {
+        console.error('delete error', e);
+      } finally {
+        removeMessageToolbar();
+      }
+    });
+
+    // Append in same order as before
+    toolbar.appendChild(replyBtn);
+    toolbar.appendChild(forwardBtn);
+    toolbar.appendChild(copyBtn);
+
+    // decide append order using the freshest sender id
+    const { senderId } = currentIds();
+    const isMine = (senderId !== null && currentUser && typeof currentUser.id !== 'undefined' && Number(senderId) === Number(currentUser.id));
+    if(isMine){
+      toolbar.appendChild(editBtn);
+      toolbar.appendChild(delBtn);
+    } else {
+      toolbar.appendChild(delBtn);
+    }
+
+    // Add to DOM BEFORE measuring/positioning so offsetWidth/Height are available
+    document.body.appendChild(toolbar);
+
+    // position near anchor or message row and keep inside viewport (defensive)
+    let anchorRect = null;
+    try { anchorRect = anchorEl ? anchorEl.getBoundingClientRect() : null; } catch(e){ anchorRect = null; }
+    let rowRect = { left: 0, right: 0, top: 0, height: 40 };
+    try { if(rowEl) rowRect = rowEl.getBoundingClientRect(); } catch(e){ /* keep fallback */ }
+
+    const tw = toolbar.offsetWidth || 160;
+    const th = toolbar.offsetHeight || ((toolbar.children.length || 1) * 40);
+    let left, top;
+
+    if(anchorRect){
+      left = anchorRect.left + window.scrollX - Math.round((tw - anchorRect.width) / 2);
+      top = anchorRect.top + window.scrollY - th - 8;
+    } else {
+      const rightSide = rowRect.right + window.scrollX + 8;
+      const leftSide = rowRect.left + window.scrollX - tw - 8;
+      if(rightSide + tw <= window.innerWidth - 8){
+        left = rightSide;
+      } else {
+        left = Math.max(8, leftSide);
+      }
+      top = rowRect.top + window.scrollY + Math.round((rowRect.height / 2) - (th / 2));
+    }
+
+    // ensure bounds
+    if(left < 8) left = 8;
+    if(left + tw > window.innerWidth - 8) left = window.innerWidth - tw - 8;
+    if(top < 8) top = 8;
+    if(top + th > window.innerHeight - 8) top = window.innerHeight - th - 8;
+
+    toolbar.style.left = left + 'px';
+    toolbar.style.top = top + 'px';
+
+    // If row's data-msgid may change (temp -> server id), observe it and keep toolbar.dataset.for current
+    let observer = null;
+    if(window.MutationObserver && rowEl){
+      try {
+        observer = new MutationObserver(() => {
+          try {
+            const latest = rowEl.dataset && rowEl.dataset.msgid ? rowEl.dataset.msgid : null;
+            if(latest) toolbar.dataset.for = latest;
+          } catch(e){ /* ignore */ }
+        });
+        observer.observe(rowEl, { attributes: true, attributeFilter: ['data-msgid'] });
+      } catch(e){ console.debug('observer init failed', e); }
+    }
+    // attach the observer reference so removal can disconnect it
+    toolbar._observer = observer;
+    toolbar._row = rowEl;
+
+    // close toolbar when clicking outside (single-use listener)
+    setTimeout(()=> {
+      document.addEventListener('click', function onceClose(e){
+        if(!toolbar.contains(e.target) && !(anchorEl && anchorEl.contains(e.target))) {
+          removeMessageToolbar();
+        }
+      }, { once: true });
+    }, 0);
+
+  } catch (err) {
+    console.error('showMessageToolbar fatal error', err);
+    // don't throw — let future clicks attempt again
+  }
+}
+
+/* remove toolbar and cleanup observer(s) */
+function removeMessageToolbar(){
+  try {
+    const ex = Array.from(document.querySelectorAll('.msg-toolbar'));
+    ex.forEach(n => {
+      try {
+        // disconnect observer if we stored it
+        if(n && n._observer && typeof n._observer.disconnect === 'function'){
+          try{ n._observer.disconnect(); }catch(e){ /* noop */ }
+        }
+      } catch(e){ /* noop */ }
+      try{ n.remove(); }catch(e){ /* noop */ }
+    });
+  } catch(e){
+    console.debug('removeMessageToolbar cleanup error', e);
+  }
+}
+
+/* Delegated click handler to ensure the three-dot reliably opens the toolbar.
+   This helps when dynamically-created buttons miss per-button attachment or handlers are lost.
+*/
+document.addEventListener('click', (ev) => {
+  try {
+    const dotBtn = ev.target.closest && ev.target.closest('.msg-actions-button');
+    if (!dotBtn) return;
+
+    ev.stopPropagation();
+    ev.preventDefault();
+
+    const row = dotBtn.closest && dotBtn.closest('.msg-row');
+    if (!row) return;
+
+    const msgId = row.dataset.msgid;
+    const senderId = row.dataset.senderId;
+    const bubble = row.querySelector('.bubble > div:not(.reply-snippet)');
+    const text = bubble ? bubble.textContent.trim() : '';
+
+    const messageObj = {
+      id: msgId,
+      sender_id: senderId,
+      text: text
+    };
+
+    removeMessageToolbar();
+    showMessageToolbar(row, messageObj, dotBtn);
+  } catch (err) {
+    console.error('Delegated dot click failed', err);
+  }
+});
+
+/* ---- Forward modal implementation ---- */
+
+/* Create forward modal DOM (only once) */
+function createForwardModalIfNeeded(){
+  if(document.getElementById('forwardModalBackdrop')) return;
+  const backdrop = document.createElement('div');
+  backdrop.id = 'forwardModalBackdrop';
+  backdrop.className = 'forward-modal-backdrop';
+  backdrop.style.display = 'none';
+  backdrop.innerHTML = `
+    <div class="forward-modal" role="dialog" aria-modal="true" aria-label="Forward message">
+      <div class="forward-left">
+        <div class="forward-title">Share message</div>
+        <div class="small-muted">Pick a destination</div>
+        <div class="forward-quick" id="forwardQuick">
+          <!-- quick app buttons inserted here -->
+        </div>
+
+        <div style="margin-top:8px">
+          <div style="font-weight:600; margin-bottom:6px">Forward in app</div>
+          <input id="forwardSearch" placeholder="Search people or conversations" style="width:100%;padding:8px;border-radius:8px;border:1px solid rgba(0,0,0,0.06)"/>
+          <div class="forward-list" id="forwardList"></div>
+        </div>
+      </div>
+      <div class="forward-right">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-weight:700">Forward preview</div>
+          <div><button id="forwardClose" class="btn secondary">Close</button></div>
+        </div>
+        <div id="forwardPreview" style="margin-top:10px;border-radius:8px;padding:12px;background:rgba(0,0,0,0.02);min-height:72px"></div>
+
+        <div class="forward-actions" style="justify-content:flex-end">
+          <button id="forwardCancel" class="btn secondary">Cancel</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(backdrop);
+
+  // quick buttons: Email, WhatsApp, Facebook, Instagram, TikTok, X (Twitter), Telegram, Copy
+  const quick = document.getElementById('forwardQuick');
+  const QUICK_APPS = [
+    { id: 'email', label: 'Email', icon: '<i class="fa fa-envelope"></i>', cls: 'app-email' },
+    { id: 'whatsapp', label: 'WhatsApp', icon: '<i class="fa fa-brands fa-whatsapp"></i>', cls: 'app-whatsapp' },
+    { id: 'facebook', label: 'Facebook', icon: '<i class="fa fa-brands fa-facebook-f"></i>', cls: 'app-facebook' },
+    { id: 'instagram', label: 'Instagram', icon: '<i class="fa fa-brands fa-instagram"></i>', cls: 'app-instagram' },
+    { id: 'tiktok', label: 'TikTok', icon: '<i class="fa fa-brands fa-tiktok"></i>', cls: 'app-tiktok' },
+    { id: 'x', label: 'X', icon: '<i class="fa fa-brands fa-x-twitter"></i>', cls: 'app-x' },
+    { id: 'telegram', label: 'Telegram', icon: '<i class="fa fa-paper-plane"></i>', cls: 'app-telegram' },
+    { id: 'copy', label: 'Copy', icon: '<i class="fa fa-copy"></i>', cls: 'app-copy' }
+  ];
+
+  QUICK_APPS.forEach(a => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.dataset.app = a.id;
+    b.className = a.cls;              // add class for color
+    b.innerHTML = `<span class="icon">${a.icon}</span><span>${a.label}</span>`;
+    b.addEventListener('click', () => handleForwardExternal(a.id));
+    quick.appendChild(b);
+  });
+
+  // Close / Cancel wiring
+  document.getElementById('forwardClose').addEventListener('click', hideForwardModal);
+  document.getElementById('forwardCancel').addEventListener('click', hideForwardModal);
+
+  // Search filter for in-app list
+  document.getElementById('forwardSearch').addEventListener('input', (e) => {
+    const q = e.target.value.trim().toLowerCase();
+    renderForwardList(q);
+  });
+
+  // click outside to close
+  backdrop.addEventListener('click', (ev) => {
+    if(ev.target === backdrop) hideForwardModal();
+  });
+}
+
+/* Show modal and populate preview */
+let _forwardingMessageId = null;
+let _forwardingMessageText = '';
+
+function showForwardModal(messageId){
+  createForwardModalIfNeeded();
+  _forwardingMessageId = messageId;
+  // find the message DOM to obtain text (fallback)
+  const el = document.querySelector(`.msg-row[data-msgid="${messageId}"]`);
+  let text = '';
+  if(el){
+    const bubbleText = el.querySelector('.bubble > div:not(.reply-snippet)');
+    text = bubbleText ? bubbleText.textContent.trim() : '';
+  }
+  _forwardingMessageText = text || '';
+  // populate preview
+  const preview = document.getElementById('forwardPreview');
+  preview.innerHTML = `<div style="font-weight:600;margin-bottom:6px">Message</div><div style="white-space:pre-wrap">${escapeHtml(_forwardingMessageText)}</div>`;
+
+  // populate in-app forward list (latest conversations)
+  renderForwardList('');
+
+  document.getElementById('forwardModalBackdrop').style.display = 'flex';
+}
+
+function hideForwardModal(){
+  const b = document.getElementById('forwardModalBackdrop');
+  if(b) b.style.display = 'none';
+  _forwardingMessageId = null;
+  _forwardingMessageText = '';
+}
+
+/* Render the in-app forward list (conversations array) */
+function renderForwardList(filter = ''){
+  const container = document.getElementById('forwardList');
+  if(!container) return;
+  container.innerHTML = '';
+  if(!conversations || !conversations.length){
+    container.innerHTML = `<div style="padding:12px;color:var(--muted)">No conversations available</div>`;
+    return;
+  }
+  const items = conversations.filter(c => {
+    const name = (c.name || '').toString().toLowerCase();
+    const last = ((c.last_message && (typeof c.last_message === 'string' ? c.last_message : (c.last_message.text || ''))) || '').toString().toLowerCase();
+    return (!filter) || name.includes(filter) || last.includes(filter);
+  });
+  items.forEach(it => {
+    const row = document.createElement('div');
+    row.className = 'forward-item';
+    row.innerHTML = `
+      <div class="avatar"><img src="${escapeHtml(makeAvatarUrl(it.avatar_url || it))}" style="width:40px;height:40px;object-fit:cover;border-radius:6px"/></div>
+      <div class="meta">
+        <div style="font-weight:600">${escapeHtml(it.name || 'Unknown')}</div>
+        <div class="small-muted">${escapeHtml((it.last_message && (typeof it.last_message === 'string' ? it.last_message : (it.last_message.text || ''))) || '')}</div>
+      </div>
+      <div><button class="btn" data-forward-to="${escapeHtml(it.id)}">Send</button></div>
+    `;
+    container.appendChild(row);
+    const btn = row.querySelector('button[data-forward-to]');
+    btn.addEventListener('click', ()=> {
+      const targetId = it.id;
+      forwardInAppToConversation(targetId, _forwardingMessageText, _forwardingMessageId);
+      hideForwardModal();
+    });
+  });
+}
+
+/* Handle external app forward */
+function handleForwardExternal(appId){
+  const text = _forwardingMessageText || '';
+  if(!text) { alert('No message to forward'); return; }
+  const encoded = encodeURIComponent(text);
+  if(appId === 'email'){
+    const subject = encodeURIComponent('Forwarded message');
+    const href = `mailto:?subject=${subject}&body=${encoded}`;
+    window.open(href, '_blank');
+  } else if(appId === 'whatsapp'){
+    // Using wa.me with text
+    const href = `https://wa.me/?text=${encoded}`;
+    window.open(href, '_blank');
+  } else if(appId === 'x'){
+    const href = `https://twitter.com/intent/tweet?text=${encoded}`;
+    window.open(href, '_blank');
+  } else if(appId === 'telegram'){
+    const href = `https://t.me/share/url?url=&text=${encoded}`;
+    window.open(href, '_blank');
+  } else if(appId === 'copy'){
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(()=> {
+        alert('Message text copied to clipboard');
+      }).catch(()=> alert('Copy failed'));
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try{ document.execCommand('copy'); alert('Message copied'); }catch(e){ alert('Copy failed'); }
+      ta.remove();
+    }
+  } else {
+    alert('Not supported');
+  }
+}
+
+/* Forward in-app to conversation ID (or user ID) */
+async function forwardInAppToConversation(targetId, text, originalMsgId = null){
+  if(!targetId || !text) return;
+  // assume targetId is user id from /api/contacts
+  const toId = Number(targetId);
+  if(!toId){ alert('Invalid target'); return; }
+
+  // Build conversation_id format used in your app: conv_<min>_<max>
+  const a = Math.min(Number(currentUser.id), toId);
+  const b = Math.max(Number(currentUser.id), toId);
+  const conv = `conv_${a}_${b}`;
+  const forwardText = `FW: ${text}`;
+
+  // Try socket first, otherwise fallback to API
+  if(socket){
+    socket.emit('send_message', { conversation_id: conv, text: forwardText, attachments: [], forward_from: originalMsgId || null }, (ack) => {
+      if(ack && ack.success){
+        alert('Forwarded in-app');
+        loadData();
+      } else {
+        // fallback to fetch if ack fails
+        fetch('/api/send_message',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({conversation_id:conv,text:forwardText,forward_from: originalMsgId || null})})
+          .then(r=>r.json()).then(j => {
+            if(j && j.success) alert('Forwarded in-app');
+            else alert('Forward failed');
+            loadData();
+          }).catch(e => { console.error(e); alert('Forward failed'); });
+      }
+    });
+  } else {
+    fetch('/api/send_message',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({conversation_id:conv,text:forwardText,forward_from: originalMsgId || null})})
+      .then(r=>r.json()).then(j => {
+        if(j && j.success) alert('Forwarded in-app');
+        else alert('Forward failed');
+        loadData();
+      }).catch(e => { console.error(e); alert('Forward failed'); });
+  }
+}
+
+/* ---- Reply / Forward / Copy helpers (reply unchanged) ---- */
+function replyToMessage(msgId, msgObj){
+  // find element and preview text
+  const el = document.querySelector(`.msg-row[data-msgid="${msgId}"]`);
+  let textPreview = '';
+  let senderName = '';
+  if(el){
+    const bubbleText = el.querySelector('.bubble > div:not(.reply-snippet)');
+    textPreview = bubbleText ? bubbleText.textContent.trim() : '';
+    const senderId = el.dataset.senderId;
+    if(senderId && Number(senderId) !== Number(currentUser.id)){
+      senderName = ''; // server doesn't always supply full name here; client UX will show stub if available
+    }
+  }
+  // fallback to msgObj content
+  if(!textPreview && msgObj && msgObj.text) textPreview = msgObj.text.slice(0,160);
+  // attempt to extract sender name from messageObj.sender
+  if(msgObj && msgObj.sender && msgObj.sender.name) senderName = msgObj.sender.name;
+
+  replyTo = { messageId: msgId, senderName: senderName || '', textPreview: textPreview || '' };
+  renderComposerReply();
+  msgInput.focus();
+}
+
+/* ---- Moderation, info menu, context menu, socket handlers, search, etc. ---- */
+
+async function forwardMessagePrompt(msgId){
+  // kept as a wrapper for backward compatibility: show modal
+  showForwardModal(msgId);
+}
+
+async function forwardMessageToUserId(msgId, userId){
+  // convenience wrapper (unused, preserved)
+  forwardInAppToConversation(userId, _forwardingMessageText || '', msgId);
+}
+
+
+/* ----------------- Robust fixes inserted near top ----------------- */
+
+/* 1) Image fallback for missing avatar file (prevents broken image) */
+(function(){
+  const DEFAULT = '{{ url_for("static", filename="default-avatar.png") }}';
+  // If the <img id="otherAvatar"> fails to load, replace with DEFAULT (or a known working fallback)
+  try {
+    const oa = document.getElementById('otherAvatar');
+    if(oa) {
+      // If src already missing on server, assign default immediate (defensive)
+      if(!oa.src || oa.src.trim().length === 0) oa.src = DEFAULT;
+      oa.addEventListener('error', function _avatarError(){
+        try { this.removeEventListener('error', _avatarError); } catch(e){}
+        // point to default static file; if that also 404s, the developer should place default-avatar.png in /static
+        this.src = DEFAULT;
+      });
+    }
+  } catch(e){ console.debug('avatar fallback install failed', e); }
+})();
+
+/* 2) Prefer server-hosted socket.io client (ensures version parity) + CDN fallback */
+(function(){
+  // Try to prefer the server-provided client first: /socket.io/socket.io.js
+  function injectScript(src, onload, onerror){
+    const s = document.createElement('script');
+    s.src = src;
+    s.async = false;
+    s.onload = onload || function(){};
+    s.onerror = onerror || function(){};
+    document.head.appendChild(s);
+  }
+  // If `io` already present, do nothing.
+  if(typeof io === 'undefined'){
+    // Try server-served client first
+    injectScript('/socket.io/socket.io.js', function(){ console.debug('socket.io client loaded from server /socket.io/socket.io.js'); }, function(){
+      // fallback to CDN (use your server's socket.io major version if known; adjust if needed)
+      injectScript('https://cdn.socket.io/4.7.2/socket.io.min.js', function(){ console.debug('socket.io client loaded from CDN fallback'); }, function(){ console.warn('socket.io client failed to load from both server and CDN'); });
+    });
+  }
+})();
+
+/* 3) clearConversationForReal - global robust function so info menu won't throw ReferenceError */
+window.clearConversationForReal = window.clearConversationForReal || (async function(otherId){
+  if(!otherId) { throw new Error('clearConversationForReal: missing otherId'); }
+  console.debug('clearConversationForReal called, otherId:', otherId);
+
+  // try to construct conversation id if we know currentUser
+  let conv = null;
+  try{
+    if(window.currentUser && typeof window.currentUser.id !== 'undefined'){
+      const a = Math.min(Number(window.currentUser.id), Number(otherId));
+      const b = Math.max(Number(window.currentUser.id), Number(otherId));
+      conv = `conv_${a}_${b}`;
+    }
+  }catch(e){ conv = null; }
+
+  // helper to attempt a fetch and return true on success
+  async function tryFetch(url, opts = {}) {
+    try{
+      const res = await fetch(url, opts);
+      const j = await (res.json().catch(()=>({})));
+      if(res.ok && (j.success || res.status === 204)) return { ok:true, url, json:j };
+      return { ok:false, url, json:j, status: res.status };
+    }catch(err){
+      return { ok:false, url, error: String(err) };
+    }
+  }
+
+  // Candidate endpoints (ordered): (1) conv-specific clear, (2) general clear with conversation_id, (3) delete conv resource
+  const attempts = [];
+  if(conv){
+    attempts.push(() => tryFetch(`/api/conversations/${encodeURIComponent(conv)}/clear`, { method:'POST', headers:{'Content-Type':'application/json'} }));
+  }
+  // generic clear endpoint with body
+  attempts.push(() => tryFetch(`/api/conversations/clear`, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ conversation_id: conv || null, other_id: Number(otherId) }) }));
+  // try deleting conversation resource
+  if(conv){
+    attempts.push(() => tryFetch(`/api/conversations/${encodeURIComponent(conv)}`, { method:'DELETE' }));
+  }
+  // fallback: delete by user (older APIs)
+  attempts.push(() => tryFetch(`/api/conversations/clear_by_user/${encodeURIComponent(otherId)}`, { method:'POST' }));
+
+  // run attempts sequentially until one succeeds
+  for(const fn of attempts){
+    try {
+      const r = await fn();
+      console.debug('clearConversationForReal attempt result:', r);
+      if(r && r.ok){
+        // reflect result in UI and emit socket event if socket exists
+        try {
+          const messagesElLocal = document.getElementById('messages');
+          if(messagesElLocal) messagesElLocal.innerHTML = '<div style="padding:20px;color:var(--muted)">Conversation cleared.</div>';
+          await (window.loadData ? window.loadData() : Promise.resolve());
+        } catch(e){ console.debug('UI update after clear failed', e); }
+        try { if(window.socket && typeof window.socket.emit === 'function') window.socket.emit('conversation_cleared',{ conversation_id: conv || null, other_id: Number(otherId) }); } catch(e){}
+        return true;
+      }
+    } catch(e){
+      console.debug('clear attempt error', e);
+    }
+  }
+
+  // If we reach here everything failed
+  alert('Clear conversation failed. Check console for details and confirm backend endpoint exists.');
+  return false;
+});
+
+/* ----------------- End inserted fixes ----------------- */
+
+
+
+
+// ---------- Ensure global clearConversationForReal exists (paste near top of script) ----------
+window.clearConversationForReal = window.clearConversationForReal || (async function(otherId){
+  console.log('clearConversationForReal called, otherId:', otherId, 'conversationId:', conversationId, 'activeOtherId:', activeOtherId);
+  const oid = (typeof otherId !== 'undefined' && otherId !== null) ? otherId : (typeof activeOtherId !== 'undefined' ? activeOtherId : null);
+  if(!oid && !conversationId){
+    alert('No conversation selected to clear.');
+    return false;
+  }
+
+  // Don't prompt here — caller usually already confirmed. If you want an extra confirm, uncomment:
+  // if(!confirm('Clear this conversation for you? This cannot be undone.')) return false;
+
+  const tryPost = async (endpoint) => {
+    try {
+      console.log('Attempting clear via', endpoint);
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ confirm: true })
+      });
+      const j = await res.json().catch(()=>({}));
+      if(res.ok && j && (j.success === true || j.success === undefined)) {
+        return { ok: true, body: j };
+      }
+      return { ok: false, body: j, status: res.status };
+    } catch(err) {
+      return { ok: false, error: err };
+    }
+  };
+
+  // candidate endpoints in order
+  const endpoints = [];
+  if(typeof conversationId !== 'undefined' && conversationId) endpoints.push(`/api/conversations/${encodeURIComponent(conversationId)}/clear`);
+  // try numeric otherId path
+  if(oid) endpoints.push(`/api/conversations/${encodeURIComponent(oid)}/clear`);
+  // fallback conv_<min>_<max>
+  try {
+    const meId = (currentUser && currentUser.id) ? Number(currentUser.id) : null;
+    const otherNum = Number(oid);
+    if(meId && otherNum && !isNaN(otherNum)) {
+      const a = Math.min(meId, otherNum);
+      const b = Math.max(meId, otherNum);
+      endpoints.push(`/api/conversations/conv_${a}_${b}/clear`);
+    }
+  } catch(e){ /* ignore */ }
+
+  // try each endpoint until success
+  for(const ep of endpoints) {
+    const r = await tryPost(ep);
+    if(r.ok) {
+      // UI cleanup: remove message rows cleanly; keep in try/catch
+      try {
+        document.querySelectorAll('.msg-row').forEach(r => {
+          try { if(typeof r._cleanupControls === 'function') r._cleanupControls(); } catch(e){}
+          try { r.remove(); } catch(e){}
+        });
+        cleanupOrphanControls();
+      } catch(e){ console.debug('post-clear DOM cleanup error', e); }
+
+      try {
+        messagesEl.innerHTML = '';
+        const hint = document.createElement('div');
+        hint.style.textAlign = 'center';
+        hint.style.color = 'var(--muted)';
+        hint.style.padding = '20px';
+        hint.textContent = 'Conversation cleared.';
+        messagesEl.appendChild(hint);
+      } catch(e){ console.debug('post-clear hint error', e); }
+
+      // try a socket leave (best-effort)
+      try { if(socket && conversationId) socket.emit('leave_room', { conversation_id: conversationId }); } catch(e){}
+
+      // refresh conversation list (best-effort)
+      try { await loadData(); } catch(e){ console.debug('loadData after clear failed', e); }
+
+      console.log('clearConversationForReal succeeded via', ep);
+      return true;
+    } else {
+      console.warn('clear attempt failed for', ep, r);
+    }
+  }
+
+  // all attempts failed
+  alert('Clear conversation failed (server unreachable or endpoint not found). See console for details.');
+  console.debug('clearConversationForReal: all endpoints tried, failed', endpoints);
+  return false;
+});
+
+
+
+/* ---- Info menu (header) ---- */
+function createInfoMenuIfNeeded(){
+  if(document.querySelector('.info-menu')) return;
+  const menu = document.createElement('div');
+  menu.className = 'info-menu';
+  menu.style.display = 'none';
+  menu.innerHTML = `
+    <button id="m-block-toggle"><i class="fa fa-ban"></i> Block user</button>
+    <button id="m-report" class="danger"><i class="fa fa-flag"></i> Report user</button>
+    <button id="m-clear"><i class="fa fa-trash"></i> Clear conversation</button>
+  `;
+  document.body.appendChild(menu);
+
+  // Internal click stopper:
+  if(!menu._internalStopper){
+    menu._internalStopper = function(e){
+      if(e.target.closest && e.target.closest('button')) {
+        return;
+      }
+      e.stopPropagation();
+    };
+    menu.addEventListener('click', menu._internalStopper);
+  }
+
+  // Idempotent wiring helper (attaches once per button)
+  function wireBtn(id, handler){
+    const b = document.getElementById(id);
+    if(!b) return;
+    if(b._attached) return;
+    b._attached = true;
+    b.addEventListener('click', async (ev) => {
+      ev.stopPropagation();
+      try{
+        await handler(ev);
+      }catch(err){
+        console.error(id + ' handler error', err);
+        alert('Action failed; see console for details');
+      }
+      try{ menu.style.display = 'none'; }catch(e){}
+    });
+  }
+
+  // Block / Unblock toggle
+  wireBtn('m-block-toggle', async () => {
+    if(!activeOtherId){ alert('No user selected'); return; }
+    try{
+      const blockedList = await loadBlockedCache();
+      const isBlocked = blockedList.some(b => Number(b.blocked_id) === Number(activeOtherId));
+      if(isBlocked){
+        if(!confirm('Unblock this user?')) return;
+        await blockUserToggle(activeOtherId, false);
+      } else {
+        if(!confirm('Block this user? Blocked users cannot message you.')) return;
+        await blockUserToggle(activeOtherId, true);
+      }
+      blockedCache = null;
+      const bt = document.getElementById('m-block-toggle');
+      if(bt){
+        const newBlockedList = await loadBlockedCache();
+        const nowBlocked = newBlockedList.some(b => Number(b.blocked_id) === Number(activeOtherId));
+        bt.textContent = nowBlocked ? 'Unblock user' : 'Block user';
+        bt.innerHTML = `<i class="fa fa-ban"></i> ${bt.textContent}`;
+      }
+    }catch(e){
+      console.error('block toggle failed', e);
+      alert('Block/unblock failed');
+    }
+  });
+
+  // Report user
+  wireBtn('m-report', async () => {
+    if(!activeOtherId){ alert('No user selected'); return; }
+    if(!confirm('Report this user?')) return;
+    try{
+      await reportUser(activeOtherId);
+      alert('Report submitted. Thank you.');
+    }catch(e){
+      console.error('report failed', e);
+      alert('Report failed');
+    }
+  });
+
+  // Clear conversation
+  wireBtn('m-clear', async () => {
+    if(!activeOtherId){ alert('No conversation selected'); return; }
+    if(!confirm('Clear this conversation for you? This cannot be undone.')) return;
+    try{
+      await clearConversationForReal(activeOtherId);
+      menu.style.display = 'none';
+      const messagesElLocal = document.getElementById('messages');
+      if(messagesElLocal) messagesElLocal.innerHTML = '<div style="padding:20px;color:var(--muted)">Conversation cleared.</div>';
+      loadData();
+    }catch(e){
+      console.error('clear conversation failed', e);
+      alert('Clear conversation failed');
+    }
+  });
+}
+createInfoMenuIfNeeded();
+
+/* ---------- Robust info button wiring (fixes "three-dot" not working + outside-close) ---------- */
+function ensureInfoBtnListener(){
+  const existing = document.getElementById('infoBtn');
+  if(existing && existing._infoAttached) return;
+
+  function attach(btn){
+    if(!btn) return;
+    if(btn._infoAttached) return;
+    btn._infoAttached = true;
+
+    btn.addEventListener('click', async (ev) => {
+      ev.stopPropagation();
+      createInfoMenuIfNeeded();
+      const menu = document.querySelector('.info-menu');
+      if(!menu) return;
+
+      if(!menu._internalStopper){
+        menu._internalStopper = (e) => e.stopPropagation();
+        menu.addEventListener('click', menu._internalStopper);
+      }
+
+      const blockBtn = document.getElementById('m-block-toggle');
+      try {
+        const blockedList = await loadBlockedCache();
+        const isBlocked = blockedList.some(b => Number(b.blocked_id) === Number(activeOtherId));
+        blockBtn.textContent = isBlocked ? 'Unblock user' : 'Block user';
+        blockBtn.innerHTML = `<i class="fa fa-ban"></i> ${blockBtn.textContent}`;
+      } catch (e) {
+        blockBtn.textContent = 'Block user';
+        blockBtn.innerHTML = `<i class="fa fa-ban"></i> ${blockBtn.textContent}`;
+      }
+
+      const rect = btn.getBoundingClientRect();
+      menu.style.display = 'block';
+      const menuWidth = menu.offsetWidth || 220;
+      let left = rect.left - Math.max(40, Math.round(menuWidth/2));
+      if(left < 8) left = 8;
+      if(left + menuWidth > window.innerWidth - 8) left = window.innerWidth - menuWidth - 8;
+      menu.style.left = left + 'px';
+      menu.style.top = (rect.bottom + 8) + 'px';
+
+      if(menu._outsideHandler){ try{ document.removeEventListener('click', menu._outsideHandler); }catch(e){} menu._outsideHandler = null; }
+      if(menu._escHandler){ try{ document.removeEventListener('keydown', menu._escHandler); }catch(e){} menu._escHandler = null; }
+
+      const outsideHandler = function(ev2){
+        if(ev2.target === btn || btn.contains(ev2.target)) return;
+        if(!menu.contains(ev2.target)){
+          menu.style.display = 'none';
+          try{ document.removeEventListener('click', outsideHandler); }catch(e){}
+          try{ document.removeEventListener('keydown', escHandler); }catch(e){}
+          menu._outsideHandler = null;
+          menu._escHandler = null;
+        }
+      };
+
+      const escHandler = function(ev3){
+        if(ev3.key === 'Escape' || ev3.key === 'Esc'){
+          menu.style.display = 'none';
+          try{ document.removeEventListener('click', outsideHandler); }catch(e){}
+          try{ document.removeEventListener('keydown', escHandler); }catch(e){}
+          menu._outsideHandler = null;
+          menu._escHandler = null;
+        }
+      };
+
+      menu._outsideHandler = outsideHandler;
+      menu._escHandler = escHandler;
+
+      setTimeout(() => {
+        document.addEventListener('click', outsideHandler);
+        document.addEventListener('keydown', escHandler);
+      }, 0);
+    });
+  }
+
+  if(existing){
+    attach(existing);
+    return;
+  }
+
+  const mo = new MutationObserver((mutations, obs) => {
+    const btn = document.getElementById('infoBtn');
+    if(btn){
+      attach(btn);
+      try{ obs.disconnect(); }catch(e){}
+    }
+  });
+  mo.observe(document.documentElement || document.body, { childList: true, subtree: true });
+}
+
+// Run it now (idempotent)
+ensureInfoBtnListener();
+
+/* ---------------- Block / Unblock UI helpers ---------------- */
+let blockedCache = null;              // cached list of { blocked_id, created_at } that current user blocked
+const blockedByOthers = new Set();    // set of user ids who have blocked current user (populated by socket events)
+
+async function loadBlockedCache(force = false){
+  if(blockedCache && !force) return blockedCache;
+  try{
+    const res = await fetch('/api/blocked');
+    if(!res.ok) { blockedCache = []; return blockedCache; }
+    blockedCache = await res.json();
+    return blockedCache;
+  }catch(e){
+    console.error('loadBlockedCache failed', e);
+    blockedCache = [];
+    return blockedCache;
+  }
+}
+
+function isBlockedByMe(otherId){
+  if(!otherId) return false;
+  if(!blockedCache) return false;
+  return blockedCache.some(b => Number(b.blocked_id) === Number(otherId));
+}
+
+function isBlockedByOther(otherId){
+  if(!otherId) return false;
+  return blockedByOthers.has(Number(otherId));
+}
+
+async function blockUserToggle(otherId, shouldBlock = true){
+  if(!otherId) throw new Error('missing otherId');
+  try{
+    const res = await fetch(`/api/block/${encodeURIComponent(otherId)}`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ block: !!shouldBlock })
+    });
+    const j = await res.json();
+    if(res.ok && j.success){
+      await loadBlockedCache(true);
+      if(!shouldBlock) blockedByOthers.delete(Number(otherId));
+      applyBlockedUIForActive();
+      loadData();
+      return true;
+    } else {
+      console.warn('blockUserToggle failed', j);
+      alert('Failed to update block state: ' + (j.error || 'unknown'));
+      return false;
+    }
+  }catch(e){
+    console.error('blockUserToggle error', e);
+    alert('Failed to update block state');
+    return false;
+  }
+}
+
+function ensureBlockBanner(){
+  let banner = document.getElementById('blockBanner');
+  if(banner) return banner;
+
+  banner = document.createElement('div');
+  banner.id = 'blockBanner';
+  banner.className = 'blocked-banner';
+  try{
+    const chatMain = document.querySelector('.chat');
+    const header = chatMain ? chatMain.querySelector('.header') : null;
+    if(header && header.parentNode){
+      header.parentNode.insertBefore(banner, header.nextSibling);
+    } else if(chatMain){
+      chatMain.insertBefore(banner, chatMain.firstChild);
+    } else {
+      document.body.appendChild(banner);
+    }
+  }catch(e){
+    console.debug('ensureBlockBanner placement failed', e);
+    document.body.appendChild(banner);
+  }
+  return banner;
+}
+
+function applyBlockedUIForActive(){
+  const banner = ensureBlockBanner();
+  if(!activeOtherId){
+    banner.style.display = 'none';
+    msgInput.disabled = false;
+    sendBtn.disabled = false;
+    return;
+  }
+
+  const byMe = isBlockedByMe(activeOtherId);
+  const byOther = isBlockedByOther(activeOtherId);
+
+  if(byMe){
+    banner.innerHTML = `<div class="msg"><strong>You have blocked this user.</strong> They cannot message you. You won't receive messages from them.</div>\n                        <div><button id="bannerUnblockBtn" title="Unblock user">Unblock</button></div>`;
+    banner.style.display = 'flex';
+    msgInput.disabled = true;
+    sendBtn.disabled = true;
+    const btn = document.getElementById('bannerUnblockBtn');
+    if(btn && !btn._handlerAttached){
+      btn._handlerAttached = true;
+      btn.addEventListener('click', async ()=> {
+        if(!confirm('Unblock this user?')) return;
+        await blockUserToggle(activeOtherId, false);
+      });
+    }
+    return;
+  } else if(byOther){
+    banner.innerHTML = `<div class="msg"><strong>This user has blocked you.</strong> You cannot send messages to them.</div>\n                        <div><button class="muted-btn" id="bannerCloseBlocked">OK</button></div>`;
+    banner.style.display = 'flex';
+    msgInput.disabled = true;
+    sendBtn.disabled = true;
+    const cb = document.getElementById('bannerCloseBlocked');
+    if(cb && !cb._handlerAttached){
+      cb._handlerAttached = true;
+      cb.addEventListener('click', () => { banner.style.display = 'none'; });
+    }
+    return;
+  } else {
+    banner.style.display = 'none';
+    msgInput.disabled = false;
+    sendBtn.disabled = false;
+  }
+}
+
+// socket-handling for block events (keep UI in sync)
+if(socket){
+  socket.on('user_blocked', async (d) => {
+    try{
+      if(!d) return;
+      if(Number(d.blocker_id) === Number(currentUser && currentUser.id)){
+        await loadBlockedCache(true);
+      }
+      if(Number(d.blocked_id) === Number(currentUser && currentUser.id)){
+        blockedByOthers.add(Number(d.blocker_id));
+      }
+      if(activeOtherId && (Number(d.blocker_id) === Number(activeOtherId) || Number(d.blocked_id) === Number(activeOtherId))){
+        await loadBlockedCache(true);
+        applyBlockedUIForActive();
+      }
+      loadData();
+    }catch(e){
+      console.debug('user_blocked handler failed', e);
+    }
+  });
+}
+
+/* Context menu implementation (robust) */
+function createCtxMenuIfNeeded(){
+  if(document.querySelector('.ctx-menu')) return;
+
+  const menu = document.createElement('div');
+  menu.className = 'ctx-menu';
+  menu.style.display = 'none';
+  menu.style.position = 'absolute';
+  menu.style.minWidth = '200px';
+  menu.style.zIndex = 2000;
+  menu.innerHTML = `
+    <button id="ctx-reply"><i class="fa fa-reply"></i> Reply</button>
+    <button id="ctx-forward"><i class="fa fa-share"></i> Forward</button>
+    <button id="ctx-copy"><i class="fa fa-copy"></i> Copy</button>
+    <button id="ctx-edit"><i class="fa fa-pen"></i> Edit</button>
+    <button id="ctx-delete" class="danger"><i class="fa fa-trash"></i> Delete</button>
+    <button id="ctx-report" class="danger"><i class="fa fa-flag"></i> Report</button>
+  `;
+  document.body.appendChild(menu);
+
+  menu.addEventListener('click', async (ev) => {
+    ev.stopPropagation();
+    const btn = ev.target.closest && ev.target.closest('button');
+    if(!btn) return;
+    const mid = menu.dataset.msgid;
+    const otherid = menu.dataset.otherid || activeOtherId;
+    menu.style.display = 'none';
+
+    try {
+      if(btn.id === 'ctx-reply'){
+        if(!mid) return alert('Message id not found');
+        const msgEl = document.querySelector(`.msg-row[data-msgid="${mid}"]`);
+        const bubbleTextEl = msgEl ? msgEl.querySelector('.bubble > div:not(.reply-snippet)') : null;
+        const txt = bubbleTextEl ? bubbleTextEl.textContent.trim() : '';
+        const sender = msgEl && msgEl.dataset && msgEl.dataset.senderId ? { id: msgEl.dataset.senderId } : {};
+        replyToMessage(mid, { id: mid, text: txt, sender });
+      } else if(btn.id === 'ctx-forward'){
+        if(!mid) return alert('Message id not found');
+        showForwardModal(mid);
+      } else if(btn.id === 'ctx-copy'){
+        if(!mid) return alert('Message id not found');
+        copyMessageToClipboard(mid);
+      } else if(btn.id === 'ctx-edit'){
+        if(!mid) return alert('Message id not found');
+        await editMessage(mid);
+      } else if(btn.id === 'ctx-delete'){
+        if(!mid) return alert('Message id not found');
+        await deleteMessage(mid);
+      } else if(btn.id === 'ctx-report'){
+        const rid = otherid || (menu.dataset.reportedid || null);
+        if(!rid) return alert('Could not determine user to report');
+        if(!confirm('Report this user?')) return;
+        await reportUser(Number(rid));
+        alert('Report submitted');
+      }
+    } catch(err){
+      console.error('ctx-menu handler error', err);
+      alert('Action failed; see console for details');
+    }
+  });
+
+  window.addEventListener('scroll', () => { if(menu) menu.style.display = 'none'; }, true);
+  document.addEventListener('keydown', (e) => { if(e.key === 'Escape') menu.style.display = 'none'; });
+}
+
+// Robust contextmenu handler (uses elementFromPoint to avoid overlays)
+if(window.__chat_ctx_handler__) document.removeEventListener('contextmenu', window.__chat_ctx_handler__);
+window.__chat_ctx_handler__ = function(e){
+  try {
+    const elAtPoint = document.elementFromPoint(e.clientX, e.clientY);
+    const candidate = (e.target && e.target.closest && e.target.closest('.msg-row'))
+                   || (elAtPoint && elAtPoint.closest && elAtPoint.closest('.msg-row'))
+                   || null;
+    if(!candidate) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    createCtxMenuIfNeeded();
+    const menu = document.querySelector('.ctx-menu');
+    if(!menu) return;
+
+    const senderId = candidate.dataset && candidate.dataset.senderId ? Number(candidate.dataset.senderId) : null;
+    const msgId = candidate.dataset && candidate.dataset.msgid ? candidate.dataset.msgid : (candidate.getAttribute && candidate.getAttribute('data-msgid')) || '';
+    const possibleOtherId = (senderId && Number(currentUser && currentUser.id) && Number(senderId) !== Number(currentUser.id)) ? Number(senderId) : (activeOtherId || '');
+
+    menu.dataset.msgid = msgId || '';
+    menu.dataset.otherid = possibleOtherId || '';
+
+    const editBtn = menu.querySelector('#ctx-edit');
+    const delBtn  = menu.querySelector('#ctx-delete');
+    const rptBtn  = menu.querySelector('#ctx-report');
+    const repBtn  = menu.querySelector('#ctx-reply');
+    const fwdBtn  = menu.querySelector('#ctx-forward');
+    const cpBtn   = menu.querySelector('#ctx-copy');
+
+    if(Number(senderId) === Number(currentUser && currentUser.id)){
+      if(editBtn) editBtn.style.display = '';
+      if(delBtn) delBtn.style.display = '';
+      if(rptBtn) rptBtn.style.display = 'none';
+      if(repBtn) repBtn.style.display = '';
+      if(fwdBtn) fwdBtn.style.display = '';
+      if(cpBtn) cpBtn.style.display = '';
+    } else {
+      if(editBtn) editBtn.style.display = 'none';
+      if(delBtn) delBtn.style.display = '';
+      if(rptBtn) rptBtn.style.display = '';
+      if(repBtn) repBtn.style.display = '';
+      if(fwdBtn) fwdBtn.style.display = '';
+      if(cpBtn) cpBtn.style.display = '';
+    }
+
+    const menuW = menu.offsetWidth || 220;
+    const menuH = menu.offsetHeight || 200;
+    let left = e.pageX;
+    let top  = e.pageY;
+    if(left + menuW > window.scrollX + window.innerWidth - 8) left = window.scrollX + window.innerWidth - menuW - 8;
+    if(top + menuH > window.scrollY + window.innerHeight - 8) top = Math.max(window.scrollY + 8, top - menuH - 12);
+    if(left < window.scrollX + 8) left = window.scrollX + 8;
+    if(top  < window.scrollY + 8) top  = window.scrollY + 8;
+
+    menu.style.left = left + 'px';
+    menu.style.top  = top + 'px';
+    menu.style.display = 'block';
+       // --- Attach a one-time outside handler (capture) so clicking anywhere closes the ctx menu ---
+(function attachOutsideClose(menuEl){
+  if(!menuEl) return;
+  // prevent double-attach
+  if(menuEl._outsideAttached) return;
+
+  // cleanup function
+  function cleanup() {
+    try {
+      document.removeEventListener('click', outsideHandler, true);
+      document.removeEventListener('contextmenu', outsideHandler, true);
+      document.removeEventListener('pointerdown', outsideHandler, true);
+      document.removeEventListener('touchstart', outsideHandler, true);
+      document.removeEventListener('keydown', escHandler, true);
+    } catch (e) { /* ignore */ }
+    menuEl._outsideAttached = false;
+  }
+
+  // close on outside click/touch/contextmenu
+  const outsideHandler = function(ev) {
+    try {
+      if(!menuEl || menuEl.style.display === 'none') return;
+      // if click is inside menu, leave it open
+      if(ev.target && menuEl.contains(ev.target)) return;
+      // otherwise hide and cleanup
+      try { menuEl.style.display = 'none'; } catch(e){}
+      cleanup();
+    } catch (err) {
+      console.error('ctx-menu outsideHandler error', err);
+      cleanup();
+    }
+  };
+
+  // close on Escape
+  const escHandler = function(ev) {
+    try {
+      if(ev.key === 'Escape' || ev.key === 'Esc') {
+        try { menuEl.style.display = 'none'; } catch(e){}
+        cleanup();
+      }
+    } catch (err) {
+      console.error('ctx-menu escHandler error', err);
+      cleanup();
+    }
+  };
+
+  // Attach on capture so it fires even if other handlers call stopPropagation()
+  document.addEventListener('click', outsideHandler, true);
+  document.addEventListener('contextmenu', outsideHandler, true);
+  document.addEventListener('pointerdown', outsideHandler, true);
+  document.addEventListener('touchstart', outsideHandler, true);
+  document.addEventListener('keydown', escHandler, true);
+
+  menuEl._outsideAttached = true;
+})(menu);
+
+
+  } catch(err){
+    console.error('contextmenu handler error', err);
+  }
+};
+document.addEventListener('contextmenu', window.__chat_ctx_handler__);
+
+
+
+/* ---- Socket handlers and other logic (unchanged but robust) ---- */
+if(socket){
+  socket.on('connect', ()=> socket.emit('identify',{}));
+
+  socket.on('message', data=>{
+    if(!data) return;
+
+    if(data.conversation_id && data.conversation_id === conversationId){
+      if(!document.querySelector(`.msg-row[data-msgid="${data.id}"]`)){
+        const matchingTemp = findMatchingTempFor(data);
+        if(matchingTemp){
+          matchingTemp.dataset.msgid = data.id;
+          document.querySelectorAll(`.msg-actions-hotspot[data-for="${matchingTemp.dataset.msgid}"]`).forEach(n => n.dataset.for = data.id);
+          document.querySelectorAll(`.msg-actions-wrap[data-for="${matchingTemp.dataset.msgid}"]`).forEach(n => n.dataset.for = data.id);
+          const bubble = matchingTemp.querySelector('.bubble');
+          if(bubble){
+            const txtNode = bubble.querySelector('div:not(.reply-snippet)');
+            if(txtNode) txtNode.innerHTML = escapeHtml(data.text || '');
+            const meta = bubble.querySelector('.meta-time');
+            if(meta) meta.textContent = humanTime(data.created_at) + ' · ' + (data.status || 'Delivered');
+            if(data.reply_to && data.reply_to.text){
+              const rs = bubble.querySelector('.reply-snippet');
+              if(rs) rs.textContent = data.reply_to.text.slice(0,240);
+            }
+            if(data.reactions) updateMessageReactions(data.id, data.reactions || []);
+          }
+        } else {
+          addMessage(data);
+        }
+      }
+      if(socket) socket.emit('message_read',{conversation_id:conversationId});
+    } else {
+      loadData();
+      try{
+        if(data.conversation_id){
+          const parts = data.conversation_id.replace('conv_','').split('_');
+          if(parts.length===2){
+            const otherId = (Number(parts[0]) === Number(currentUser.id)) ? Number(parts[1]) : Number(parts[0]);
+            const el = convList.querySelector(`[data-id="${otherId}"]`);
+            if(el){
+              el.classList.add('unread');
+              let badge = el.querySelector('.badge');
+              if(badge){
+                badge.textContent = Number(badge.textContent||0) + 1;
+              } else {
+                const newBadge = document.createElement('div');
+                newBadge.className = 'badge';
+                newBadge.textContent = '1';
+                el.appendChild(newBadge);
+              }
+            }
+          }
+        }
+      }catch(e){ console.debug('could not bump badge', e); }
+    }
+  });
+
+  socket.on('reaction', d => {
+    if(!d || !d.message_id) return;
+    if(d.conversation_id === conversationId){
+      updateMessageReactions(d.message_id, d.reactions || []);
+    } else {
+      loadData();
+    }
+  });
+
+  socket.on('typing', d=>{
+    if(d.conversation_id === conversationId){
+      otherSub.textContent = d.typing ? (d.name || 'Typing...') + ' is typing…' : 'Online';
+      if(d.typing) setTimeout(()=> otherSub.textContent = 'Online', 2500);
+    }
+  });
+
+  socket.on('profile_updated', d=>{
+    if(!d || !d.user_id) return;
+    if(activeOtherId && Number(activeOtherId) === Number(d.user_id)){
+      if(d.name) otherName.textContent = d.name;
+      if(d.avatar_url) otherAvatar.src = makeAvatarUrl(d.avatar_url);
+    }
+    loadData();
+  });
+
+  socket.on('message_status', d=>{
+    if(!d || !d.conversation_id) return;
+    if(d.conversation_id === conversationId && Array.isArray(d.message_ids)){
+      d.message_ids.forEach(mid => {
+        const el = document.querySelector(`.msg-row[data-msgid="${mid}"]`);
+        if(el){
+          const meta = el.querySelector('.meta-time');
+          if(meta) meta.textContent = humanTime(d.timestamp) + ' · Seen';
+        }
+      });
+    }
+    try{
+      const parts = d.conversation_id.replace('conv_','').split('_');
+      if(parts.length===2){
+        const otherId = (Number(parts[0]) === Number(currentUser.id)) ? Number(parts[1]) : Number(parts[0]);
+        const el = convList.querySelector(`[data-id="${otherId}"]`);
+        if(el){
+          el.classList.remove('unread');
+          const badge = el.querySelector('.badge');
+          if(badge) badge.remove();
+        }
+      }
+    }catch(e){ console.debug('message_status handling error', e); }
+  });
+
+  socket.on('message_deleted', d => {
+    if(!d || !d.message_id) return;
+    const el = document.querySelector(`.msg-row[data-msgid="${d.message_id}"]`);
+    if(el){
+      if(typeof el._cleanupControls === 'function') el._cleanupControls();
+      el.remove();
+    }
+    // remove any orphan controls
+    cleanupOrphanControls();
+  });
+
+  socket.on('message_edited', m => {
+    if(!m || !m.id) return;
+    const el = document.querySelector(`.msg-row[data-msgid="${m.id}"]`);
+    if(el){
+      const bubble = el.querySelector('.bubble > div:not(.reply-snippet)');
+      if(bubble) bubble.textContent = m.text || '';
+      const meta = el.querySelector('.meta-time');
+      if(meta) meta.textContent = (m.created_at ? new Date(m.created_at).toLocaleString() : '') + ' · ' + (m.status || 'edited');
+    }
+  });
+
+  socket.on('conversation_cleared', d => {
+    if(!d || !d.conversation_id) return;
+    if(conversationId === d.conversation_id){
+      const messagesElLocal = document.getElementById('messages');
+      if(messagesElLocal) messagesElLocal.innerHTML = '<div style="padding:20px;color:var(--muted)">Conversation cleared.</div>';
+    }
+    loadData();
+  });
+
+  socket.on('disconnect', ()=>console.log('socket disconnected'));
+}
+
+/* ---- Search filtering ---- */
+searchInput.addEventListener('input', ()=> {
+  const q = searchInput.value.trim().toLowerCase();
+  const items = Array.from(convList.children);
+  items.forEach(it => {
+    const text = it.innerText.toLowerCase();
+    it.style.display = text.includes(q) ? '' : 'none';
+  });
+});
+
+/* ---- Expose helper for dev console ---- */
+window.openConversation = openConversation;
+
+
+  
+// ------------------ Robust Report modal JS (Promise-based) ------------------
+(function(){
+  const QUICK_REASONS = [
+    "Spam / unsolicited messages",
+    "Harassment / abusive language",
+    "Impersonation / fake account",
+    "Inappropriate content",
+    "Scam / fraud attempt",
+    "Other"
+  ];
+
+  // ensure quick-reasons HTML exists (you probably already have the modal markup)
+  function ensureReportModalMarkup() {
+    if(document.getElementById('reportModalBackdrop')) return;
+    // If you didn't add the modal HTML earlier, you can create it here.
+    // But it's simpler to paste the modal HTML into the page (as instructed before).
+    console.warn('Report modal element not found; please add the modal HTML into the page.');
+  }
+
+  // showReportModal returns a Promise that resolves true when report successfully sent,
+  // resolves false if user cancelled, rejects on unexpected errors.
+  async function showReportModalPromise(targetUserId, targetName){
+    ensureReportModalMarkup();
+    const backdrop = document.getElementById('reportModalBackdrop');
+    if(!backdrop) throw new Error('Report modal not found in DOM');
+
+    const quickContainer = document.getElementById('reportQuickReasons');
+    const detailsEl = document.getElementById('reportDetails');
+    const previewDetails = document.getElementById('reportPreviewDetails');
+    const previewReason = document.getElementById('reportSelectedReason');
+    const targetTitle = document.getElementById('reportTargetTitle');
+    const submitBtn = document.getElementById('reportSubmit');
+    const closeBtn = document.getElementById('reportCloseBtn');
+    const cancelBtn = document.getElementById('reportCancel');
+
+    // clear previous
+    quickContainer.innerHTML = '';
+    QUICK_REASONS.forEach((r, idx) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = r;
+      b.dataset.idx = String(idx);
+      b.addEventListener('click', () => {
+        quickContainer.querySelectorAll('button').forEach(x => x.classList.remove('selected'));
+        b.classList.add('selected');
+        previewReason.textContent = r;
+      });
+      quickContainer.appendChild(b);
+    });
+    // select first by default
+    const first = quickContainer.querySelector('button');
+    if(first) first.classList.add('selected');
+    previewReason.textContent = QUICK_REASONS[0];
+
+    detailsEl.value = '';
+    previewDetails.textContent = '(no additional details)';
+    targetTitle.textContent = targetName ? `Reporting ${targetName}` : `Reporting user (${targetUserId})`;
+
+    backdrop.style.display = 'flex';
+    submitBtn.disabled = false;
+    submitBtn.textContent = 'Send report';
+
+    // wire once handlers
+    let resolved = false;
+    let cleanupHandlers = () => {
+      try { closeBtn.removeEventListener('click', onCancel); } catch(e){}
+      try { cancelBtn.removeEventListener('click', onCancel); } catch(e){}
+      try { submitBtn.removeEventListener('click', onSubmit); } catch(e){}
+      detailsEl.removeEventListener('input', onDetailsInput);
+    };
+
+    function onDetailsInput(){ previewDetails.textContent = detailsEl.value.trim() || '(no additional details)'; }
+
+    function onCancel(){
+      if(resolved) return;
+      resolved = true;
+      cleanupHandlers();
+      backdrop.style.display = 'none';
+      // resolve with false to indicate user cancelled
+      promiseResolve(false);
+    }
+
+    async function onSubmit(){
+      if(resolved) return;
+      const selected = quickContainer.querySelector('button.selected');
+      const reason = selected ? selected.textContent : QUICK_REASONS[0];
+      const details = detailsEl.value.trim();
+
+      // validate at least a reason (we always have one)
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Sending...';
+
+      try {
+        const res = await fetch(`/api/report/${encodeURIComponent(targetUserId)}`, {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({ reason, details })
+        });
+        const j = await res.json().catch(()=>({}));
+
+        if(res.ok && j && j.success){
+          // success: close modal and resolve true
+          resolved = true;
+          cleanupHandlers();
+          backdrop.style.display = 'none';
+          promiseResolve(true);
+          return;
+        } else {
+          // show helpful message (if server provided details include them in console)
+          let errMsg = (j && (j.error || j.message)) ? (j.error || j.message) : 'Report failed';
+          // If server included 'details' (debug mode), log it for troubleshooting
+          if(j && j.details) {
+            console.warn('Server report error details:', j.details);
+            errMsg += ': ' + j.details;
+          }
+          alert('Report failed: ' + errMsg);
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Send report';
+          // do not resolve yet — allow user to retry or cancel
+        }
+      } catch(err){
+        console.error('Report submit error', err);
+        alert('Report failed: network or server error');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Send report';
+      }
+    }
+
+    detailsEl.addEventListener('input', onDetailsInput);
+    closeBtn.addEventListener('click', onCancel);
+    cancelBtn.addEventListener('click', onCancel);
+    submitBtn.addEventListener('click', onSubmit);
+
+    // return promise that will be resolved by handlers above
+    let promiseResolve, promiseReject;
+    const p = new Promise((resolve, reject) => { promiseResolve = resolve; promiseReject = reject; });
+
+    // timeout guard (optional) — not strictly necessary
+    // setTimeout(()=> { if(!resolved){ resolved=true; cleanupHandlers(); backdrop.style.display='none'; promiseResolve(false); } }, 20*60*1000);
+
+    return p;
+  }
+
+  // Expose function used by menus/ctx to open the modal and await result
+  window.reportUser = async function(otherId){
+    try {
+      // try to obtain a display name from conv list if possible
+      let name = '';
+      try {
+        const el = document.querySelector(`.conv-item[data-id="${otherId}"]`);
+        if(el){
+          const n = el.querySelector('.name');
+          if(n) name = n.textContent.trim();
+        }
+      } catch(e){ /* ignore */ }
+
+      // show modal and await result (true if submitted, false if cancelled)
+      const submitted = await showReportModalPromise(otherId, name || null);
+      return submitted;
+    } catch(err){
+      console.error('reportUser internal error', err);
+      return false;
+    }
+  };
+
+})();
+ 
+/* ===== Media + Emoji wiring ===== */
+(function(){
+  const mediaBtn = document.getElementById('mediaBtn');
+  const emojiBtn = document.getElementById('emojiBtn');
+  const fileInput = document.getElementById('msgFileInput');
+  const emojiPanel = document.getElementById('emojiPanel');
+  const emojiContent = document.getElementById('emojiContent');
+
+  // Extensive emoji list — large but not literally every unicode emoji.
+  // You can expand this list; it's a compact set covering commonly-used emojis.
+  const EMOJIS = [
+    '😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😌','😍','🥰',
+    '😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🤩','🥳','😏',
+    '😒','😞','😔','😟','😕','🙁','☹️','😣','😖','😫','😩','🥺','😢','😭','😤','😠',
+    '😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥',
+    '😶','😐','😑','😬','🙄','😯','😦','😧','😮','😲','🥱','😴','🤤','😪','😵','🤐',
+    '🥴','🤢','🤮','🤧','😷','🤒','🤕','🤑','🤠','🥸','😈','👿','👹','👺','🤡','💩',
+    '👻','💀','☠️','👽','👾','🤖','🎃','😺','😸','😹','😻','😼','😽','🙀','😿','😾',
+    '🙌','👏','🤝','👍','👎','👊','✊','🤛','🤜','🤞','✌️','🤟','🤘','👌','🤏','👈',
+    '👉','👆','👇','☝️','✋','🤚','🖐️','🖖','👋','🤙','💪','🦾','🦵','🦿','🦶','🫱',
+    '🫲','🫳','🫴','🫵','🙏','💍','💄','💋','👄','🫦','👅','👂','👃','🧠','🫀','❤️',
+    '🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘',
+    '🔥','✨','⭐','🌟','💫','⚡','🎉','🎊','🎈','🏆','🥇','✅','❌','❗','❓','⚠️',
+    '💤','🔒','🔓','🔔','🔕','📌','📎','🔖','🔗','🚩','🏳️','🏳️‍🌈','🏴','🇺🇳',
+    '😀','😃','😄','😁','😆','😅','😂','🤣','🙂','🙃','😉','😊','😇','😍','😘','😗',
+    '😙','😚','😋','😜','😝','😛','🤪','🤨','🧐','🤓','😎','🤩','🥳','😏','😒','😞',
+    '😔','😟','😕','☹️','🙁','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬',
+    '🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🤭','🤫','🤥','😶','😐'
+  ];
+
+  // Populate emoji grid
+  function buildEmojiGrid(){
+    if(!emojiContent) return;
+    if(emojiContent.dataset.inited) return;
+    emojiContent.dataset.inited = '1';
+    EMOJIS.forEach(e => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.title = e;
+      b.textContent = e;
+      b.addEventListener('click', (ev) => {
+        ev.preventDefault();
+        insertEmojiAtCursor(e);
+        // keep panel open so user can pick multiple; optionally close:
+        // toggleEmojiPanel(false);
+      });
+      emojiContent.appendChild(b);
+    });
+  }
+
+  // Show/hide panel
+  function toggleEmojiPanel(show){
+    buildEmojiGrid();
+    if(!emojiPanel) return;
+    if(show){
+      emojiPanel.style.display = 'block';
+      emojiPanel.setAttribute('aria-hidden', 'false');
+      // ensure it's visible above composer
+      // scroll panel into view if needed
+      setTimeout(()=> { try{ emojiPanel.scrollTop = 0; }catch(e){} }, 20);
+    } else {
+      emojiPanel.style.display = 'none';
+      emojiPanel.setAttribute('aria-hidden', 'true');
+    }
+  }
+
+  // Insert emoji at textarea caret
+  function insertEmojiAtCursor(ch){
+    try {
+      const ta = document.getElementById('msgInput');
+      ta.focus();
+      // modern browsers: selectionStart / selectionEnd
+      const start = ta.selectionStart || 0;
+      const end = ta.selectionEnd || 0;
+      const value = ta.value || '';
+      ta.value = value.slice(0, start) + ch + value.slice(end);
+      const newPos = start + ch.length;
+      ta.setSelectionRange(newPos, newPos);
+      // trigger autosize/height handling if you have it
+      ta.dispatchEvent(new Event('input', { bubbles: true }));
+    } catch(e){ console.error('insertEmojiAtCursor error', e); }
+  }
+
+  // Media: wire file input
+  if(mediaBtn && fileInput){
+    mediaBtn.addEventListener('click', ()=> {
+      fileInput.value = '';
+      fileInput.click();
+    });
+    fileInput.addEventListener('change', async (ev) => {
+      const f = ev.target.files && ev.target.files[0];
+      if(!f) return;
+      // quick client validation
+      if(!f.type.startsWith('image/')) { alert('Only images are supported'); return; }
+      // Best-effort confirmation that a conversation is open
+      if(!conversationId){ alert('Open a conversation first'); return; }
+      try {
+        mediaBtn.disabled = true;
+        mediaBtn.textContent = 'Uploading...';
+        // Upload using FormData to server endpoint
+        const fd = new FormData();
+        fd.append('attachment', f, f.name);
+        // Expected endpoint: /api/upload_attachment -> see app.py patch
+        const res = await fetch('/api/upload_attachment', { method: 'POST', body: fd });
+        const j = await res.json().catch(()=>({}));
+        if(res.ok && j && j.success && j.url){
+          // send message with attachment
+          const payload = {
+            conversation_id: conversationId,
+            text: '', // optional caption could be provided
+            attachments: [{ url: j.url, type: 'image', filename: j.filename }]
+          };
+          if(socket){
+            socket.emit('send_message', payload, (ack) => {
+              if(ack && ack.success) {
+                // success: reload messages
+                loadData();
+              } else {
+                alert('Send failed');
+              }
+            });
+          } else {
+            // fallback to API
+            fetch('/api/send_message', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) })
+              .then(r => r.json()).then(j2 => { if(j2 && j2.success){ loadData(); } else alert('Send failed'); })
+              .catch(()=> alert('Send failed'));
+          }
+        } else {
+          const msg = (j && (j.error || j.message)) ? (j.error || j.message) : 'Upload failed';
+          alert(msg);
+        }
+      } catch(err){
+        console.error('attachment upload failed', err);
+        alert('Upload failed');
+      } finally {
+        mediaBtn.disabled = false;
+        mediaBtn.innerHTML = '<i class="fa fa-paperclip" aria-hidden="true"></i>';
+      }
+    });
+  }
+
+  // Emoji toggle
+  if(emojiBtn){
+    emojiBtn.addEventListener('click', (ev) => {
+      ev.preventDefault();
+      const visible = (emojiPanel && emojiPanel.style.display === 'block');
+      toggleEmojiPanel(!visible);
+    });
+
+    // close emoji when clicking outside
+    document.addEventListener('click', (ev) => {
+      if(!emojiPanel || emojiPanel.style.display !== 'block') return;
+      const inside = ev.target.closest && ev.target.closest('#emojiPanel');
+      const isBtn = ev.target.closest && ev.target.closest('#emojiBtn');
+      if(!inside && !isBtn) toggleEmojiPanel(false);
+    });
+  }
+
+  // ensure keyboard ESC closes emoji
+  document.addEventListener('keydown', (ev) => {
+    if(ev.key === 'Escape') toggleEmojiPanel(false);
+  });
+
+  // init lazy
+  buildEmojiGrid();
+
+})();
+
+
+/* ----------------- Image viewer (open image in-app + back button support) ----------------- */
+
+// Insert viewer DOM once
+(function ensureImageViewerDom(){
+  if(document.getElementById('imageViewerOverlay')) return;
+  const ov = document.createElement('div');
+  ov.id = 'imageViewerOverlay';
+  ov.className = 'image-viewer-overlay';
+  ov.innerHTML = `
+    <div class="image-viewer-inner" role="dialog" aria-modal="true" aria-label="Image preview">
+      <button class="image-viewer-close" id="imageViewerClose" title="Close (Esc / Back)">&larr; Close</button>
+      <img class="viewer-img" id="imageViewerImg" src="" alt="Image preview"/>
+      <div class="image-viewer-caption" id="imageViewerCaption"></div>
+    </div>
+  `;
+  document.body.appendChild(ov);
+
+  const closeBtn = ov.querySelector('#imageViewerClose');
+  closeBtn.addEventListener('click', closeImageViewer);
+
+  // click overlay background to close
+  ov.addEventListener('click', (e) => {
+    if(e.target === ov) closeImageViewer();
+  });
+
+  // Escape closes
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape') {
+      if(ov.classList.contains('visible')) closeImageViewer();
+    }
+  });
+
+  // popstate handler: if user hits back, close the viewer if open
+  window.addEventListener('popstate', (e) => {
+    if(ov.classList.contains('visible')){
+      // when triggered by back, just close viewer without pushing another state
+      closeImageViewer(true);
+    }
+  }, false);
+})();
+
+
+
+
+</script>
+
+<script>
+/* ---------- Robust boxed image viewer (single guarded implementation) ---------- */
+
+/* Ensure flag exists so other handlers can check */
+window.__imageViewerVisible = window.__imageViewerVisible || false;
+
+/* Ensure DOM overlay exists (you already had this; keep it) */
+(function ensureImageViewerDom(){
+  if(document.getElementById('imageViewerOverlay')) return;
+  const ov = document.createElement('div');
+  ov.id = 'imageViewerOverlay';
+  ov.className = 'image-viewer-overlay';
+  ov.style.display = 'none';
+  ov.innerHTML = `
+    <div class="image-viewer-inner" role="dialog" aria-modal="true" aria-label="Image preview">
+      <div class="image-viewer-frame">
+        <img id="imageViewerImg" class="viewer-img" src="" alt="Image preview"/>
+        <button id="imageViewerClose" class="image-viewer-close" title="Close">Close</button>
+        <div id="imageViewerCaption" class="image-viewer-caption"></div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(ov);
+
+  // Prevent clicks inside the overlay from reaching other handlers
+  ov.addEventListener('click', (ev) => {
+    // If user clicks the overlay background (not inner frame), close
+    if (ev.target === ov) {
+      ev.stopPropagation();
+      ev.preventDefault();
+      closeImageViewer();
+      return;
+    }
+    // otherwise let inner elements handle it (close button handles itself)
+  });
+
+  // Close button
+  const closeBtn = () => document.getElementById('imageViewerClose');
+  // handle click later in code when element exists
+})();
+
+/* Open viewer: sets guard AND prevents accidental bubbling */
+function openImageViewer(url, caption){
+  try {
+    const ov = document.getElementById('imageViewerOverlay');
+    const img = document.getElementById('imageViewerImg');
+    const cap = document.getElementById('imageViewerCaption');
+    const closeBtnEl = document.getElementById('imageViewerClose');
+
+    if(!ov || !img) { window.open(url, '_blank'); return; }
+
+    // Set global guard so other click handlers do nothing while viewer is open
+    window.__imageViewerVisible = true;
+
+    // show overlay and prevent body scroll
+    ov.classList.add('visible');
+    ov.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+
+    // caption
+    if(cap) cap.textContent = caption || '';
+
+    // Reset handlers to avoid duplicate bindings
+    img.onload = null;
+    img.onerror = null;
+    if(closeBtnEl) {
+      // remove previous listener if any
+      closeBtnEl.onclick = null;
+      // ensure clicking close doesn't bubble to other handlers
+      closeBtnEl.addEventListener('click', function(ev){
+        ev.stopPropagation();
+        ev.preventDefault();
+        closeImageViewer();
+      }, { once: true });
+    }
+
+    // Stop clicks on the image itself from bubbling (prevents delegated handlers from reopening)
+    img.onclick = function(ev){ ev.stopPropagation(); ev.preventDefault(); };
+
+    // onload: CSS handles fit, but ensure objectFit
+    img.onload = function(){
+      try {
+        img.style.objectFit = 'contain';
+        img.style.objectPosition = 'center center';
+        img.style.maxWidth = '100%';
+        img.style.maxHeight = '100%';
+      } catch(e){}
+    };
+
+    // onerror fallback
+    img.onerror = function(){
+      // close the viewer and open in new tab
+      try { closeImageViewer(); } catch(e){}
+      window.open(url, '_blank');
+    };
+
+    // set src last (starts loading)
+    img.src = url;
+  } catch(e) {
+    console.error('openImageViewer error', e);
+    try { window.open(url, '_blank'); } catch(ignore){}
+  }
+}
+
+/* Close viewer: clear guard and make sure event doesn't re-trigger other handlers */
+function closeImageViewer(){
+  try {
+    const ov = document.getElementById('imageViewerOverlay');
+    const img = document.getElementById('imageViewerImg');
+    const cap = document.getElementById('imageViewerCaption');
+
+    if(!ov) return;
+
+    // Hide overlay and restore scroll immediately
+    ov.classList.remove('visible');
+    ov.style.display = 'none';
+    document.body.style.overflow = '';
+
+    // Clear caption + src after a short delay to avoid flicker
+    setTimeout(()=>{
+      try { if(img) { img.onclick = null; img.src = ''; } }catch(e){}
+      try { if(cap) cap.textContent = ''; }catch(e){}
+    }, 150);
+
+    // clear guard AFTER hiding overlay
+    window.__imageViewerVisible = false;
+  } catch(e){
+    console.error('closeImageViewer error', e);
+  }
+}
+
+/* ---------- Robust delegated click handler (attach once to #messages) ---------- */
+(function installAttachmentClickHandler(){
+  const messagesContainer = document.getElementById('messages');
+  if(!messagesContainer) return;
+
+  // prevent double-install
+  if(messagesContainer._attachmentHandlerInstalled) return;
+  messagesContainer._attachmentHandlerInstalled = true;
+
+  messagesContainer.addEventListener('click', function(e){
+    try {
+      // Only handle left-clicks (button 0)
+      if(typeof e.button !== 'undefined' && e.button !== 0) return;
+
+      // If the boxed viewer is visible, ignore clicks (so close won't re-open)
+      if(window.__imageViewerVisible) {
+        return;
+      }
+
+      // Ignore modifier keys (open-in-new-tab requested)
+      if(e.ctrlKey || e.metaKey || e.shiftKey) return;
+
+      // Defensive: if click is inside the overlay, ignore
+      const overlay = document.getElementById('imageViewerOverlay');
+      if(overlay && overlay.contains(e.target)) return;
+
+      // Find a nearest att-link that contains an <img>
+      const a = e.target && e.target.closest ? e.target.closest('.att-link') : null;
+      if(!a || !messagesContainer.contains(a)) return;
+      const containedImg = a.querySelector && a.querySelector('img');
+      if(!containedImg) return;
+
+      // prevent normal navigation and other handlers (we handle the click here)
+      e.preventDefault();
+      e.stopPropagation();
+
+      // derive url and caption then open boxed viewer (our single canonical viewer)
+      const url = a.href || containedImg.src || containedImg.getAttribute('src') || containedImg.dataset.src;
+      const caption = containedImg.getAttribute('alt') || containedImg.title || '';
+      if(!url) return;
+
+      openImageViewer(url, caption);
+    } catch(err){
+      console.error('attachment click handler error', err);
+    }
+  }, false); // bubble-phase
+})();
+
+/* ---------------- Safety note ----------------
+If you previously added other global handlers that open images (search for "document.addEventListener('click'" or "openImageViewer(" across your file),
+please REMOVE or COMMENT OUT the older handlers. They are likely earlier in chat.html and are reopening the wide viewer. Keep only the code above for attachments.
+*/
+</script>
+
+</body>
+</html>
+                               

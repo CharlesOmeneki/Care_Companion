@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Notifications Admin Panel</title>
+  <style>
+    :root{
+      --bg:#f6f8fa;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#6b7280;
+      --line:#e6eef2;
+      --primary:#0ea5a0;
+      --danger:#ef4444;
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      font-family:Inter,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      background:var(--bg);
+      margin:0;
+      padding:20px;
+      color:var(--text);
+    }
+
+    .wrap{
+      max-width:900px;
+      margin:20px auto;
+      background:var(--card);
+      padding:20px;
+      border-radius:12px;
+      box-shadow:0 6px 20px rgba(16,24,40,.06);
+    }
+
+    .topbar{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:12px;
+      flex-wrap:wrap;
+    }
+
+    .topbar h2{
+      margin:0;
+      font-size:28px;
+      line-height:1.2;
+    }
+
+    .meta{
+      font-size:13px;
+      color:var(--muted);
+      margin-top:4px;
+    }
+
+    label{
+      display:block;
+      margin-top:12px;
+      font-weight:600;
+      color:var(--text);
+    }
+
+    input[type=text],
+    textarea,
+    select{
+      width:100%;
+      padding:10px 12px;
+      border-radius:8px;
+      border:1px solid var(--line);
+      margin-top:6px;
+      background:#fff;
+      color:var(--text);
+      outline:none;
+      font:inherit;
+    }
+
+    input[type=text]:focus,
+    textarea:focus,
+    select:focus{
+      border-color:#9fe7e3;
+      box-shadow:0 0 0 3px rgba(14,165,160,.10);
+    }
+
+    .row{
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      margin-top:2px;
+    }
+
+    .col{
+      flex:1;
+      min-width:0;
+    }
+
+    button{
+      margin-top:12px;
+      padding:10px 14px;
+      border-radius:8px;
+      border:0;
+      background:var(--primary);
+      color:#fff;
+      font-weight:600;
+      cursor:pointer;
+      font:inherit;
+    }
+
+    .btn-link{
+      display:inline-block;
+      text-decoration:none;
+    }
+
+    .flash{
+      padding:10px 12px;
+      border-radius:8px;
+      background:#d1fae5;
+      margin-bottom:10px;
+      color:#064e3b;
+      word-break:break-word;
+    }
+
+    #single_wrap{
+      display:none;
+    }
+
+    .logout-btn{
+      background:var(--danger);
+      margin-top:0;
+    }
+
+    @media (max-width: 900px){
+      body{
+        padding:14px;
+      }
+
+      .wrap{
+        margin:12px auto;
+        padding:16px;
+      }
+
+      .topbar{
+        align-items:flex-start;
+      }
+
+      .topbar h2{
+        font-size:24px;
+      }
+
+      .row{
+        flex-direction:column;
+      }
+
+      .col{
+        width:100%;
+      }
+
+      .topbar > div:last-child{
+        width:100%;
+      }
+
+      .topbar .btn-link,
+      .topbar button{
+        width:100%;
+      }
+    }
+
+    @media (max-width: 600px){
+      body{
+        padding:10px;
+      }
+
+      .wrap{
+        margin:0 auto;
+        padding:14px;
+        border-radius:10px;
+      }
+
+      .topbar h2{
+        font-size:22px;
+      }
+
+      .meta{
+        font-size:12px;
+      }
+
+      label{
+        margin-top:10px;
+        font-size:14px;
+      }
+
+      input[type=text],
+      textarea,
+      select{
+        font-size:16px;
+        padding:11px 12px;
+      }
+
+      textarea{
+        min-height:140px;
+      }
+
+      button{
+        width:100%;
+      }
+
+      .flash{
+        font-size:14px;
+      }
+    }
+  </style>
+  <script>
+    function onTargetChange(){
+      const t = document.getElementById('target').value;
+      const wrap = document.getElementById('single_wrap');
+      if (wrap) {
+        wrap.style.display = (t === 'single') ? 'block' : 'none';
+      }
+    }
+    window.addEventListener('DOMContentLoaded', ()=>{ onTargetChange(); });
+  </script>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div>
+        <h2>Notifications Admin</h2>
+        <div class="meta">Send in-app and/or email notifications</div>
+      </div>
+      <div>
+        <a class="btn-link" href="{{ url_for('notif_admin_logout') }}">
+          <button type="button" class="logout-btn">Logout</button>
+        </a>
+      </div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for cat, msg in messages %}
+          <div class="flash">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="post" action="{{ url_for('notif_admin_panel') }}">
+      <label>Title</label>
+      <input type="text" name="title" placeholder="e.g. New Safety Policy" required />
+
+      <label>Message</label>
+      <textarea name="message" rows="5" placeholder="e.g. All caregivers must update their CPR certificate" required></textarea>
+
+      <div class="row">
+        <div class="col">
+          <label>Target</label>
+          <select name="target" id="target" onchange="onTargetChange()">
+            <option value="all">All users</option>
+            <option value="caregiver">Caregivers</option>
+            <option value="family">Family</option>
+            <option value="single">Single user</option>
+          </select>
+        </div>
+
+        <div class="col" id="single_wrap">
+          <label>Single user (id or email)</label>
+          <input type="text" name="single_user" placeholder="User ID or email (only used when Target=Single)"/>
+        </div>
+      </div>
+
+      <label>Delivery method</label>
+      <select name="delivery">
+        <option value="inapp">In app</option>
+        <option value="email">Email</option>
+        <option value="both">Both</option>
+      </select>
+
+      <button type="submit">Send notification</button>
+    </form>
+  </div>
+</body>
+</html>

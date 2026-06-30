@@ -1,0 +1,718 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Notifications</title>
+  <style>
+    /* Base */
+    :root{
+      --bg:#f5f9ff;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --accent-600:#1e6fb8;  /* primary deep blue */
+      --accent-500:#2a86d4;  /* mid blue */
+      --accent-300:#8fc5ff;  /* light blue */
+      --accent-100:#eaf6ff;  /* very pale */
+      --sep:#cfe8ff;
+    }
+    html,body{height:100%}
+    body{
+      font-family: Inter, system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin:0;
+      background: linear-gradient(180deg,var(--bg), #f7fbff 60%);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      line-height:1.45;
+      padding:20px 12px;
+    }
+
+    .wrap{
+      max-width:980px;
+      margin:28px auto;
+      padding:20px;
+    }
+
+    /* Header */
+    .header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:12px;
+    }
+    .title{
+      font-size:20px;
+      font-weight:700;
+      color:var(--accent-600);
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .title .icon {
+      width:36px;
+      height:36px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:9px;
+      background: linear-gradient(180deg,var(--accent-500),var(--accent-600));
+      color:#fff;
+      font-weight:700;
+      box-shadow: 0 8px 20px rgba(42,134,212,0.16);
+      font-size:16px;
+    }
+
+    .controls{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+
+    /* Buttons */
+    .btn{
+      padding:10px 14px;
+      border-radius:10px;
+      border:none;
+      cursor:pointer;
+      font-weight:600;
+      font-size:13px;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      text-decoration:none;
+      color:var(--text);
+      background:transparent;
+    }
+    .btn:focus{outline:3px solid rgba(34,139,230,0.12); outline-offset:2px}
+
+    .btn-primary{
+      background: linear-gradient(90deg,var(--accent-500),var(--accent-600));
+      color:#fff;
+      box-shadow: 0 8px 22px rgba(30,111,184,0.14);
+    }
+    .btn-ghost{
+      background: transparent;
+      border:1px solid rgba(15,23,42,0.06);
+      color:var(--accent-600);
+    }
+    .btn-danger{
+      background: transparent;
+      color:#c43131;
+      border:1px solid rgba(196,49,49,0.08);
+      font-weight:700;
+      padding:8px 10px;
+      border-radius:8px;
+      cursor:pointer;
+    }
+
+    /* three-dot menu */
+    .menu-wrap{ position:relative; display:inline-block; }
+    .menu-btn{
+      appearance:none;
+      border:0;
+      background:transparent;
+      font-size:20px;
+      line-height:1;
+      padding:8px;
+      border-radius:8px;
+      cursor:pointer;
+      color:var(--muted);
+    }
+    .menu-btn:hover{ background: rgba(11,116,209,0.04); color:var(--accent-600) }
+
+    .menu-dropdown{
+      position:absolute;
+      right:0;
+      top:calc(100% + 8px);
+      background:var(--card);
+      border-radius:10px;
+      box-shadow:0 10px 28px rgba(2,6,23,0.08);
+      min-width:160px;
+      overflow:hidden;
+      display:none;
+      z-index:14000;
+    }
+    .menu-dropdown.show{ display:block; }
+    .menu-dropdown button{
+      display:block;
+      width:100%;
+      text-align:left;
+      padding:10px 12px;
+      border:0;
+      background:transparent;
+      cursor:pointer;
+      font-size:14px;
+      color:var(--text);
+    }
+    .menu-dropdown button:hover{ background:rgba(0,0,0,0.04) }
+
+    /* Card */
+    .card{
+      background:var(--card);
+      border-radius:14px;
+      padding:6px;
+      margin-top:8px;
+      box-shadow:0 10px 30px rgba(6,43,76,0.06);
+      overflow:hidden;
+    }
+
+    /* Notification item */
+    .notif-item{
+      display:flex;
+      gap:14px;
+      padding:16px 18px;
+      border-bottom:2px solid var(--sep);    /* thicker separator */
+      align-items:flex-start;
+      transition:background .18s ease, transform .12s ease;
+    }
+    .notif-item:last-child{ border-bottom: none; }
+
+    .notif-item.unread{
+      background: linear-gradient(90deg,var(--accent-100), rgba(214,243,255,0.4));
+      border-left:6px solid var(--accent-300);
+    }
+
+    .notif-icon{
+      width:48px;
+      min-width:48px;
+      height:48px;
+      border-radius:10px;
+      background:var(--accent-100);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:var(--accent-600);
+      font-weight:700;
+      font-size:18px;
+      box-shadow: 0 6px 18px rgba(42,134,212,0.06);
+    }
+
+    .notif-body{
+      flex:1;
+      min-width:0; /* allow truncation */
+    }
+    .notif-title{
+      font-weight:700;
+      margin-bottom:6px;
+      color:var(--accent-600);
+      font-size:15px;
+    }
+    .notif-msg{
+      white-space:pre-wrap;
+      color:var(--text);
+      margin-bottom:8px;
+      font-size:14px;
+    }
+    .notif-meta{
+      color:var(--muted);
+      font-size:12px;
+    }
+
+    .notif-actions{
+      min-width:140px;
+      text-align:right;
+      display:flex;
+      justify-content:flex-end;
+      align-items:center;
+      gap:8px;
+    }
+
+    .small-note{
+      color:var(--muted);
+      font-size:13px;
+      font-weight:600;
+    }
+
+    .empty{
+      padding:36px;
+      text-align:center;
+      color:var(--muted);
+      font-size:15px;
+    }
+
+    
+  </style>
+
+  <style>
+  /* keep all your existing CSS above this */
+
+  /* Responsive */
+  @media (max-width:640px){
+    body{
+      padding:12px 8px;
+    }
+
+    .wrap{
+      max-width:100%;
+      margin:0 auto;
+      padding:0;
+    }
+
+    .header{
+      flex-direction:column;
+      align-items:stretch;
+      gap:10px;
+      margin-bottom:10px;
+    }
+
+    .title{
+      font-size:18px;
+      gap:8px;
+    }
+
+    .title .icon{
+      width:32px;
+      height:32px;
+      font-size:15px;
+      border-radius:8px;
+      flex:0 0 auto;
+    }
+
+    .controls{
+      width:100%;
+      flex-wrap:wrap;
+      gap:8px;
+      align-items:stretch;
+    }
+
+    .controls .btn,
+    .controls .menu-wrap{
+      flex:1 1 100%;
+    }
+
+    .controls .btn{
+      width:100%;
+      justify-content:center;
+      padding:11px 12px;
+      font-size:13px;
+      border-radius:10px;
+    }
+
+    .menu-wrap{
+      margin-left:0 !important;
+      display:block;
+    }
+
+    .menu-btn{
+      width:100%;
+      padding:10px 12px;
+      font-size:22px;
+      border:1px solid rgba(15,23,42,0.06);
+      background:#fff;
+    }
+
+    .menu-dropdown{
+      right:0;
+      left:0;
+      min-width:unset;
+      width:100%;
+    }
+
+    .card{
+      margin-top:10px;
+      padding:4px;
+      border-radius:12px;
+    }
+
+    .notif-item{
+      padding:12px 10px;
+      gap:10px;
+      align-items:flex-start;
+    }
+
+    .notif-icon{
+      width:38px;
+      min-width:38px;
+      height:38px;
+      font-size:15px;
+      border-radius:9px;
+    }
+
+    .notif-title{
+      font-size:14px;
+      margin-bottom:4px;
+    }
+
+    .notif-msg{
+      font-size:13px;
+      word-break:break-word;
+      overflow-wrap:anywhere;
+    }
+
+    .notif-meta{
+      font-size:11px;
+    }
+
+    .notif-actions{
+      min-width:unset;
+      width:100%;
+      margin-top:10px;
+      justify-content:flex-start;
+      flex-wrap:wrap;
+      text-align:left;
+    }
+
+    .notif-item{
+      flex-wrap:wrap;
+    }
+
+    .notif-body{
+      min-width:0;
+      width:calc(100% - 48px);
+    }
+
+    .btn-danger,
+    .btn-primary{
+      padding:9px 11px;
+      font-size:12px;
+      border-radius:9px;
+    }
+
+    .empty{
+      padding:28px 16px;
+      font-size:14px;
+    }
+  }
+
+  @media (max-width:380px){
+    body{
+      padding:10px 6px;
+    }
+
+    .title{
+      font-size:17px;
+    }
+
+    .controls .btn{
+      font-size:12px;
+    }
+
+    .notif-item{
+      padding:10px 8px;
+    }
+
+    .notif-body{
+      width:100%;
+    }
+  }
+</style> 
+
+</head>
+<body>
+  <div class="wrap">
+    <div class="header">
+      <div class="title">
+        <div class="icon">🔔</div>
+        Notifications
+      </div>
+      <div class="controls">
+        <button id="markAllBtn" class="btn btn-primary">Mark all read</button>
+        <!-- BACK: go to profile_setup and suppress overlay so the one-time badge/overlay won't show -->
+        <a href="{{ url_for('profile_setup', suppress_overlay=1) }}" class="btn btn-ghost">Back</a>
+
+        <!-- three-dot menu (Clear all) -->
+        <div class="menu-wrap" id="menuWrap" style="margin-left:6px;">
+          <button id="menuBtn" class="menu-btn" aria-expanded="false" aria-controls="menuDropdown" title="More actions">⋯</button>
+          <div id="menuDropdown" class="menu-dropdown" role="menu" aria-hidden="true">
+            <button id="clearAllBtn" role="menuitem">Clear all</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="listContainer" class="card" aria-live="polite">
+      <div class="empty">Loading notifications…</div>
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    const listEl = document.getElementById('listContainer');
+    const markAllBtn = document.getElementById('markAllBtn');
+
+    // Menu elements
+    const menuBtn = document.getElementById('menuBtn');
+    const menuDropdown = document.getElementById('menuDropdown');
+    const menuWrap = document.getElementById('menuWrap');
+    const clearAllBtn = document.getElementById('clearAllBtn');
+
+    function safeDate(d){
+      try{ return new Date(d).toLocaleString(); }catch(e){ return d || ''; }
+    }
+
+    // Try a set of sensible server endpoints for delete. Return true on success.
+    async function _attemptDelete(payload) {
+      // Try POST /api/notifications/delete
+      try {
+        const r = await fetch('/api/notifications/delete', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(payload)
+        });
+        if (r.ok) return true;
+      } catch (e) {}
+
+      // Try POST /api/notifications/remove (alternate)
+      try {
+        const r2 = await fetch('/api/notifications/remove', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(payload)
+        });
+        if (r2.ok) return true;
+      } catch (e) {}
+
+      // If we have a notification id, try DELETE /api/notifications/<id>
+      if (payload.notification_id) {
+        try {
+          const r3 = await fetch('/api/notifications/' + encodeURIComponent(payload.notification_id), {
+            method: 'DELETE',
+            credentials: 'same-origin',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify(payload) // some backends expect extra info
+          });
+          if (r3.ok) return true;
+        } catch (e) {}
+      }
+
+      // last resort: try deleting by recipient_ids via /api/notifications (DELETE with body)
+      try {
+        const r4 = await fetch('/api/notifications', {
+          method: 'DELETE',
+          credentials: 'same-origin',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(payload)
+        });
+        if (r4.ok) return true;
+      } catch (e) {}
+
+      return false;
+    }
+
+    async function deleteNotification(recipientId, notificationId){
+      // Build payload preferring recipient_id (deletes the recipient-row) else notification_id
+      const payload = {};
+      if (Array.isArray(recipientId)) payload.recipient_ids = recipientId;
+      else if (recipientId) payload.recipient_ids = [recipientId];
+
+      if (!payload.recipient_ids && notificationId) payload.notification_id = notificationId;
+
+      // Defensive: if nothing to send, return false
+      if ((!payload.recipient_ids || payload.recipient_ids.length === 0) && !payload.notification_id) return false;
+      return await _attemptDelete(payload);
+    }
+
+    function renderItem(n){
+      const wrapper = document.createElement('div');
+      wrapper.className = 'notif-item' + (n.is_read ? '' : ' unread');
+      wrapper.dataset.notificationId = n.id || '';
+      wrapper.dataset.recipientId = n.recipient_id || '';
+
+      // Icon (kept purely cosmetic and non-essential)
+      const ico = document.createElement('div');
+      ico.className = 'notif-icon';
+      const initial = (n.title && String(n.title).trim()[0]) ? String(n.title).trim()[0].toUpperCase() : 'N';
+      ico.textContent = initial;
+
+      const body = document.createElement('div');
+      body.className = 'notif-body';
+      const title = document.createElement('div');
+      title.className = 'notif-title';
+      title.textContent = n.title || 'Notification';
+      const msg = document.createElement('div');
+      msg.className = 'notif-msg';
+      msg.textContent = n.message || '';
+      const meta = document.createElement('div');
+      meta.className = 'notif-meta';
+      meta.textContent = safeDate(n.created_at);
+
+      body.appendChild(title);
+      body.appendChild(msg);
+      body.appendChild(meta);
+
+      const right = document.createElement('div');
+      right.className = 'notif-actions';
+
+      // Delete button (always available)
+      const del = document.createElement('button');
+      del.className = 'btn-danger';
+      del.setAttribute('aria-label', 'Delete notification');
+      del.title = 'Delete';
+      del.textContent = 'Delete';
+      del.addEventListener('click', async function(ev){
+        ev.stopPropagation();
+        if(!confirm('Delete this notification? This cannot be undone.')) return;
+        const recId = n.recipient_id || n.recipientId || wrapper.dataset.recipientId || null;
+        const ok = await deleteNotification(recId, n.id);
+        if (ok) {
+          try { wrapper.remove(); } catch(e){ wrapper.style.display = 'none'; }
+          try{ window.refreshNotificationBadge && window.refreshNotificationBadge(); }catch(_){} 
+          // If list becomes empty, show empty state
+          if (!listEl.querySelector('.notif-item')) {
+            listEl.innerHTML = '<div class="empty">No notifications.</div>';
+          }
+        } else {
+          alert('Could not delete notification. Your server may not expose a delete endpoint or the request failed.');
+        }
+      });
+
+      if(!n.is_read){
+        const mr = document.createElement('button');
+        mr.className = 'btn btn-primary';
+        mr.textContent = 'Mark read';
+        mr.addEventListener('click', function(ev){
+          ev.stopPropagation();
+          markRead(n.recipient_id || n.id, n.id).then(()=> {
+            wrapper.classList.remove('unread');
+            try{ mr.remove(); }catch(e){}
+            try{ window.refreshNotificationBadge && window.refreshNotificationBadge(); }catch(_){} 
+          });
+        });
+        right.appendChild(mr);
+      } else {
+        const note = document.createElement('div');
+        note.className = 'small-note';
+        note.textContent = 'Read';
+        right.appendChild(note);
+      }
+
+      right.appendChild(del);
+
+      wrapper.appendChild(ico);
+      wrapper.appendChild(body);
+      wrapper.appendChild(right);
+
+      wrapper.addEventListener('click', function(){
+        if(!n.is_read){
+          markRead(n.recipient_id || n.id, n.id).then(()=> {
+            wrapper.classList.remove('unread');
+            try{ window.refreshNotificationBadge && window.refreshNotificationBadge(); }catch(_){} 
+          });
+        }
+      });
+
+      return wrapper;
+    }
+
+    async function fetchNotifications(){
+      try {
+        const res = await fetch('/api/notifications', { credentials: 'same-origin' });
+        if(!res.ok) throw new Error('no-notifs');
+        const j = await res.json().catch(()=>({notifications:[]}));
+        const arr = Array.isArray(j) ? j : (j && Array.isArray(j.notifications) ? j.notifications : []);
+        if(!Array.isArray(arr) || arr.length === 0){
+          listEl.innerHTML = '<div class="empty">No notifications.</div>';
+          return;
+        }
+        listEl.innerHTML = '';
+        arr.forEach(n => listEl.appendChild(renderItem(n)));
+      } catch (e) {
+        listEl.innerHTML = '<div class="empty">Could not load notifications.</div>';
+        console.debug('fetch notifications failed', e);
+      }
+    }
+
+    async function markRead(recipientId, notificationId){
+      try {
+        const payload = {};
+        if (recipientId) payload.recipient_ids = [recipientId];
+        else if (notificationId) payload.notification_id = notificationId;
+        const res = await fetch('/api/notifications/mark_read', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) return true;
+      } catch(e){}
+      return false;
+    }
+
+    // Clear All logic (reuses deleteNotification)
+    async function clearAllNotifications(){
+      if(!confirm('Clear all notifications? This will remove all notifications for you.')) return;
+      clearAllBtn.disabled = true;
+      clearAllBtn.textContent = 'Clearing…';
+      try {
+        const res = await fetch('/api/notifications', { credentials: 'same-origin' });
+        if(!res.ok) throw new Error('fetch failed');
+        const j = await res.json().catch(()=>({notifications:[]}));
+        const arr = Array.isArray(j) ? j : (j && Array.isArray(j.notifications) ? j.notifications : []);
+        const ids = arr.map(n => n.recipient_id || n.id).filter(Boolean);
+        if(ids.length === 0){
+          listEl.innerHTML = '<div class="empty">No notifications.</div>';
+          return;
+        }
+        // Attempt delete: pass array of recipient ids (or notification ids)
+        const ok = await deleteNotification(ids, null);
+        if(ok){
+          listEl.innerHTML = '<div class="empty">No notifications.</div>';
+          try{ window.refreshNotificationBadge && window.refreshNotificationBadge(); }catch(_){} 
+        } else {
+          alert('Could not clear notifications. Your server may not accept bulk delete. Try deleting individually.');
+        }
+      } catch(e){
+        console.debug('clearAllNotifications failed', e);
+        alert('Could not clear notifications. Please try again.');
+      } finally {
+        clearAllBtn.disabled = false;
+        clearAllBtn.textContent = 'Clear all';
+        toggleMenu(false);
+      }
+    }
+
+    // Menu toggling & accessibility
+    function toggleMenu(show){
+      if(show){
+        menuDropdown.classList.add('show');
+        menuBtn.setAttribute('aria-expanded','true');
+        menuDropdown.setAttribute('aria-hidden','false');
+      } else {
+        menuDropdown.classList.remove('show');
+        menuBtn.setAttribute('aria-expanded','false');
+        menuDropdown.setAttribute('aria-hidden','true');
+      }
+    }
+
+    if(menuBtn){
+      menuBtn.addEventListener('click', function(e){
+        e.stopPropagation();
+        toggleMenu(!menuDropdown.classList.contains('show'));
+      });
+    }
+    // click outside to close
+    document.addEventListener('click', function(ev){
+      if(menuWrap && !menuWrap.contains(ev.target)) toggleMenu(false);
+    });
+    // keyboard (Esc) closes menu
+    document.addEventListener('keydown', function(ev){
+      if(ev.key === 'Escape') toggleMenu(false);
+    });
+    if(clearAllBtn) clearAllBtn.addEventListener('click', function(ev){
+      ev.stopPropagation();
+      clearAllNotifications();
+    });
+
+    markAllBtn.addEventListener('click', async function(){
+      try {
+        await fetch('/api/notifications/mark_all_read', { method:'POST', credentials:'same-origin' });
+      } catch(e){ /* ignore */ }
+      fetchNotifications();
+      try{ window.refreshNotificationBadge && window.refreshNotificationBadge(); }catch(_){} 
+    });
+
+    window.refreshNotificationsPage = fetchNotifications;
+    fetchNotifications();
+  })();
+  </script>
+
+
+
+
+</body>
+</html>

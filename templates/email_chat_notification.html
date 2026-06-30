@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{ title or "Notification from Care Companion" }}</title>
+  <style>
+    body { margin:0; padding:0; background:#f5f8fc; font-family: Arial, Helvetica, sans-serif; color:#0f172a;}
+    table{border-collapse:collapse;}
+    .button{display:inline-block;padding:10px 14px;border-radius:9px;text-decoration:none;font-weight:700;}
+    /* header text style larger */
+    .header-title { font-size:20px; font-weight:800; color:#e6f6ff; letter-spacing:0.2px; }
+    @media (max-width:480px){ .header-title{font-size:18px} }
+
+    /* Small visual tweaks for inner content */
+    .muted{color:#6b7b8f;font-size:14px;margin:0;}
+    .card-body { padding:20px; color:#334155; font-size:14px; line-height:1.45; }
+    .chat-ref { margin:0 0 8px 0; font-size:18px; color:#062b5a; font-weight:700; }
+    .visitor-msg { margin:12px 0 0 0; color:#0b2540; font-size:15px; }
+    .timestamp { margin-top:16px; color:#6b7b8f; font-size:13px; }
+
+    /* CTA box */
+    .cta-box {
+      margin-top:18px;
+      padding:14px;
+      border-radius:10px;
+      background: linear-gradient(90deg, rgba(42,134,212,0.06), rgba(30,111,184,0.03));
+      border:1px solid rgba(30,111,184,0.06);
+      text-align:center;
+    }
+    .cta-btn {
+      display:inline-block;
+      padding:12px 18px;
+      border-radius:10px;
+      color:#fff;
+      text-decoration:none;
+      font-weight:800;
+      background: linear-gradient(90deg,#2a86d4,#1e6fb8);
+      box-shadow: 0 8px 20px rgba(30,111,184,0.10);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .footer { padding:12px 18px; background:#f1f7ff; color:#616f7f; font-size:12px; text-align:center; }
+  </style>
+</head>
+<body>
+  <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+    <tr>
+      <td align="center" style="padding:28px 12px;">
+        <table width="600" cellpadding="0" cellspacing="0" role="presentation" style="max-width:600px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 10px 22px rgba(6,43,76,0.06);">
+          <tr>
+            <!-- BLUE HEADER: logo removed, text enlarged -->
+            <td style="padding:18px 20px;background:linear-gradient(90deg,#2a86d4,#1e6fb8);color:#fff;">
+              <div class="header-title">Care Companion</div>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="card-body">
+              <h2 class="chat-ref">{{ chat_ref and ("Live chat waiting — ref " ~ chat_ref) or "Live chat waiting" }}</h2>
+
+              <!-- Visitor label and message -->
+              <p class="visitor-msg"><strong>Visitor:</strong> {{ visitor_message }}</p>
+
+              <!-- Boxed CTA so the button is obvious -->
+              <div class="cta-box" role="group" aria-label="Open chat">
+                <!-- Inline styles included to help strict email clients render the button -->
+                <a class="cta-btn" href="{{ link }}" style="display:inline-block; padding:12px 18px; border-radius:10px; text-decoration:none; color:#fff;">Open chat (agent)</a>
+              </div>
+
+              <p class="timestamp">Timestamp: {{ timestamp }}</p>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="footer">
+              © Care Companion {{ current_year or "" }} — Helping families & caregivers connect safely.
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

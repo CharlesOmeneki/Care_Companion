@@ -1,0 +1,1719 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Edit profile — Care Companion</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    /* Palette matching your profile_setup.html (dark-blue theme) */
+    :root{
+      --admiral: #062b5a;
+      --indigo:  #2b3d9a;
+      --berry:   #1e5fbf;
+      --navy:    #0a2a66;
+      --ice:     #f5f9ff;
+      --muted:   #a6bacf;
+      --accent:  #00d4ff;
+      --card:    linear-gradient(180deg, rgba(8,30,66,0.94), rgba(11,51,120,0.98));
+      --dotted-box-bg: #062235;
+      --success-bg: rgba(0, 16, 26, 0.72);
+      --input-bg: rgba(255,255,255,0.03);
+      --input-border: rgba(255,255,255,0.06);
+    }
+
+    *{box-sizing:border-box;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial; -webkit-font-smoothing:antialiased;}
+    html,body{height:100%;}
+    body{
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+      /* keep the same soft page background, but the main content will be dark */
+      background: #151b54; 
+      color:var(--admiral);
+      padding:28px 16px;
+    }
+
+    /* Wrap now uses the same dark 'card' style as profile_setup */
+    .wrap{
+      width:980px; max-width:96%;
+      background: var(--card);
+      border-radius:14px;
+      padding:20px;
+      box-shadow: 0 30px 80px rgba(6,27,60,0.35);
+      border: 1px solid rgba(255,255,255,0.03);
+      color: var(--ice);
+    }
+
+    /* headings & small text tuned for dark background */
+    header.hdr{ display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:14px; }
+    header.hdr h1{ margin:0; color:var(--ice); font-size:20px; }
+    header.hdr p{ margin:0; color:var(--muted); font-size:13px; }
+
+    /* columns/cards - cards are slightly translucent over the dark wrap */
+    .columns { display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-top:10px; }
+    .card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:12px; padding:14px;
+      border: 1px solid rgba(255,255,255,0.03);
+      color: var(--ice);
+    }
+    .card h2 { margin:0 0 8px 0; font-size:16px; color:var(--ice); }
+    /* inputs: translucent dark inputs so they fit the dark UI but remain readable */
+    .field { width:100%; padding:10px 12px; border-radius:8px; border:1px solid var(--input-border); background: var(--input-bg); font-size:14px; color:var(--ice); }
+    .field::placeholder { color: rgba(245,249,255,0.6); }
+    textarea.field { min-height:70px; resize:vertical; }
+    label.field-label { display:block; font-weight:700; color:var(--ice); margin-bottom:6px; font-size:13px; }
+
+    .row { display:flex; gap:12px; }
+    .row .col { flex:1; }
+
+    .small-hint { font-size:13px; color:var(--muted); margin-top:6px; }
+
+    .chk-grid { display:grid; grid-template-columns: repeat(2, 1fr); gap:8px; margin-top:6px; }
+    .chk { display:flex; gap:8px; align-items:center; padding:8px; border-radius:8px; background: rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.02); color:var(--ice); }
+
+    .availability-days { display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+    .day { padding:6px 8px; border-radius:6px; background: rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.03); cursor:pointer; display:flex; gap:6px; align-items:center; color:var(--ice); }
+
+    .actions { display:flex; gap:8px; justify-content:flex-end; margin-top:14px; }
+    .btn { background: linear-gradient(90deg,var(--berry),var(--indigo)); color:#fff; border:none; padding:10px 12px; border-radius:8px; font-weight:800; cursor:pointer; box-shadow: 0 10px 26px rgba(11,99,216,0.08); text-decoration:none; display:inline-block; }
+    .btn.secondary { background:transparent; color:var(--ice); border:1px solid rgba(255,255,255,0.06); }
+
+    .muted-note { font-size:13px; color:var(--muted); }
+
+    .warn-text { color: #ff6b6b; font-weight:700; font-size:13px; display:none; }
+
+    /* Avatar / hero-avatar styles (copied from profile_setup) */
+    .hero-avatar{ width:100px; height:100px; border-radius:50%; margin:0; position:relative; overflow:visible; border:6px solid var(--accent); background:#00314a; box-shadow: 0 14px 36px rgba(2,20,40,0.6); z-index:1; }
+    .hero-avatar img{ width:100%; height:100%; object-fit:cover; display:block; border-radius:50%; }
+    .hero-avatar .plus{ position:absolute; right:-10px; bottom:-10px; transform: none; width:34px; height:34px; border-radius:50%; background:var(--accent); color:#002233; display:flex; align-items:center; justify-content:center; font-weight:800; border:4px solid #fff; cursor:pointer; box-shadow: 0 6px 12px rgba(0,0,0,0.25); z-index:4; text-decoration:none; }
+    /* keep a small compatibility rule for earlier preview element */
+    #previewProfilePhoto { background:#002233; }
+
+    @media(max-width:880px){ .columns { grid-template-columns:1fr; } .chk-grid { grid-template-columns:1fr; } }
+
+    /* Keep specific inline styles used by templates unchanged; only colors were tuned */
+
+    /* -----------------------------
+       Dropdown visibility fixes
+       Ensure option items are readable on click/open
+       ----------------------------- */
+
+    /* Keep select appearance in dark UI but make option list readable */
+    select.field {
+      background: var(--input-bg);
+      color: var(--ice);
+      /* relative stacking helps in some browsers */
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Force dropdown options to be light-background + dark text for readability.
+       Note: many browsers respect these styles; using !important to override UA styles where necessary. */
+    select.field option,
+    select.field optgroup {
+      background: #ffffff !important;
+      color: var(--admiral) !important;
+    }
+
+    /* When the select itself is focused/clicked, show selected text in dark color so it remains readable on white options */
+    select.field:focus {
+      color: var(--admiral);
+      background: #ffffff;
+    }
+
+    /* For IE/Edge legacy expand arrow visibility */
+    select.field::-ms-expand {
+      color: var(--admiral);
+    }
+
+    /* Small fallback: if browser forces dark dropdown, at least increase contrast of highlighted options */
+    option:checked,
+    select.field option:hover {
+      background: #f0f6ff !important;
+      color: var(--admiral) !important;
+    }
+
+
+
+
+
+    /* Mobile view fix for profile_edit.html */
+@media (max-width: 880px) {
+  body{
+    padding:14px 10px;
+    align-items:flex-start;
+  }
+
+  .wrap{
+    width:100%;
+    max-width:100%;
+    padding:14px;
+    border-radius:12px;
+  }
+
+  header.hdr{
+    flex-direction:column;
+    align-items:stretch;
+    gap:10px;
+    margin-bottom:12px;
+  }
+
+  header.hdr h1{
+    font-size:18px;
+    line-height:1.2;
+  }
+
+  header.hdr p{
+    font-size:12px;
+  }
+
+  .columns{
+    grid-template-columns:1fr;
+    gap:12px;
+  }
+
+  .card{
+    padding:12px;
+    border-radius:12px;
+  }
+
+  .card h2{
+    font-size:15px;
+  }
+
+  .row{
+    flex-direction:column;
+    gap:10px;
+  }
+
+  .row .col{
+    width:100%;
+  }
+
+  /* override inline widths used in the salary row */
+  .row > div[style]{
+    width:100% !important;
+  }
+
+  .field,
+  select.field,
+  textarea.field{
+    width:100%;
+    font-size:14px;
+    padding:11px 12px;
+    border-radius:10px;
+  }
+
+  textarea.field{
+    min-height:84px;
+  }
+
+  .hero-avatar{
+    width:84px;
+    height:84px;
+    flex:0 0 auto;
+  }
+
+  .hero-avatar .plus{
+    width:30px;
+    height:30px;
+    right:-8px;
+    bottom:-8px;
+    font-size:14px;
+  }
+
+  .chk-grid{
+    grid-template-columns:1fr;
+    gap:8px;
+  }
+
+  .chk{
+    padding:10px;
+    font-size:13px;
+    align-items:flex-start;
+  }
+
+  .availability-days{
+    gap:8px;
+  }
+
+  .day{
+    width:100%;
+    justify-content:flex-start;
+    padding:10px 10px;
+    font-size:13px;
+  }
+
+  .actions{
+    flex-direction:column-reverse;
+    align-items:stretch;
+    gap:10px;
+    margin-top:16px;
+  }
+
+  .actions .btn{
+    width:100%;
+    text-align:center;
+    padding:12px 14px;
+    border-radius:10px;
+  }
+
+  .small-hint,
+  .muted-note,
+  .warn-text{
+    font-size:12px;
+  }
+}
+
+@media (max-width: 420px) {
+  body{
+    padding:10px 6px;
+  }
+
+  .wrap{
+    padding:12px;
+  }
+
+  header.hdr h1{
+    font-size:17px;
+  }
+
+  .card{
+    padding:10px;
+  }
+
+  .field,
+  select.field,
+  textarea.field{
+    font-size:13px;
+    padding:10px 11px;
+  }
+
+  .hero-avatar{
+    width:76px;
+    height:76px;
+  }
+
+  .hero-avatar .plus{
+    width:28px;
+    height:28px;
+    right:-7px;
+    bottom:-7px;
+  }
+} 
+
+.user-name{
+  font-size:16px;
+  font-weight:800;
+  color:var(--ice);
+  margin-top:6px;
+}
+  </style>
+</head>
+<body>
+  <div class="wrap" role="main" aria-labelledby="editTitle">
+    <header class="hdr">
+      <div>
+        <h1 id="editTitle">Edit your profile</h1>
+        <p class="small-muted">All tiles are pre-filled from your draft or saved profile. Make changes and click <strong>Save</strong>.</p>
+      </div>
+      <div>
+      <a href="{{ url_for('profile_setup', suppress_overlay=1) }}" class="btn secondary" style="text-decoration:none;">
+       Back to preview
+      </a>
+ 
+      </div>
+    </header>
+
+    {# NOTE: data1 = normalize_for_template(session['profile_step1'] or ...) ; data2 = normalize_for_template(session['profile_step2'] or ...) #}
+
+    {# --- normalize selected values, prefer draft (data2) then persisted profile --- #}
+    {% set raw_sel_specialties = (data2.get('specialties') if data2 else (profile and profile.specialties)) or '' %}
+    {% set raw_sel_specialties_other = (data2.get('specialties_other') if data2 else (profile and profile.specialties_other)) or '' %}
+    {% set sel_specialties = raw_sel_specialties|string|lower %}
+
+    {% set raw_sel_services = (data2.get('services') if data2 else (profile and profile.services)) or '' %}
+    {% set raw_sel_services_other = (data2.get('services_other') if data2 else (profile and profile.services_other)) or '' %}
+    {% set sel_services = raw_sel_services|string|lower %}
+
+    {% set raw_sel_availability = (data2.get('availability') if data2 else (profile and profile.availability)) or '' %}
+    {% set sel_availability = raw_sel_availability|string|lower %}
+
+    <form id="profileEditForm" method="post" enctype="multipart/form-data" action="{{ url_for('profile_edit') }}">
+      <div class="columns">
+        <!-- STEP 1 -->
+        <section class="card" aria-labelledby="step1Title">
+          <h2 id="step1Title">Step 1 — Basic info & avatar</h2>
+
+          <label class="field-label" for="profile_photo">Profile photo</label>
+
+          <!-- REPLACED: hero-avatar (matches profile_setup.html) -->
+          <div style="display:flex; gap:12px; align-items:center;">
+            <div class="hero-avatar" style="width:100px; height:100px;">
+              {% if (data1.get('profile_photo') if data1 else None) %}
+                <img id="previewProfilePhoto" src="{{ url_for('uploaded_file', filename=(data1.get('profile_photo'))) }}" alt="avatar">
+              {% elif profile and profile.profile_photo %}
+                <img id="previewProfilePhoto" src="{{ url_for('uploaded_file', filename=profile.profile_photo) }}" alt="avatar">
+              {% else %}
+                <img id="previewProfilePhoto" src="{{ url_for('static', filename='default-avatar.png') }}" alt="avatar">
+              {% endif %}
+              <label for="profile_photo" class="plus" title="Change avatar">+</label>
+              <!-- hidden file input (still named profile_photo so server code unchanged) -->
+              <input id="profile_photo" name="profile_photo" type="file" accept="image/*" style="display:none;">
+            </div>
+
+            <div style="flex:1;">
+              {% set display_name = (
+  (
+    (user.first_name if user else '') ~ ' ' ~
+    (user.last_name if user else '')
+  ).strip()
+  if user else ''
+) or (user.full_name if user and user.full_name else '') or (user.name if user and user.name else '') or (user.username if user and user.username else '') or 'Logged in user' %}
+
+<div class="user-name">{{ display_name }}</div>
+            </div>
+          </div>
+
+          <label class="field-label" for="bio" style="margin-top:10px;">Bio</label>
+          <textarea id="bio" name="bio" class="field" placeholder="Short bio...">{{ (data1.get('bio') if data1 else '') or (profile and profile.bio) or '' }}</textarea>
+
+          <label class="field-label" for="marital_status" style="margin-top:8px;">Marital status</label>
+          <input id="marital_status" name="marital_status" class="field" value="{{ (data1.get('marital_status') if data1 else '') or (profile and profile.marital_status) or '' }}">
+
+          <div class="row" style="margin-top:8px;">
+            <div class="col">
+              <label class="field-label" for="age">Age</label>
+              <input id="age" name="age" type="number" min="0" class="field" value="{{ (data1.get('age') if data1 else '') or (profile and profile.age) or '' }}">
+            </div>
+            <div class="col">
+              <label class="field-label" for="languages_1">Languages</label>
+              <input id="languages_1" name="languages" class="field" value="{{ (data1.get('languages') if data1 else '') or (profile and profile.languages) or '' }}" placeholder="e.g., English, Igbo">
+            </div>
+          </div>
+
+          <label class="field-label" for="location_city_1" style="margin-top:10px;">State</label>
+          <input id="location_city_1" name="location_city" class="field" value="{{ (data1.get('location_city') if data1 else '') or (profile and (profile.location.split('/') if profile.location else None) and (profile.location.split('/')[0] if profile.location.split('/')|length > 0 else '')) or '' }}" placeholder="e.g., Lagos">
+
+          <label class="field-label" for="location_country_1" style="margin-top:8px;">Country</label>
+          <input id="location_country_1" name="location_country" class="field" value="{{ (data1.get('location_country') if data1 else '') or (profile and (profile.location.split('/') if profile.location else None) and (profile.location.split('/')[1] if profile.location.split('/')|length > 1 else '')) or '' }}" placeholder="e.g., Nigeria">
+        </section>
+
+        <!-- STEP 2 -->
+        <section class="card" aria-labelledby="step2Title">
+          <h2 id="step2Title">Step 2 — Role-specific details</h2>
+
+          {% if user and user.role == 'caregiver' %}
+            <!-- CAREGIVER -->
+            <label class="field-label" for="experience_years">Years of experience</label>
+            <input id="experience_years" name="experience_years" type="number" min="0" class="field" value="{{ (data2.get('experience_years') if data2 else '') or (profile and profile.experience_years) or '' }}">
+
+            <label class="field-label" for="specialties" style="margin-top:8px;">Specialty / Skills</label>
+            <select id="specialties" name="specialties" class="field">
+              <option value="">— select your specialty —</option>
+              <option value="dementia_care" {% if sel_specialties in ['dementia_care','dementia','dementia care'] %}selected{% endif %}>Dementia care</option>
+              <option value="pediatric_care" {% if sel_specialties in ['pediatric_care','pediatric','pediatric care'] %}selected{% endif %}>Pediatric care</option>
+              <option value="post_op_care" {% if sel_specialties in ['post_op_care','post_op','post op','post-operative care'] %}selected{% endif %}>Post-operative care</option>
+              <option value="palliative_care" {% if sel_specialties in ['palliative_care','palliative','palliative care'] %}selected{% endif %}>Palliative care</option>
+              <option value="companionship" {% if sel_specialties in ['companionship','companionship care'] %}selected{% endif %}>Companionship</option>
+              <option value="mobility_assistance" {% if sel_specialties in ['mobility_assistance','mobility','mobility assistance'] %}selected{% endif %}>Mobility assistance</option>
+              <option value="medication_management" {% if sel_specialties in ['medication_management','medication','medication management'] %}selected{% endif %}>Medication management</option>
+              <option value="wound_care" {% if sel_specialties in ['wound_care','wound','wound care'] %}selected{% endif %}>Wound care</option>
+              <option value="alzheimers_care" {% if sel_specialties in ['alzheimers_care','alzheimers','alzheimers care','alzheimer\'s care'] %}selected{% endif %}>Alzheimer's care</option>
+              <option value="infant_care" {% if sel_specialties in ['infant_care','infant','infant care'] %}selected{% endif %}>Infant care</option>
+              <option value="other" {% if sel_specialties == 'other' or (sel_specialties == '' and raw_sel_specialties_other) %}selected{% endif %}>Others (please specify)</option>
+            </select>
+
+            <div id="specialtiesOtherWrap" style="margin-top:8px; display: {% if sel_specialties == 'other' or (sel_specialties == '' and raw_sel_specialties_other) %}block{% else %}none{% endif %};">
+              <label class="field-label" for="specialties_other">If Others, specify (max 21 chars)</label>
+              <input id="specialties_other" name="specialties_other" class="field" maxlength="21" placeholder="e.g., Speech therapy" value="{{ raw_sel_specialties_other }}">
+              <div class="small-hint">Maximum 21 characters.</div>
+            </div>
+
+            <label class="field-label" for="certifications" style="margin-top:8px;">Certifications (optional)</label>
+            <input id="certifications" name="certifications" class="field" value="{{ (data2.get('certifications') if data2 else '') or (profile and profile.certifications) or '' }}" placeholder="e.g., CPR, First Aid">
+
+            <label class="field-label" style="margin-top:8px;">Salary (structured)</label>
+            <div class="row">
+              <div class="col"><input id="salary_amount" name="salary_amount" inputmode="numeric" class="field" placeholder="Amount" value="{{ (data2.get('salary_amount') if data2 else '') or '' }}"></div>
+              <div style="width:160px;">
+                <select id="salary_currency" name="salary_currency" class="field">
+                  <option value="">Currency</option>
+                  <option value="NGN" {% if (data2 and data2.get('salary_currency')) == 'NGN' or (profile and (profile.hourly_rate and '₦' in profile.hourly_rate)) %}selected{% endif %}>NGN — Naira</option>
+                  <option value="USD" {% if (data2 and data2.get('salary_currency')) == 'USD' %}selected{% endif %}>USD — US Dollar</option>
+                  <option value="EUR" {% if (data2 and data2.get('salary_currency')) == 'EUR' %}selected{% endif %}>EUR — Euro</option>
+                  <option value="GBP" {% if (data2 and data2.get('salary_currency')) == 'GBP' %}selected{% endif %}>GBP — British Pound</option>
+                  <option value="CAD" {% if (data2 and data2.get('salary_currency')) == 'CAD' %}selected{% endif %}>CAD — Canadian Dollar</option>
+                  <option value="AUD" {% if (data2 and data2.get('salary_currency')) == 'AUD' %}selected{% endif %}>AUD — Australian Dollar</option>
+                  <option value="ZAR" {% if (data2 and data2.get('salary_currency')) == 'ZAR' %}selected{% endif %}>ZAR — South African Rand</option>
+                  <option value="GHS" {% if (data2 and data2.get('salary_currency')) == 'GHS' %}selected{% endif %}>GHS — Ghana Cedi</option>
+                  <option value="KES" {% if (data2 and data2.get('salary_currency')) == 'KES' %}selected{% endif %}>KES — Kenyan Shilling</option>
+                  <option value="INR" {% if (data2 and data2.get('salary_currency')) == 'INR' %}selected{% endif %}>INR — Indian Rupee</option>
+                </select>
+              </div>
+              <div style="width:140px;">
+                <select id="salary_frequency" name="salary_frequency" class="field">
+                  <option value="">Frequency</option>
+                  <option value="monthly" {% if (data2 and data2.get('salary_frequency')) == 'monthly' %}selected{% endif %}>Monthly</option>
+                  <option value="weekly" {% if (data2 and data2.get('salary_frequency')) == 'weekly' %}selected{% endif %}>Weekly</option>
+                  <option value="hourly" {% if (data2 and data2.get('salary_frequency')) == 'hourly' %}selected{% endif %}>Hourly</option>
+                  <option value="daily" {% if (data2 and data2.get('salary_frequency')) == 'daily' %}selected{% endif %}>Daily</option>
+                </select>
+              </div>
+            </div>
+
+            <input type="hidden" name="salary" id="salary_hidden" value="{{ (data2.get('salary') if data2 else '') or (profile and profile.hourly_rate) or '' }}">
+            <input type="hidden" name="hourly_rate" id="hourly_rate_hidden" value="{{ (data2.get('hourly_rate') if data2 else '') or (profile and profile.hourly_rate) or '' }}">
+
+            <label class="field-label" for="willing_to_travel" style="margin-top:8px;">Willing to travel</label>
+            <select id="willing_to_travel" name="willing_to_travel" class="field">
+              <option value="">— select —</option>
+              <option value="yes" {% if (data2 and data2.get('willing_to_travel')) == 'yes' or (profile and profile.willing_to_travel == 'yes') %}selected{% endif %}>Yes</option>
+              <option value="no" {% if (data2 and data2.get('willing_to_travel')) == 'no' or (profile and profile.willing_to_travel == 'no') %}selected{% endif %}>No</option>
+            </select>
+
+            <label class="field-label" style="margin-top:8px;">Services you offer (choose one)</label>
+            <div class="chk-grid">
+              {% set ds = raw_sel_services %}
+              {% set sv = sel_services %}
+              <label class="chk"><input type="radio" name="services_radio" value="companionship" {% if 'companionship' in sv %}checked{% endif %}> Companionship</label>
+              <label class="chk"><input type="radio" name="services_radio" value="personal_care" {% if 'personal' in sv %}checked{% endif %}> Personal care</label>
+              <label class="chk"><input type="radio" name="services_radio" value="medication" {% if 'medication' in sv %}checked{% endif %}> Medication reminders</label>
+              <label class="chk"><input type="radio" name="services_radio" value="meal_prep" {% if 'meal' in sv %}checked{% endif %}> Meal prep</label>
+              <label class="chk"><input type="radio" name="services_radio" value="light_housekeeping" {% if 'housekeeping' in sv %}checked{% endif %}> Light housekeeping</label>
+              <label class="chk"><input type="radio" name="services_radio" value="transportation" {% if 'transport' in sv %}checked{% endif %}> Transportation</label>
+              <label class="chk"><input type="radio" name="services_radio" value="respite_care" {% if 'respite' in sv %}checked{% endif %}> Respite care</label>
+              <label class="chk"><input id="services_other_radio" type="radio" name="services_radio" value="other" {% if sel_services == 'other' or (sel_services == '' and raw_sel_services_other) %}checked{% endif %}> Others</label>
+            </div>
+
+            <div id="servicesOtherWrap" style="display: {% if sel_services == 'other' or (sel_services == '' and raw_sel_services_other) %}block{% else %}none{% endif %}; margin-top:8px;">
+              <label class="field-label" for="services_other">If others, specify (max 21 chars)</label>
+              <input id="services_other" name="services_other" class="field" maxlength="21" placeholder="e.g., Speech therapy" value="{{ raw_sel_services_other }}">
+              <div class="small-hint">Maximum 21 characters. You may select only one service.</div>
+            </div>
+
+            <label class="field-label" for="preferred_age" style="margin-top:8px;">Preferred care recipient age groups</label>
+            <select id="preferred_age" name="preferred_age" class="field">
+              <option value="">— select age group —</option>
+              <option value="Children" {% if (data2 and data2.get('preferred_age')) == 'Children' or (profile and profile.preferred_age == 'Children') %}selected{% endif %}>Children (1–12)</option>
+              <option value="Teenagers" {% if (data2 and data2.get('preferred_age')) == 'Teenagers' or (profile and profile.preferred_age == 'Teenagers') %}selected{% endif %}>Teenagers (13–17)</option>
+              <option value="Adults" {% if (data2 and data2.get('preferred_age')) == 'Adults' or (profile and profile.preferred_age == 'Adults') %}selected{% endif %}>Adults (18–64)</option>
+              <option value="Seniors" {% if (data2 and data2.get('preferred_age')) == 'Seniors' or (profile and profile.preferred_age == 'Seniors') %}selected{% endif %}>Seniors (65+)</option>
+              <option value="All_ages" {% if (data2 and data2.get('preferred_age')) == 'All_ages' or (profile and profile.preferred_age == 'All_ages') %}selected{% endif %}>All ages</option>
+              <option value="Other" {% if (data2 and data2.get('preferred_age')) == 'Other' %}selected{% endif %}>Other / Mixed</option>
+            </select>
+
+            <label class="field-label" style="margin-top:8px;">Disability?</label>
+            <select id="disability_yesno" name="disability" class="field">
+              <option value="">— select —</option>
+              <option value="no" {% if (data2 and data2.get('disability')) in (None, '', 'no') or (profile and profile.disability in (None,'','no')) %}selected{% endif %}>No</option>
+              <option value="yes" {% if (data2 and data2.get('disability')) == 'yes' or (profile and profile.disability == 'yes') %}selected{% endif %}>Yes</option>
+            </select>
+
+            <div id="disabilityDetailsWrap" style="display: {% if (data2 and data2.get('disability') == 'yes') or (profile and profile.disability_details) %}block{% else %}none{% endif %}; margin-top:8px;">
+              <label class="field-label" for="disability_details">If yes, specify (max 21 chars)</label>
+              <input id="disability_details" name="disability_details" class="field" maxlength="21" placeholder="e.g., Mobility impairment" value="{{ (data2.get('disability_details') if data2 else '') or (profile and profile.disability_details) or '' }}">
+            </div>
+
+            <label class="field-label" style="margin-top:8px;">Availability (days)</label>
+            <div class="availability-days" aria-label="Availability days">
+              {% set raw_ad = (data2 and data2.get('availability_days')) or (profile and profile.availability) or '' %}
+              {% set adlist = [] %}
+              {% if raw_ad %}
+                {% if raw_ad is string %}
+                  {% set adlist = raw_ad.replace('Mon-Sun','Mon, Tue, Wed, Thu, Fri, Sat, Sun').replace('-',',').split(',') %}
+                {% else %}
+                  {% set adlist = raw_ad %}
+                {% endif %}
+              {% endif %}
+              <label class="day"><input type="checkbox" name="availability_days" value="Mon" {% if 'Mon' in (adlist|map('trim')|list) %}checked{% endif %}> Mon</label>
+              <label class="day"><input type="checkbox" name="availability_days" value="Tue" {% if 'Tue' in (adlist|map('trim')|list) %}checked{% endif %}> Tue</label>
+              <label class="day"><input type="checkbox" name="availability_days" value="Wed" {% if 'Wed' in (adlist|map('trim')|list) %}checked{% endif %}> Wed</label>
+              <label class="day"><input type="checkbox" name="availability_days" value="Thu" {% if 'Thu' in (adlist|map('trim')|list) %}checked{% endif %}> Thu</label>
+              <label class="day"><input type="checkbox" name="availability_days" value="Fri" {% if 'Fri' in (adlist|map('trim')|list) %}checked{% endif %}> Fri</label>
+              <label class="day"><input type="checkbox" name="availability_days" value="Sat" {% if 'Sat' in (adlist|map('trim')|list) %}checked{% endif %}> Sat</label>
+              <label class="day"><input type="checkbox" name="availability_days" value="Sun" {% if 'Sun' in (adlist|map('trim')|list) %}checked{% endif %}> Sun</label>
+              <label class="day"><input id="monSunBox_edit" type="checkbox" name="availability_days" value="Mon-Sun" {% if raw_ad and ('Mon-Sun' in raw_ad or 'All' in raw_ad or (raw_ad is string and raw_ad|lower == 'mon-sun')) %}checked{% endif %}> Mon-Sun</label>
+            </div>
+
+            <div class="row" style="margin-top:8px;">
+              <div class="col">
+                <label class="field-label" for="availability_start">Start time</label>
+                <input id="availability_start" name="availability_start" type="time" class="field" value="{{ (data2 and data2.get('availability_start')) or (profile and profile.availability and (profile.availability.split(',')|last|trim) and '' ) or (data2 and data2.get('availability_start')) or '' }}">
+              </div>
+              <div class="col">
+                <label class="field-label" for="availability_end">End time</label>
+                <input id="availability_end" name="availability_end" type="time" class="field" value="{{ (data2 and data2.get('availability_end')) or '' }}">
+              </div>
+            </div>
+
+            <label class="field-label" for="languages_2" style="margin-top:8px;">Languages you speak</label>
+            <input id="languages_2" name="languages" class="field" value="{{ (data2.get('languages') if data2 else '') or (profile and profile.languages) or '' }}" placeholder="e.g., English, Yoruba">
+
+          {% else %}
+            <!-- FAMILY block -->
+            <label class="field-label">Type(s) of care needed (select one)</label>
+            <div class="chk-grid">
+              {% set cn = (data2.get('care_needed') if data2 else '') or (profile and profile.care_needed) or '' %}
+              <label class="chk"><input type="radio" name="care_needed" value="Elderly care" {% if 'elderly' in cn|lower %}checked{% endif %}> Elderly care</label>
+              <label class="chk"><input type="radio" name="care_needed" value="Child care" {% if 'child' in cn|lower %}checked{% endif %}> Child care</label>
+              <label class="chk"><input type="radio" name="care_needed" value="Special needs" {% if 'special' in cn|lower %}checked{% endif %}> Special needs</label>
+              <label class="chk"><input type="radio" name="care_needed" value="Post-op recovery" {% if 'post' in cn|lower %}checked{% endif %}> Post-op recovery</label>
+              <label class="chk"><input type="radio" name="care_needed" value="Infant care" {% if 'infant' in cn|lower %}checked{% endif %}> Infant care</label>
+              <label class="chk"><input type="radio" name="care_needed" value="Dementia care" {% if 'dementia' in cn|lower %}checked{% endif %}> Dementia care</label>
+              <label class="chk"><input type="radio" name="care_needed" value="Companionship" {% if 'companionship' in cn|lower %}checked{% endif %}> Companionship</label>
+              <label class="chk"><input id="care_needed_other_radio" type="radio" name="care_needed" value="other" {% if (data2 and data2.get('care_needed_other')) or (profile and profile.care_needed_other) %}checked{% endif %}> Others</label>
+            </div>
+
+            <div id="careNeededOtherWrap" style="margin-top:8px; display: {% if (data2 and data2.get('care_needed_other')) or (profile and profile.care_needed_other) %}block{% else %}none{% endif %};">
+              <label class="field-label" for="care_needed_other">If Others, specify (max 21 chars)</label>
+              <input id="care_needed_other" name="care_needed_other" class="field" maxlength="21" placeholder="e.g., Companion care" value="{{ (data2.get('care_needed_other') if data2 else '') or (profile and profile.care_needed_other) or '' }}">
+              <div class="muted-note">Maximum 21 characters.</div>
+            </div>
+
+            <div class="row" style="margin-top:8px;">
+              <div class="col">
+                <label class="field-label" for="number_of_dependents">Number of dependents</label>
+                <input id="number_of_dependents" name="number_of_dependents" type="number" min="0" class="field" value="{{ (data2.get('number_of_dependents') if data2 else '') or (profile and profile.number_of_dependents) or '' }}">
+              </div>
+              <div class="col">
+                <label class="field-label" for="preferred_caregiver_age">Preferred caregiver age</label>
+                <select id="preferred_caregiver_age" name="preferred_caregiver_age" class="field">
+                  <option value="">— select preferred caregiver age —</option>
+                  <option value="18-25" {% if (data2 and data2.get('preferred_caregiver_age')) == '18-25' or (profile and profile.preferred_caregiver_age == '18-25') %}selected{% endif %}>18–25</option>
+                  <option value="26-35" {% if (data2 and data2.get('preferred_caregiver_age')) == '26-35' or (profile and profile.preferred_caregiver_age == '26-35') %}selected{% endif %}>26–35</option>
+                  <option value="36-45" {% if (data2 and data2.get('preferred_caregiver_age')) == '36-45' or (profile and profile.preferred_caregiver_age == '36-45') %}selected{% endif %}>36–45</option>
+                  <option value="46-60" {% if (data2 and data2.get('preferred_caregiver_age')) == '46-60' or (profile and profile.preferred_caregiver_age == '46-60') %}selected{% endif %}>46–60</option>
+                  <option value="60+" {% if (data2 and data2.get('preferred_caregiver_age')) == '60+' or (profile and profile.preferred_caregiver_age == '60+') %}selected{% endif %}>60+</option>
+                  <option value="no_pref" {% if (data2 and data2.get('preferred_caregiver_age')) == 'no_pref' or (profile and profile.preferred_caregiver_age == 'no_pref') %}selected{% endif %}>No preference</option>
+                </select>
+              </div>
+            </div>
+
+            <label class="field-label" style="margin-top:8px;">Preferred schedule (days)</label>
+            <div class="availability-days" aria-label="Preferred schedule days">
+              {% set raw_ps = (data2 and data2.get('preferred_schedule') ) or (profile and profile.preferred_schedule) or '' %}
+              {% set pslist = [] %}
+              {% if raw_ps %}
+                {% if raw_ps is string %}
+                  {% set pslist = raw_ps.replace('Mon-Sun','Mon, Tue, Wed, Thu, Fri, Sat, Sun').replace('-',',').split(',') %}
+                {% else %}
+                  {% set pslist = raw_ps %}
+                {% endif %}
+              {% endif %}
+              <label class="day"><input type="checkbox" name="preferred_schedule_days" value="Mon" {% if 'Mon' in (pslist|map('trim')|list) %}checked{% endif %}> Mon</label>
+              <label class="day"><input type="checkbox" name="preferred_schedule_days" value="Tue" {% if 'Tue' in (pslist|map('trim')|list) %}checked{% endif %}> Tue</label>
+              <label class="day"><input type="checkbox" name="preferred_schedule_days" value="Wed" {% if 'Wed' in (pslist|map('trim')|list) %}checked{% endif %}> Wed</label>
+              <label class="day"><input type="checkbox" name="preferred_schedule_days" value="Thu" {% if 'Thu' in (pslist|map('trim')|list) %}checked{% endif %}> Thu</label>
+              <label class="day"><input type="checkbox" name="preferred_schedule_days" value="Fri" {% if 'Fri' in (pslist|map('trim')|list) %}checked{% endif %}> Fri</label>
+              <label class="day"><input type="checkbox" name="preferred_schedule_days" value="Sat" {% if 'Sat' in (pslist|map('trim')|list) %}checked{% endif %}> Sat</label>
+              <label class="day"><input type="checkbox" name="preferred_schedule_days" value="Sun" {% if 'Sun' in (pslist|map('trim')|list) %}checked{% endif %}> Sun</label>
+              <label class="day"><input id="prefMonSunBox_edit" type="checkbox" name="preferred_schedule_days" value="Mon-Sun" {% if raw_ps and ('Mon-Sun' in raw_ps or 'All' in raw_ps) %}checked{% endif %}> Mon-Sun</label>
+            </div>
+
+            <div class="row" style="margin-top:8px;">
+              <div class="col">
+                <label class="field-label" for="preferred_schedule_start">Start time</label>
+                <input id="preferred_schedule_start" name="preferred_schedule_start" type="time" class="field" value="{{ (data2.get('preferred_schedule_start') if data2 else '') or '' }}">
+              </div>
+              <div class="col">
+                <label class="field-label" for="preferred_schedule_end">End time</label>
+                <input id="preferred_schedule_end" name="preferred_schedule_end" type="time" class="field" value="{{ (data2.get('preferred_schedule_end') if data2 else '') or '' }}">
+              </div>
+            </div>
+
+            <label class="field-label" for="hourly_budget" style="margin-top:8px;">Salary budget</label>
+            <input id="hourly_budget" name="hourly_budget" class="field" value="{{ (data2.get('hourly_budget') if data2 else '') or (profile and profile.hourly_budget) or '' }}">
+
+            <label class="field-label" for="preferred_gender" style="margin-top:8px;">Preferred caregiver gender</label>
+            <select id="preferred_gender" name="preferred_gender" class="field">
+              <option value="">— select —</option>
+              <option value="female" {% if (data2 and data2.get('preferred_gender')) == 'female' or (profile and profile.preferred_gender == 'female') %}selected{% endif %}>Female</option>
+              <option value="male" {% if (data2 and data2.get('preferred_gender')) == 'male' or (profile and profile.preferred_gender == 'male') %}selected{% endif %}>Male</option>
+              <option value="no_preference" {% if (data2 and data2.get('preferred_gender')) == 'no_preference' or (profile and profile.preferred_gender == 'no_preference') %}selected{% endif %}>No preference</option>
+            </select>
+
+            <label class="field-label" for="household_info" style="margin-top:8px;">Household info / notes</label>
+            <textarea id="household_info" name="household_info" maxlength="17" class="field" placeholder="Describe the household, pets, parking, access needs">{{ (data2.get('household_info') if data2 else '') or (profile and profile.household_info) or '' }}</textarea>
+            <div class="small-hint">Maximum 40 characters. <span id="household_counter" aria-live="polite">{{ ((data2.get('household_info') if data2 else '') or (profile and profile.household_info) or '')|length }}</span>/40</div>
+
+            <label class="field-label" for="medical_needs" style="margin-top:8px;">Medical needs (if any)</label>
+            <textarea id="medical_needs" name="medical_needs" maxlength="17" class="field" placeholder="Any medical conditions, equipment, medications">{{ (data2.get('medical_needs') if data2 else '') or (profile and profile.medical_needs) or '' }}</textarea>
+            <div class="small-hint">Maximum 40 characters. <span id="medical_counter" aria-live="polite">{{ ((data2.get('medical_needs') if data2 else '') or (profile and profile.medical_needs) or '')|length }}</span>/40</div>
+
+            <!-- NOTE: Removed the duplicate final 'languages' tile as requested -->
+
+            <label class="field-label" for="location_city_2" style="margin-top:8px;">State</label>
+            <input id="location_city_2" name="location_city" class="field" value="{{ (data2.get('location_city') if data2 else '') or (profile and (profile.location.split('/') if profile.location else None) and (profile.location.split('/')[0] if profile.location.split('/')|length > 0 else '')) or '' }}" placeholder="e.g., Rivers">
+
+            <label class="field-label" for="location_country_2" style="margin-top:8px;">Country</label>
+            <input id="location_country_2" name="location_country" class="field" value="{{ (data2.get('location_country') if data2 else '') or (profile and (profile.location.split('/') if profile.location else None) and (profile.location.split('/')[1] if profile.location.split('/')|length > 1 else '')) or '' }}" placeholder="e.g., Nigeria">
+
+          {% endif %}
+        </section>
+      </div>
+
+      <!-- canonical hidden fields so server receives consistent keys -->
+      <input type="hidden" id="ps_services" name="services"
+             value="{{ raw_sel_services or ((data2.get('services') if data2 else '') or (profile and profile.services) or '') }}">
+
+      <!-- Hidden canonical combined location so existing JS still works -->
+      <input type="hidden" id="location_combined_edit" name="location" value="{{ (data2.get('location') if data2 else '') or (profile and profile.location) or '' }}">
+
+      <div class="actions">
+        <button type="button" id="cancelEdit" class="btn secondary">Cancel</button>
+        <button type="submit" id="saveEditBtn" class="btn">Save</button>
+      </div>
+    </form>
+  </div>
+</body>
+
+
+
+
+<script>
+  window.__USER_ID__ = {{ (user.id if user is defined and user else '_anon') | tojson }};
+</script>
+<script src="{{ url_for('static', filename='js/profile-sync.js') }}"></script>
+
+<script>
+(function () {
+  // run after DOM is ready to avoid timing issues
+  document.addEventListener('DOMContentLoaded', function () {
+    // --- small helpers ---------------------------------------------------
+    function safeGet(id) { try { return document.getElementById(id); } catch (e) { return null; } }
+    function safeQ(sel) { try { return document.querySelector(sel); } catch (e) { return null; } }
+    function safeQAll(sel) { try { return Array.from(document.querySelectorAll(sel)); } catch (e) { return []; } }
+    function tryParseJSON(s) { try { return JSON.parse(s); } catch (e) { return s; } }
+
+    // Namespaced user-aware fallback prefix (not required but useful)
+    var USER_ID = (typeof window.__USER_ID__ !== 'undefined' && window.__USER_ID__ !== null) ? String(window.__USER_ID__) : '_anon';
+    var PREFIX = 'cc_' + USER_ID + '_';
+
+    // Remove published hide flag when opening edit page so save&publish becomes re-visible on preview
+    try { localStorage.removeItem('profile_published_hidden'); } catch (e) { /* ignore */ }
+
+    // --- element refs ---------------------------------------------------
+    const specialtiesEl = safeGet('specialties');
+    const specialtiesOtherWrap = safeGet('specialtiesOtherWrap');
+    const specialtiesOtherInput = safeGet('specialties_other');
+
+    const servicesRadios = safeQAll('input[name="services_radio"]');
+    const servicesOtherWrap = safeGet('servicesOtherWrap');
+    const servicesOtherInput = safeGet('services_other');
+
+    const careRadios = safeQAll('input[name="care_needed"]');
+    const careOtherWrap = safeGet('careNeededOtherWrap');
+    const careOtherInput = safeGet('care_needed_other');
+
+    const disabilitySelect = safeGet('disability_yesno');
+    const disabilityDetailsWrap = safeGet('disabilityDetailsWrap');
+    const disabilityDetailsInput = safeGet('disability_details');
+
+    const saveBtn = safeGet('saveEditBtn');
+    const cancelBtn = safeGet('cancelEdit');
+
+    // profile photo preview
+    const profilePhotoInput = safeGet('profile_photo');
+    const previewProfilePhoto = safeGet('previewProfilePhoto');
+    if (profilePhotoInput) {
+      profilePhotoInput.addEventListener('change', function (e) {
+        try {
+          const f = e.target.files && e.target.files[0];
+          if (f && f.type && f.type.startsWith('image/')) {
+            const url = URL.createObjectURL(f);
+            if (previewProfilePhoto) previewProfilePhoto.src = url;
+          }
+        } catch (err) { /* ignore preview errors */ }
+      });
+    }
+
+    // --- safe restore from localStorage (only if element has no meaningful value) -
+    function getStored(keyVariants) {
+      for (let k of keyVariants) {
+        try {
+          const v = localStorage.getItem(k);
+          if (v !== null && v !== undefined && v !== '') return tryParseJSON(v);
+        } catch (e) { /* ignore storage read errors */ }
+      }
+      return null;
+    }
+
+    function restoreSelectIfEmpty(el, keyNames) {
+      if (!el) return;
+      try {
+        // treat empty value or purely default '' as empty
+        const current = (el.value || '').toString().trim();
+        if (current && current !== '') return; // server already set a value — do not overwrite
+
+        const stored = getStored(keyNames);
+        if (!stored) return;
+        // stored might be an array/text; accept either
+        if (typeof stored === 'string') {
+          el.value = stored;
+        } else {
+          // fallback JSON structures
+          el.value = Array.isArray(stored) ? (stored[0] || '') : (String(stored) || '');
+        }
+        // trigger change for dependent UI
+        el.dispatchEvent(new Event('change', { bubbles: true }));
+      } catch (err) {
+        // fail silently
+      }
+    }
+
+    // Key name variants to check (unprefixed and prefixed)
+    const specialtiesKeys = ['profile_specialties', PREFIX + 'profile_specialties'];
+    const servicesKeys   = ['profile_services', PREFIX + 'profile_services'];
+    const availKeys      = ['profile_availability', PREFIX + 'profile_availability'];
+
+    // Try restore only when the UI element has no meaningful server-side value
+    restoreSelectIfEmpty(specialtiesEl, specialtiesKeys);
+    // services are radios: restore by selecting the matching radio only if none checked
+    (function restoreServicesIfEmpty() {
+      try {
+        const anyChecked = safeQ('input[name="services_radio"]:checked');
+        if (anyChecked) return; // server already provided a choice
+        const stored = getStored(servicesKeys);
+        if (!stored) return;
+        // stored is likely a string (e.g. "Companionship" or "companionship")
+        const normalized = ('' + stored).toLowerCase();
+        // try to match value attributes
+        const radios = safeQAll('input[name="services_radio"]');
+        for (let r of radios) {
+          if (!r || !r.value) continue;
+          if (r.value.toLowerCase() === normalized || normalized.indexOf(r.value.toLowerCase()) !== -1) {
+            r.checked = true;
+            r.dispatchEvent(new Event('change', { bubbles: true }));
+            return;
+          }
+        }
+        // if we reach here and one radio has value 'other', check it and fill the other input
+        const otherRadio = radios.find(rr => rr && rr.value === 'other');
+        if (otherRadio) {
+          otherRadio.checked = true;
+          if (servicesOtherInput && stored) servicesOtherInput.value = stored;
+          otherRadio.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+      } catch (e) { /* ignore */ }
+    })();
+
+    // availability restoration (checkboxes) — only when none checked yet
+    (function restoreAvailabilityIfEmpty() {
+      try {
+        const boxes = safeQAll('input[name="availability_days"]');
+        if (!boxes.length) return;
+        const anyChecked = boxes.some(b => b.checked);
+        if (anyChecked) return;
+        const stored = getStored(availKeys);
+        if (!stored) return;
+        const raw = (Array.isArray(stored) ? stored.join(',') : String(stored || '')).toLowerCase();
+        boxes.forEach(cb => {
+          const v = (cb.value || '').toLowerCase();
+          if (raw.indexOf(v) !== -1) cb.checked = true;
+        });
+      } catch (e) { /* ignore */ }
+    })();
+
+    // --- UI toggles / event handlers (same behaviour, guarded) -------------
+    // specialties other toggle
+    if (specialtiesEl) {
+      specialtiesEl.addEventListener('change', function () {
+        try {
+          if (this.value === 'other') {
+            if (specialtiesOtherWrap) specialtiesOtherWrap.style.display = 'block';
+            if (specialtiesOtherInput) specialtiesOtherInput.setAttribute('required', 'required');
+          } else {
+            if (specialtiesOtherWrap) specialtiesOtherWrap.style.display = 'none';
+            if (specialtiesOtherInput) specialtiesOtherInput.removeAttribute('required');
+          }
+        } catch (e) { /* ignore */ }
+      });
+      // run once to ensure initial visibility matches server-selected option
+      specialtiesEl.dispatchEvent(new Event('change', { bubbles: true }));
+    } else if (specialtiesOtherWrap && specialtiesOtherInput) {
+      // if no select element, hide the other wrap
+      specialtiesOtherWrap.style.display = 'none';
+      specialtiesOtherInput.removeAttribute('required');
+    }
+
+    // services other toggle
+    function servicesChangeHandler() {
+      try {
+        const sel = safeQ('input[name="services_radio"]:checked');
+        if (sel && sel.value === 'other') {
+          if (servicesOtherWrap) servicesOtherWrap.style.display = 'block';
+          if (servicesOtherInput) servicesOtherInput.setAttribute('required', 'required');
+        } else {
+          if (servicesOtherWrap) servicesOtherWrap.style.display = 'none';
+          if (servicesOtherInput) servicesOtherInput.removeAttribute('required');
+        }
+      } catch (e) { /* ignore */ }
+    }
+    servicesRadios.forEach(r => r.addEventListener('change', servicesChangeHandler));
+    servicesChangeHandler();
+
+    // care-other toggle
+    function careChangeHandler() {
+      try {
+        const sel = safeQ('input[name="care_needed"]:checked');
+        if (sel && sel.value === 'other') {
+          if (careOtherWrap) careOtherWrap.style.display = 'block';
+          if (careOtherInput) careOtherInput.setAttribute('required', 'required');
+        } else {
+          if (careOtherWrap) careOtherWrap.style.display = 'none';
+          if (careOtherInput) careOtherInput.removeAttribute('required');
+        }
+      } catch (e) { /* ignore */ }
+    }
+    careRadios.forEach(r => r.addEventListener('change', careChangeHandler));
+    careChangeHandler();
+
+    // disability toggle
+    if (disabilitySelect) {
+      disabilitySelect.addEventListener('change', function () {
+        try {
+          if (this.value === 'yes') {
+            if (disabilityDetailsWrap) disabilityDetailsWrap.style.display = 'block';
+            if (disabilityDetailsInput) disabilityDetailsInput.setAttribute('required', 'required');
+          } else {
+            if (disabilityDetailsWrap) disabilityDetailsWrap.style.display = 'none';
+            if (disabilityDetailsInput) disabilityDetailsInput.removeAttribute('required');
+          }
+        } catch (e) { /* ignore */ }
+      });
+      // run once to set initial state
+      disabilitySelect.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    // household/medical counters
+    const householdEl = safeGet('household_info');
+    const householdCounter = safeGet('household_counter');
+    const medicalEl = safeGet('medical_needs');
+    const medicalCounter = safeGet('medical_counter');
+    const MAX_FREE_TEXT = 17;
+    function updateCounter(el, counterEl) {
+      if (!el || !counterEl) return;
+      counterEl.textContent = (el.value || '').length;
+      if (el.value.length >= MAX_FREE_TEXT) { el.classList.add('warn'); }
+      else el.classList.remove('warn');
+    }
+    if (householdEl) { householdEl.addEventListener('input', () => updateCounter(householdEl, householdCounter)); updateCounter(householdEl, householdCounter); }
+    if (medicalEl) { medicalEl.addEventListener('input', () => updateCounter(medicalEl, medicalCounter)); updateCounter(medicalEl, medicalCounter); }
+
+    // Mon-Sun exclusivity helper
+    function enforceMonSunExclusivity(nameSelector, monSunId) {
+      try {
+        const boxes = safeQAll(nameSelector);
+        const mon = safeGet(monSunId);
+        boxes.forEach(cb => {
+          cb.addEventListener('change', () => {
+            try {
+              if (cb === mon && cb.checked) {
+                boxes.forEach(other => { if (other !== mon) other.checked = false; });
+              } else if (cb !== mon && cb.checked) {
+                if (mon) mon.checked = false;
+              }
+            } catch (err) { /* ignore */ }
+          });
+        });
+      } catch (e) { /* ignore */ }
+    }
+    enforceMonSunExclusivity('input[name="availability_days"]', 'monSunBox_edit');
+    enforceMonSunExclusivity('input[name="preferred_schedule_days"]', 'prefMonSunBox_edit');
+
+    // Cancel -> back to preview
+    if (cancelBtn) {
+      cancelBtn.addEventListener('click', function () { window.location.href = "{{ url_for('profile_setup') }}"; });
+    }
+
+    // combine location and disable double submit
+    const form = safeGet('profileEditForm');
+    if (form) {
+      form.addEventListener('submit', function (ev) {
+        try {
+          // combine city/country into hidden "location"
+          const cityEl = safeGet('location_city_1') || safeGet('location_city_2');
+          const countryEl = safeGet('location_country_1') || safeGet('location_country_2');
+          const locHidden = safeGet('location_combined_edit');
+          const city = cityEl && cityEl.value ? cityEl.value.trim() : '';
+          const country = countryEl && countryEl.value ? countryEl.value.trim() : '';
+          if (locHidden) {
+            if (city && country) locHidden.value = city + '/' + country;
+            else if (city) locHidden.value = city;
+            else if (country) locHidden.value = country;
+          }
+
+          // Build canonical services hidden value if present (best-effort)
+          const svcSel = safeQ('input[name="services_radio"]:checked');
+          const svcOtherEl = safeGet('services_other');
+          if (svcSel) {
+            // create/ensure a hidden input 'services' exists so server can read it consistently
+            let svcHidden = document.querySelector('input[name="services"]');
+            if (!svcHidden) {
+              svcHidden = document.createElement('input');
+              svcHidden.type = 'hidden';
+              svcHidden.name = 'services';
+              svcHidden.id = 'ps_services';
+              form.appendChild(svcHidden);
+            }
+            if (svcSel.value === 'other') {
+              svcHidden.value = (svcOtherEl && svcOtherEl.value.trim()) || 'Other';
+            } else {
+              svcHidden.value = svcSel.value;
+            }
+          }
+
+          // --- NEW: Build canonical salary hidden fields so server receives updated value ---
+          try {
+            const amtEl = safeGet('salary_amount');
+            const currEl = safeGet('salary_currency');
+            const freqEl = safeGet('salary_frequency');
+
+            const amt = amtEl && amtEl.value ? String(amtEl.value).trim() : '';
+            const curr = currEl && currEl.value ? String(currEl.value).trim() : '';
+            const freq = freqEl && freqEl.value ? String(freqEl.value).trim() : '';
+
+            var canonicalSalary = '';
+            if (curr && amt) canonicalSalary = curr + ' ' + amt;
+            else if (amt) canonicalSalary = amt;
+            else if (curr) canonicalSalary = curr;
+
+            if (canonicalSalary && freq) canonicalSalary = canonicalSalary + ' ' + freq;
+            else if (!canonicalSalary && freq) canonicalSalary = freq;
+
+            // ensure hidden inputs exist and set values
+            var salaryHidden = safeGet('salary_hidden') || document.querySelector('input[name="salary"]#salary_hidden') || document.querySelector('input[name="salary"]');
+            if (!salaryHidden) {
+              salaryHidden = document.createElement('input');
+              salaryHidden.type = 'hidden';
+              salaryHidden.name = 'salary';
+              salaryHidden.id = 'salary_hidden';
+              salaryHidden.value = canonicalSalary;
+              form.appendChild(salaryHidden);
+            } else {
+              try { salaryHidden.value = canonicalSalary; } catch (e) { /* ignore */ }
+            }
+
+            var hourlyHidden = safeGet('hourly_rate_hidden') || document.querySelector('input[name="hourly_rate"]#hourly_rate_hidden') || document.querySelector('input[name="hourly_rate"]');
+            if (!hourlyHidden) {
+              hourlyHidden = document.createElement('input');
+              hourlyHidden.type = 'hidden';
+              hourlyHidden.name = 'hourly_rate';
+              hourlyHidden.id = 'hourly_rate_hidden';
+              hourlyHidden.value = canonicalSalary;
+              form.appendChild(hourlyHidden);
+            } else {
+              try { hourlyHidden.value = canonicalSalary; } catch (e) { /* ignore */ }
+            }
+
+            // also update localStorage so the preview page picks up the new salary immediately
+            try {
+              if (canonicalSalary && window.localStorage) {
+                localStorage.setItem('profile_salary', JSON.stringify(canonicalSalary));
+              } else if (window.localStorage) {
+                localStorage.removeItem('profile_salary');
+              }
+            } catch (e) { /* ignore storage errors */ }
+          } catch (err) {
+            // non-fatal; continue submit
+            console.warn('salary canonicalization failed', err);
+          }
+
+          // disable button to avoid double clicks
+          if (saveBtn) {
+            saveBtn.disabled = true;
+            // preserve an accessible label, use textContent if present
+            try { saveBtn.textContent = 'Saving...'; } catch (e) { /* ignore */ }
+          }
+
+          // clear published flag so preview will show Save&Publish if appropriate after redirect
+          try { localStorage.removeItem('profile_published_hidden'); } catch (e) { /* ignore */ }
+
+        } catch (e) {
+          // swallow submit-time errors — we don't want to block form submission
+        }
+      }, true);
+    }
+
+    // ---------- live-sync caregiver + family fields into localStorage for preview page ----------
+    (function () {
+      // keys (kept as your original names so preview page code continues to work)
+      const LS_SPECIALTIES = 'profile_specialties';
+      const LS_SERVICES = 'profile_services';
+      const LS_AVAIL = 'profile_availability';
+      const LS_SALARY = 'profile_salary';
+
+      const LS_CARE_NEEDED = 'profile_care_needed';
+      const LS_DEPENDENTS = 'profile_dependents';
+      const LS_PREF_SCHEDULE = 'profile_preferred_schedule';
+      const LS_HOURLY_BUDGET = 'profile_hourly_budget';
+      const LS_PREF_GENDER = 'profile_preferred_gender';
+      const LS_HOUSEHOLD = 'profile_household_info';
+      const LS_MEDICAL = 'profile_medical_needs';
+      const LS_LANG = 'profile_languages';
+      const LS_LOCATION = 'profile_location';
+      const LS_PREF_AGE = 'profile_preferred_age';
+
+      function prettyToken(tok) {
+        if (tok === null || tok === undefined) return '';
+        const s = String(tok).trim();
+        if (!s) return '';
+        const map = {
+          'dementia_care': 'Dementia care', 'pediatric_care': 'Pediatric care',
+          'post_op_care': 'Post-operative care', 'palliative_care': 'Palliative care',
+          'companionship': 'Companionship', 'mobility_assistance': 'Mobility assistance',
+          'medication_management': 'Medication management', 'wound_care': 'Wound care',
+          'alzheimers_care': "Alzheimer's care", 'infant_care': 'Infant care',
+          'personal_care': 'Personal care', 'meal_prep': 'Meal preparation',
+          'light_housekeeping': 'Light housekeeping', 'transportation': 'Transportation',
+          'respite_care': 'Respite care', 'medication': 'Medication reminder',
+          'children': 'Children (1–12)', 'child': 'Children (1–12)',
+          'teenagers': 'Teenagers (13–17)', 'teens': 'Teenagers (13–17)',
+          'adults': 'Adults (18–64)', 'seniors': 'Seniors (65+)',
+          'all_ages': 'All ages', 'all-ages': 'All ages', 'all ages': 'All ages', 'all': 'All ages',
+          'other': 'Other / Mixed'
+        };
+        const lower = s.toLowerCase();
+        if (map[lower]) return map[lower];
+        return s.replace(/[_\-]+/g, ' ').split(',').map(p => {
+          p = p.trim();
+          return p ? (p.charAt(0).toUpperCase() + p.slice(1)) : '';
+        }).filter(Boolean).join(', ');
+      }
+
+      function fmtTimeHM(hm) {
+        if (!hm) return '';
+        const parts = String(hm).split(':');
+        let hh = parseInt(parts[0] || 0, 10);
+        const mm = parts[1] || '00';
+        const ampm = hh < 12 ? 'am' : 'pm';
+        hh = hh % 12;
+        if (hh === 0) hh = 12;
+        return (mm === '00') ? (hh + ampm) : (hh + ':' + mm + ampm);
+      }
+
+      function buildSpecialtiesDisplay() {
+        const sel = safeGet('specialties');
+        const otherEl = safeGet('specialties_other');
+        if (!sel) return '';
+        if (sel.value === 'other') {
+          return (otherEl && otherEl.value.trim()) ? otherEl.value.trim() : 'Other';
+        }
+        return prettyToken(sel.value);
+      }
+
+      function buildServicesDisplay() {
+        const radios = safeQAll('input[name="services_radio"]');
+        const otherEl = safeGet('services_other');
+        let chosen = '';
+        radios.forEach(r => { if (r.checked) chosen = r.value; });
+        if (!chosen) return '';
+        if (chosen === 'other') {
+          return (otherEl && otherEl.value.trim()) ? otherEl.value.trim() : 'Other';
+        }
+        return prettyToken(chosen);
+      }
+
+      function buildAvailabilityDisplay() {
+        const nodes = safeQAll('input[name="availability_days"]');
+        if (!nodes.length) return '';
+        const chosen = nodes.filter(n => n.checked).map(n => n.value);
+        const monSun = chosen.includes('Mon-Sun');
+        const start = (safeGet('availability_start') || {}).value || '';
+        const end = (safeGet('availability_end') || {}).value || '';
+
+        if (monSun) {
+          if (start && end) return 'Mon-Sun, ' + fmtTimeHM(start) + '–' + fmtTimeHM(end);
+          return 'Mon-Sun';
+        }
+        if (chosen.length) {
+          const days = chosen.join(', ');
+          if (start && end) return days + ', ' + fmtTimeHM(start) + '–' + fmtTimeHM(end);
+          return days;
+        }
+        if (start && end) return fmtTimeHM(start) + '–' + fmtTimeHM(end);
+        return '';
+      }
+
+      function buildSalaryDisplay() {
+        const amount = (safeGet('salary_amount') || {}).value || '';
+        const currency = (safeGet('salary_currency') || {}).value || '';
+        const freq = (safeGet('salary_frequency') || {}).value || '';
+        if (!amount && !currency && !freq) return '';
+        const curLabel = currency ? currency : '';
+        const amt = amount ? amount : '';
+        const freqLabel = freq ? freq : '';
+        let out = '';
+        if (curLabel && amt) out = curLabel + ' ' + amt;
+        else if (amt) out = amt;
+        if (out && freqLabel) out += ' ' + freqLabel;
+        return out.trim();
+      }
+
+      // family builders
+      function buildCareNeededDisplay() {
+        const radios = safeQAll('input[name="care_needed"]');
+        let chosen = '';
+        radios.forEach(r => { if (r.checked) chosen = r.value; });
+        if (!chosen) return '';
+        if (chosen === 'other') {
+          const other = (safeGet('care_needed_other') || {}).value || '';
+          return other.trim() || 'Other';
+        }
+        return String(chosen).trim();
+      }
+
+      function buildDependentsDisplay() {
+        const el = safeGet('number_of_dependents');
+        if (!el) return '';
+        const v = el.value;
+        return (v !== undefined && v !== null && String(v).trim() !== '') ? String(v).trim() : '';
+      }
+
+
+           function buildPreferredGenderDisplay() {
+  var el = safeGet('preferred_gender');
+  if (!el) return '';
+  var raw = (el.value || '').toString().trim();
+  if (!raw) return '';
+
+  var lower = raw.toLowerCase().trim();
+
+  // common normalized forms for "no preference"
+  var noPrefKeys = ['no_preference','no-preference','no preference','no_pref','no pref','none'];
+  if (noPrefKeys.indexOf(lower) !== -1) return 'No preference';
+
+  if (['female','f'].indexOf(lower) !== -1) return 'Female';
+  if (['male','m'].indexOf(lower) !== -1) return 'Male';
+
+  // fallback: replace underscores/hyphens with spaces and capitalise only the first letter
+  var cleaned = lower.replace(/[_\-]+/g, ' ').replace(/\s+/g, ' ').trim();
+  if (!cleaned) return '';
+
+  return cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+}
+ 
+
+
+
+      function buildPreferredScheduleDisplay() {
+        const nodes = safeQAll('input[name="preferred_schedule_days"]');
+        const chosen = nodes.filter(n => n.checked).map(n => n.value);
+        const monSun = chosen.includes('Mon-Sun');
+        const start = (safeGet('preferred_schedule_start') || {}).value || '';
+        const end = (safeGet('preferred_schedule_end') || {}).value || '';
+        if (monSun) {
+          if (start && end) return 'Mon-Sun, ' + fmtTimeHM(start) + '–' + fmtTimeHM(end);
+          return 'Mon-Sun';
+        }
+        if (chosen.length) {
+          const days = chosen.join(', ');
+          if (start && end) return days + ', ' + fmtTimeHM(start) + '–' + fmtTimeHM(end);
+          return days;
+        }
+        if (start && end) return fmtTimeHM(start) + '–' + fmtTimeHM(end);
+        return '';
+      }
+
+      function buildHourlyBudgetDisplay() { return (safeGet('hourly_budget') || {}).value || ''; }
+      function buildPreferredGenderDisplay() { return ((safeGet('preferred_gender') || {}).value || '').trim().replace('_', ' ').replace('-', ' ').replace(/\b\w/g, c => c.toUpperCase()); }
+      function buildHouseholdDisplay() { return ((safeGet('household_info') || {}).value || '').trim(); }
+      function buildMedicalDisplay() { return ((safeGet('medical_needs') || {}).value || '').trim(); }
+      function buildLanguagesDisplay() {
+        const l2 = (safeGet('languages_2') || {}).value || '';
+        const l1 = (safeGet('languages_1') || {}).value || '';
+        return (l2 && l2.trim()) ? l2.trim() : (l1 && l1.trim() ? l1.trim() : '');
+      }
+      function buildLocationDisplay() {
+        const cityEl = safeGet('location_city_1') || safeGet('location_city_2');
+        const countryEl = safeGet('location_country_1') || safeGet('location_country_2');
+        const city = cityEl && cityEl.value ? cityEl.value.trim() : '';
+        const country = countryEl && countryEl.value ? countryEl.value.trim() : '';
+        if (city && country) return city + '/' + country;
+        if (city) return city;
+        if (country) return country;
+        return '';
+      }
+      function buildPreferredAgeDisplay() {
+        const el = safeGet('preferred_age');
+        if (!el) return '';
+        const raw = (el.value || '').trim();
+        if (!raw) return '';
+        const key = raw.toLowerCase().replace(/\s+/g, '_').replace('-', '_');
+        const map = {
+          'children': 'Children (1–12)', 'children_(1–12)': 'Children (1–12)',
+          'teenagers': 'Teenagers (13–17)', 'teenagers_(13–17)': 'Teenagers (13–17)',
+          'adults': 'Adults (18–64)', 'adults_(18–64)': 'Adults (18–64)',
+          'seniors': 'Seniors (65+)', 'seniors_(65+)': 'Seniors (65+)',
+          'all_ages': 'All ages', 'all-ages': 'All ages', 'all ages': 'All ages', 'all': 'All ages',
+          'other': 'Other / Mixed'
+        };
+        if (map[key]) return map[key];
+        return prettyToken(raw);
+      }
+
+      // write all keys to localStorage (throttled)
+      function writeAllLS() {
+        try {
+          const specialties = buildSpecialtiesDisplay();
+          const services = buildServicesDisplay();
+          const avail = buildAvailabilityDisplay();
+          const salary = buildSalaryDisplay();
+          const prefAge = buildPreferredAgeDisplay();
+
+          if (specialties) localStorage.setItem(LS_SPECIALTIES, JSON.stringify(specialties)); else localStorage.removeItem(LS_SPECIALTIES);
+          if (services) localStorage.setItem(LS_SERVICES, JSON.stringify(services)); else localStorage.removeItem(LS_SERVICES);
+          if (avail) localStorage.setItem(LS_AVAIL, JSON.stringify(avail)); else localStorage.removeItem(LS_AVAIL);
+          if (salary) localStorage.setItem(LS_SALARY, JSON.stringify(salary)); else localStorage.removeItem(LS_SALARY);
+          if (prefAge) localStorage.setItem(LS_PREF_AGE, JSON.stringify(prefAge)); else localStorage.removeItem(LS_PREF_AGE);
+
+          const careNeeded = buildCareNeededDisplay();
+          const dependents = buildDependentsDisplay();
+          const prefSchedule = buildPreferredScheduleDisplay();
+          const hourlyBudget = buildHourlyBudgetDisplay();
+          const prefGender = buildPreferredGenderDisplay();
+          const household = buildHouseholdDisplay();
+          const medical = buildMedicalDisplay();
+          const languages = buildLanguagesDisplay();
+          const location = buildLocationDisplay();
+
+          if (careNeeded) localStorage.setItem(LS_CARE_NEEDED, JSON.stringify(careNeeded)); else localStorage.removeItem(LS_CARE_NEEDED);
+          if (dependents) localStorage.setItem(LS_DEPENDENTS, JSON.stringify(dependents)); else localStorage.removeItem(LS_DEPENDENTS);
+          if (prefSchedule) localStorage.setItem(LS_PREF_SCHEDULE, JSON.stringify(prefSchedule)); else localStorage.removeItem(LS_PREF_SCHEDULE);
+          if (hourlyBudget) localStorage.setItem(LS_HOURLY_BUDGET, JSON.stringify(hourlyBudget)); else localStorage.removeItem(LS_HOURLY_BUDGET);
+          if (prefGender) localStorage.setItem(LS_PREF_GENDER, JSON.stringify(prefGender)); else localStorage.removeItem(LS_PREF_GENDER);
+          if (household) localStorage.setItem(LS_HOUSEHOLD, JSON.stringify(household)); else localStorage.removeItem(LS_HOUSEHOLD);
+          if (medical) localStorage.setItem(LS_MEDICAL, JSON.stringify(medical)); else localStorage.removeItem(LS_MEDICAL);
+          if (languages) localStorage.setItem(LS_LANG, JSON.stringify(languages)); else localStorage.removeItem(LS_LANG);
+          if (location) localStorage.setItem(LS_LOCATION, JSON.stringify(location)); else localStorage.removeItem(LS_LOCATION);
+        } catch (e) {
+          // ignore storage write errors (quota/private mode)
+        }
+      }
+
+      // throttling
+      var writeTimer = null;
+      function scheduleWrite() {
+        clearTimeout(writeTimer);
+        writeTimer = setTimeout(writeAllLS, 160);
+      }
+
+      // attach listeners (caregiver)
+      const specialtiesEl2 = safeGet('specialties');
+      const specialtiesOther2 = safeGet('specialties_other');
+      const servicesEls = safeQAll('input[name="services_radio"]');
+      const servicesOther2 = safeGet('services_other');
+      const availBoxes = safeQAll('input[name="availability_days"]');
+      const startTime = safeGet('availability_start');
+      const endTime = safeGet('availability_end');
+      const salaryAmt = safeGet('salary_amount');
+      const salaryCurr = safeGet('salary_currency');
+      const salaryFreq = safeGet('salary_frequency');
+      const preferredAgeEl = safeGet('preferred_age');
+
+      if (specialtiesEl2) specialtiesEl2.addEventListener('change', scheduleWrite, true);
+      if (specialtiesOther2) specialtiesOther2.addEventListener('input', scheduleWrite, true);
+      servicesEls.forEach(r => r.addEventListener('change', scheduleWrite, true));
+      if (servicesOther2) servicesOther2.addEventListener('input', scheduleWrite, true);
+      availBoxes.forEach(cb => cb.addEventListener('change', scheduleWrite, true));
+      if (startTime) startTime.addEventListener('change', scheduleWrite, true);
+      if (endTime) endTime.addEventListener('change', scheduleWrite, true);
+      if (salaryAmt) salaryAmt.addEventListener('input', scheduleWrite, true);
+      if (salaryCurr) salaryCurr.addEventListener('change', scheduleWrite, true);
+      if (salaryFreq) salaryFreq.addEventListener('change', scheduleWrite, true);
+      if (preferredAgeEl) preferredAgeEl.addEventListener('change', scheduleWrite, true);
+
+      // attach listeners (family)
+      const careRadios2 = safeQAll('input[name="care_needed"]');
+      const careOther2 = safeGet('care_needed_other');
+      const dependentsEl = safeGet('number_of_dependents');
+      const prefSchedBoxes = safeQAll('input[name="preferred_schedule_days"]');
+      const prefStart = safeGet('preferred_schedule_start');
+      const prefEnd = safeGet('preferred_schedule_end');
+      const hourlyBudgetEl = safeGet('hourly_budget');
+      const prefGenderEl = safeGet('preferred_gender');
+      const householdEl2 = safeGet('household_info');
+      const medicalEl2 = safeGet('medical_needs');
+      const lang1 = safeGet('languages_1');
+      const lang2 = safeGet('languages_2');
+      const locCity1 = safeGet('location_city_1');
+      const locCity2 = safeGet('location_city_2');
+      const locCountry1 = safeGet('location_country_1');
+      const locCountry2 = safeGet('location_country_2');
+
+      careRadios2.forEach(r => r.addEventListener('change', scheduleWrite, true));
+      if (careOther2) careOther2.addEventListener('input', scheduleWrite, true);
+      if (dependentsEl) dependentsEl.addEventListener('input', scheduleWrite, true);
+      prefSchedBoxes.forEach(cb => cb.addEventListener('change', scheduleWrite, true));
+      if (prefStart) prefStart.addEventListener('change', scheduleWrite, true);
+      if (prefEnd) prefEnd.addEventListener('change', scheduleWrite, true);
+      if (hourlyBudgetEl) hourlyBudgetEl.addEventListener('input', scheduleWrite, true);
+      if (prefGenderEl) prefGenderEl.addEventListener('change', scheduleWrite, true);
+      if (householdEl2) householdEl2.addEventListener('input', scheduleWrite, true);
+      if (medicalEl2) medicalEl2.addEventListener('input', scheduleWrite, true);
+      if (lang1) lang1.addEventListener('input', scheduleWrite, true);
+      if (lang2) lang2.addEventListener('input', scheduleWrite, true);
+      if (locCity1) locCity1.addEventListener('input', scheduleWrite, true);
+      if (locCity2) locCity2.addEventListener('input', scheduleWrite, true);
+      if (locCountry1) locCountry1.addEventListener('input', scheduleWrite, true);
+      if (locCountry2) locCountry2.addEventListener('input', scheduleWrite, true);
+
+      // initial write so preview can reflect values immediately
+      try { writeAllLS(); } catch (e) { /* ignore */ }
+
+      // ensure we write at submit too
+      if (form) {
+        form.addEventListener('submit', function () {
+          try { writeAllLS(); } catch (e) { /* ignore */ }
+        }, true);
+      }
+    })();
+    // ---------- end live-sync ----------
+
+  }); // DOMContentLoaded
+})(); // IIFE
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // Server-provided availability (prefer draft s2 then persisted profile)
+  const serverAvailability = {{ ((data2.get('availability') if data2 else '') or (profile and profile.availability) or '') | tojson }};
+
+  if (!serverAvailability || String(serverAvailability).trim() === '') return;
+
+  const startInput = document.getElementById('availability_start');
+  const endInput = document.getElementById('availability_end');
+  const allBoxes = Array.from(document.querySelectorAll('input[name="availability_days"]'));
+  const monSunBox = document.getElementById('monSunBox_edit'); // toggle that represents Mon-Sun
+
+  // ----------------- small parsers (self-contained) -----------------
+  function parseTimeToken(tok) {
+    if (!tok && tok !== 0) return null;
+    var s = String(tok).trim().toLowerCase();
+    if (!s) return null;
+    s = s.replace(/\s+/g, '');
+    var m = s.match(/^(\d{1,2})(?::(\d{2}))?(am|pm)?$/i);
+    if (!m) return null;
+    var hh = parseInt(m[1], 10);
+    var mm = (m[2] || '00');
+    var ampm = m[3] ? m[3].toLowerCase() : null;
+    if (ampm) {
+      if (ampm === 'pm' && hh < 12) hh += 12;
+      if (ampm === 'am' && hh === 12) hh = 0;
+    }
+    if (isNaN(hh)) return null;
+    hh = Math.max(0, Math.min(23, hh));
+    var hhStr = (hh < 10 ? '0' + hh : '' + hh);
+    var mmStr = mm.length === 1 ? '0' + mm : mm;
+    return hhStr + ':' + mmStr;
+  }
+
+  function formatTimeTo12(hm) {
+    if (!hm && hm !== 0) return '';
+    var s = String(hm).trim();
+    if (!s) return '';
+    var parts = s.split(':');
+    var hh = parseInt(parts[0] || '0', 10);
+    var mm = (parts[1] || '00').slice(0, 2);
+    if (isNaN(hh)) return s;
+    var ampm = hh < 12 ? 'am' : 'pm';
+    var hh12 = hh % 12;
+    if (hh12 === 0) hh12 = 12;
+    return hh12 + (mm && mm !== '00' ? (':' + mm) : '') + ampm;
+  }
+
+  function extractTimeRangeFromString(s) {
+    if (!s && s !== 0) return null;
+    var raw = String(s);
+    var timeRe = /(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)/ig;
+    var matches = raw.match(timeRe) || [];
+    if (matches.length >= 2) {
+      var t1 = parseTimeToken(matches[0]);
+      var t2 = parseTimeToken(matches[1]);
+      if (t1 && t2) return { start: t1, end: t2 };
+    }
+    var dashRe = /(\d{1,2}:\d{2})\s*[-–—]\s*(\d{1,2}:\d{2})/;
+    var dmatch = raw.match(dashRe);
+    if (dmatch) {
+      var a = parseTimeToken(dmatch[1]);
+      var b = parseTimeToken(dmatch[2]);
+      if (a && b) return { start: a, end: b };
+    }
+    return null;
+  }
+
+  function parseDaysFromString(s) {
+    if (!s && s !== 0) return [];
+    var raw = String(s);
+    raw = raw.replace(/[;|]/g, ',').replace(/[_]+/g, ' ').trim();
+    var rangeMatch = raw.match(/\b(mon|tue|wed|thu|fri|sat|sun)\s*[-–—]\s*(mon|tue|wed|thu|fri|sat|sun)\b/i);
+    if (rangeMatch) {
+      var low = rangeMatch[1].toLowerCase(), high = rangeMatch[2].toLowerCase();
+      if (low === 'mon' && high === 'sun') return 'Mon-Sun';
+      // otherwise fall through to token parsing
+    }
+    var toks = raw.split(',').map(function (p) { return String(p || '').trim(); }).filter(Boolean);
+    var normalized = [];
+    var map = {
+      'mon': 'Mon', 'monday': 'Mon',
+      'tue': 'Tue', 'tues': 'Tue', 'tuesday': 'Tue',
+      'wed': 'Wed', 'wednesday': 'Wed',
+      'thu': 'Thu', 'thur': 'Thu', 'thurs': 'Thu', 'thursday': 'Thu',
+      'fri': 'Fri', 'friday': 'Fri',
+      'sat': 'Sat', 'saturday': 'Sat',
+      'sun': 'Sun', 'sunday': 'Sun'
+    };
+    toks.forEach(function (t) {
+      var tt = t.toLowerCase();
+      var rm = tt.match(/\b(mon|monday)\s*[-–—]\s*(sun|sunday)\b/);
+      if (rm) { normalized = ['Mon-Sun']; return; }
+      var firstWord = tt.split(/\s|_|\-/)[0];
+      if (map[firstWord]) {
+        if (normalized.indexOf(map[firstWord]) === -1) normalized.push(map[firstWord]);
+      } else {
+        Object.keys(map).forEach(function (k) {
+          if (tt.indexOf(k) !== -1 && normalized.indexOf(map[k]) === -1) normalized.push(map[k]);
+        });
+      }
+    });
+    var allDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    var hasAll = allDays.every(function (d) { return normalized.indexOf(d) !== -1; });
+    if (hasAll) return 'Mon-Sun';
+    return normalized;
+  }
+  // ----------------- end parsers -----------------
+
+  // Extract times (if any) and populate time inputs (only if inputs empty)
+  try {
+    const tr = extractTimeRangeFromString(serverAvailability);
+    if (tr) {
+      if (startInput && (!startInput.value || String(startInput.value).trim() === '')) startInput.value = tr.start;
+      if (endInput && (!endInput.value || String(endInput.value).trim() === '')) endInput.value = tr.end;
+    } else {
+      // As a fallback: if serverAvailability contains something like "07:00am-04:00pm" without comma
+      // try to capture "HH:MMam-HH:MMpm" pattern
+      const fallback = String(serverAvailability).match(/(\d{1,2}:\d{2}\s*(?:am|pm)?)\s*[-–—]\s*(\d{1,2}:\d{2}\s*(?:am|pm)?)/i);
+      if (fallback) {
+        const a = parseTimeToken(fallback[1]);
+        const b = parseTimeToken(fallback[2]);
+        if (a && b) {
+          if (startInput && !startInput.value) startInput.value = a;
+          if (endInput && !endInput.value) endInput.value = b;
+        }
+      }
+    }
+  } catch (err) {
+    // don't block page if parsing fails
+    console.warn('availability time parse fallback error', err);
+  }
+
+  // Parse days and set checkboxes correctly (prefer Mon-Sun if full week)
+  try {
+    const daysParsed = parseDaysFromString(serverAvailability);
+    if (daysParsed === 'Mon-Sun') {
+      if (monSunBox) {
+        monSunBox.checked = true;
+        allBoxes.forEach(cb => { if (cb !== monSunBox) cb.checked = false; });
+      } else {
+        // fallback: check all day boxes
+        allBoxes.forEach(cb => { if (['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].indexOf(cb.value) !== -1) cb.checked = true; });
+      }
+    } else if (Array.isArray(daysParsed) && daysParsed.length) {
+      if (monSunBox) monSunBox.checked = false;
+      allBoxes.forEach(cb => {
+        if (cb === monSunBox) return;
+        cb.checked = daysParsed.indexOf(cb.value) !== -1;
+      });
+    } else {
+      // no day tokens found — do nothing
+    }
+  } catch (err) {
+    console.warn('availability days parse error', err);
+  }
+
+  // Fire change events so existing listeners update localStorage & preview values
+  try {
+    var ev = new Event('change', { bubbles: true });
+    if (startInput) startInput.dispatchEvent(ev);
+    if (endInput) endInput.dispatchEvent(ev);
+    allBoxes.forEach(cb => cb.dispatchEvent(ev));
+    if (monSunBox) monSunBox.dispatchEvent(ev);
+  } catch (e) { /* ignore */ }
+});
+</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // Server-provided preferred_schedule (prefer draft data2 then persisted profile)
+  const serverPrefSched = {{ ((data2.get('preferred_schedule') if data2 else '') or (profile and profile.preferred_schedule) or '') | tojson }};
+
+  if (!serverPrefSched || String(serverPrefSched).trim() === '') return;
+
+  const startInput = document.getElementById('preferred_schedule_start');
+  const endInput = document.getElementById('preferred_schedule_end');
+  const allBoxes = Array.from(document.querySelectorAll('input[name="preferred_schedule_days"]'));
+  const monSunBox = document.getElementById('prefMonSunBox_edit'); // Mon-Sun toggle for preferred schedule
+
+  // ---------- small parsers (self-contained, mirror availability parser) ----------
+  function parseTimeToken(tok) {
+    if (!tok && tok !== 0) return null;
+    var s = String(tok).trim().toLowerCase();
+    if (!s) return null;
+    s = s.replace(/\s+/g, '');
+    var m = s.match(/^(\d{1,2})(?::(\d{2}))?(am|pm)?$/i);
+    if (!m) return null;
+    var hh = parseInt(m[1], 10);
+    var mm = (m[2] || '00');
+    var ampm = m[3] ? m[3].toLowerCase() : null;
+    if (ampm) {
+      if (ampm === 'pm' && hh < 12) hh += 12;
+      if (ampm === 'am' && hh === 12) hh = 0;
+    }
+    if (isNaN(hh)) return null;
+    hh = Math.max(0, Math.min(23, hh));
+    var hhStr = (hh < 10 ? '0' + hh : '' + hh);
+    var mmStr = (mm.length === 1 ? '0' + mm : mm);
+    return hhStr + ':' + mmStr;
+  }
+
+  function formatTimeTo12(hm) {
+    if (!hm && hm !== 0) return '';
+    var s = String(hm).trim();
+    if (!s) return '';
+    var parts = s.split(':');
+    var hh = parseInt(parts[0] || '0', 10);
+    var mm = (parts[1] || '00').slice(0, 2);
+    if (isNaN(hh)) return s;
+    var ampm = hh < 12 ? 'am' : 'pm';
+    var hh12 = hh % 12;
+    if (hh12 === 0) hh12 = 12;
+    return hh12 + (mm && mm !== '00' ? (':' + mm) : '') + ampm;
+  }
+
+  function extractTimeRangeFromString(s) {
+    if (!s && s !== 0) return null;
+    var raw = String(s);
+    var timeRe = /(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)/ig;
+    var matches = raw.match(timeRe) || [];
+    if (matches.length >= 2) {
+      var t1 = parseTimeToken(matches[0]);
+      var t2 = parseTimeToken(matches[1]);
+      if (t1 && t2) return { start: t1, end: t2 };
+    }
+    var dashRe = /(\d{1,2}:\d{2})\s*[-–—]\s*(\d{1,2}:\d{2})/;
+    var dmatch = raw.match(dashRe);
+    if (dmatch) {
+      var a = parseTimeToken(dmatch[1]);
+      var b = parseTimeToken(dmatch[2]);
+      if (a && b) return { start: a, end: b };
+    }
+    return null;
+  }
+
+  function parseDaysFromString(s) {
+    if (!s && s !== 0) return [];
+    var raw = String(s);
+    raw = raw.replace(/[;|]/g, ',').replace(/[_]+/g, ' ').trim();
+    var rangeMatch = raw.match(/\b(mon|tue|wed|thu|fri|sat|sun)\s*[-–—]\s*(mon|tue|wed|thu|fri|sat|sun)\b/i);
+    if (rangeMatch) {
+      var low = rangeMatch[1].toLowerCase(), high = rangeMatch[2].toLowerCase();
+      if (low === 'mon' && high === 'sun') return 'Mon-Sun';
+      // otherwise fall through to token parsing
+    }
+    var toks = raw.split(',').map(function (p) { return String(p || '').trim(); }).filter(Boolean);
+    var normalized = [];
+    var map = {
+      'mon': 'Mon', 'monday': 'Mon',
+      'tue': 'Tue', 'tues': 'Tue', 'tuesday': 'Tue',
+      'wed': 'Wed', 'wednesday': 'Wed',
+      'thu': 'Thu', 'thur': 'Thu', 'thurs': 'Thu', 'thursday': 'Thu',
+      'fri': 'Fri', 'friday': 'Fri',
+      'sat': 'Sat', 'saturday': 'Sat',
+      'sun': 'Sun', 'sunday': 'Sun'
+    };
+    toks.forEach(function (t) {
+      var tt = t.toLowerCase();
+      var rm = tt.match(/\b(mon|monday)\s*[-–—]\s*(sun|sunday)\b/);
+      if (rm) { normalized = ['Mon-Sun']; return; }
+      var firstWord = tt.split(/\s|_|\-/)[0];
+      if (map[firstWord]) {
+        if (normalized.indexOf(map[firstWord]) === -1) normalized.push(map[firstWord]);
+      } else {
+        Object.keys(map).forEach(function (k) {
+          if (tt.indexOf(k) !== -1 && normalized.indexOf(map[k]) === -1) normalized.push(map[k]);
+        });
+      }
+    });
+    var allDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    var hasAll = allDays.every(function (d) { return normalized.indexOf(d) !== -1; });
+    if (hasAll) return 'Mon-Sun';
+    return normalized;
+  }
+  // ---------- end parsers ----------
+
+  // populate times if present (only when inputs are empty)
+  try {
+    const tr = extractTimeRangeFromString(serverPrefSched);
+    if (tr) {
+      if (startInput && (!startInput.value || String(startInput.value).trim() === '')) startInput.value = tr.start;
+      if (endInput && (!endInput.value || String(endInput.value).trim() === '')) endInput.value = tr.end;
+    } else {
+      // fallback: try HH:MMam-HH:MMpm pattern
+      const fallback = String(serverPrefSched).match(/(\d{1,2}:\d{2}\s*(?:am|pm)?)\s*[-–—]\s*(\d{1,2}:\d{2}\s*(?:am|pm)?)/i);
+      if (fallback) {
+        const a = parseTimeToken(fallback[1]);
+        const b = parseTimeToken(fallback[2]);
+        if (a && b) {
+          if (startInput && !startInput.value) startInput.value = a;
+          if (endInput && !endInput.value) endInput.value = b;
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('preferred schedule time parse error', err);
+  }
+
+  // parse days and set boxes appropriately (prefer Mon-Sun if full week)
+  try {
+    const daysParsed = parseDaysFromString(serverPrefSched);
+    if (daysParsed === 'Mon-Sun') {
+      if (monSunBox) {
+        monSunBox.checked = true;
+        allBoxes.forEach(cb => { if (cb !== monSunBox) cb.checked = false; });
+      } else {
+        allBoxes.forEach(cb => { if (['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].indexOf(cb.value) !== -1) cb.checked = true; });
+      }
+    } else if (Array.isArray(daysParsed) && daysParsed.length) {
+      if (monSunBox) monSunBox.checked = false;
+      allBoxes.forEach(cb => {
+        if (cb === monSunBox) return;
+        cb.checked = daysParsed.indexOf(cb.value) !== -1;
+      });
+    } else {
+      // nothing found — leave checkboxes as-is
+    }
+  } catch (err) {
+    console.warn('preferred schedule days parse error', err);
+  }
+
+  // Fire change events so existing listeners update localStorage & preview values
+  try {
+    var ev = new Event('change', { bubbles: true });
+    if (startInput) startInput.dispatchEvent(ev);
+    if (endInput) endInput.dispatchEvent(ev);
+    allBoxes.forEach(cb => cb.dispatchEvent(ev));
+    if (monSunBox) monSunBox.dispatchEvent(ev);
+  } catch (e) { /* ignore */ }
+
+});
+</script>
+
+
+</body>
+</html>

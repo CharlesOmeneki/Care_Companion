@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Profile Step 1 — Care Companion</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    /* Palette: admiral / indigo / berry / navy + white */
+    :root{
+      --admiral: #062b5a;   /* deep navy */
+      --indigo:  #2b3d9a;   /* indigo */
+      --berry:   #1e5fbf;   /* berry-blue */
+      --navy:    #0a2a66;   /* navy */
+      --ice:     #f5f9ff;   /* pale */
+      --muted:   #a6bacf;
+      --accent:  #00d4ff;   /* small accent */
+      --card:    linear-gradient(180deg, rgba(8,30,66,0.9), rgba(11,51,120,0.95));
+    }
+
+    *{box-sizing:border-box;font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;}
+
+    body{
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column; /* stack site title above the card */
+      background: linear-gradient(180deg, #e9f4ff 0%, #f6fbff 100%);
+      color:#fff;
+      -webkit-font-smoothing:antialiased;
+      padding:28px 16px; /* breathing room on very small screens */
+    }
+
+    /* SITE TITLE (outside the dark card, centered at top) */
+    .site-title {
+      font-weight:800;
+      font-size:28px;
+      color:var(--admiral); /* deep navy for contrast on the light background */
+      margin-bottom:14px;
+      letter-spacing:0.6px;
+      text-align:center;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.6); /* subtle lift */
+    }
+    @media (max-width:520px){
+      .site-title { font-size:20px; margin-bottom:10px; }
+    }
+
+    .wrap{
+      width:920px;
+      max-width:94%;
+      background: var(--card);
+      border-radius:16px;
+      padding:26px;
+      box-shadow: 0 30px 80px rgba(6, 27, 60, 0.35);
+      border: 1px solid rgba(255,255,255,0.04);
+    }
+
+    header.hdr{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:18px;
+    }
+    header.hdr h1{ margin:0; font-size:20px; color:var(--ice); letter-spacing:0.2px; }
+    header.hdr p{ margin:0; color:var(--muted); font-size:13px; }
+
+    /* container layout */
+    .main-grid { display:grid; grid-template-columns: 360px 1fr; gap:18px; align-items:start; }
+    @media(max-width:880px){ .main-grid{ grid-template-columns: 1fr; } }
+
+    /* left card: big avatar */
+    .left {
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+      border-radius:12px;
+      padding:18px;
+      border: 1px solid rgba(255,255,255,0.03);
+    }
+
+    /* Use a real border for the white ring; inner content can be 100% */
+    .avatar-wrap{
+      width:240px;
+      height:240px;
+      border-radius:50%;
+      margin:0 auto;
+      position:relative;
+      overflow:visible; /* allow badge to overlap */
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background: radial-gradient(circle at 30% 20%, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+      border: 6px solid #ffffff;    /* white ring */
+      box-shadow: 0 18px 40px rgba(2,10,30,0.45); /* depth shadow */
+      box-sizing: border-box;      /* include border in size */
+    }
+
+    /* image/placeholder fill the inner circle and are non-clickable (only the plus badge is clickable) */
+    .avatar-wrap img,
+    .profile-placeholder{
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+      display:block;
+      z-index: 2;
+      background: none;
+      pointer-events: none; /* prevents clicks on the image/placeholder */
+    }
+
+    /* placeholder shown when no photo exists — transparent so uploaded image sits flush */
+    .profile-placeholder{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background: none;
+    }
+
+    /* larger, more prominent full name under the avatar */
+    .avatar-name {
+      margin-top:12px;
+      text-align:center;
+      color:var(--ice);
+      font-weight:800;
+      font-size:20px;        /* increased font size per your request */
+      letter-spacing:0.3px;
+      line-height:1.1;
+    }
+
+    /* plus overlay: orange circular badge whose center sits on the ring */
+    .plus-overlay{
+      position:absolute;
+      top:50%;
+      right: -18px; /* centers badge half-on the ring */
+      transform: translateY(-50%);
+      width:36px;
+      height:36px;
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:20px;
+      font-weight:800;
+      color:#ffffff;               /* plus sign inside */
+      background: #ff9900;        /* orange fill for badge */
+      box-shadow: 0 8px 18px rgba(0,0,0,0.35);
+      cursor:pointer;
+      border: 3px solid #ffffff;  /* white border around badge so it sits nicely on the white ring */
+      z-index: 3;
+      pointer-events: auto;       /* ensure badge remains clickable even though image is pointer-events:none */
+    }
+    /* keyboard focus style for accessibility */
+    .plus-overlay:focus {
+      outline: 3px solid rgba(255,153,0,0.25);
+      outline-offset: 3px;
+    }
+
+    /* right column form */
+    .right {
+      background: rgba(255,255,255,0.02);
+      border-radius:12px;
+      padding:18px;
+      border: 1px solid rgba(255,255,255,0.03);
+    }
+
+    label.field-label { display:block; font-weight:700; margin-bottom:8px; color:var(--ice); }
+
+    /* Shared field styling with a tiny white line for a refined look */
+    .field {
+      width:100%;
+      padding:10px 12px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,0.12);               /* tiny white line */
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      color:var(--ice);
+      font-size:14px;
+      box-shadow: 0 1px 0 rgba(255,255,255,0.02) inset;       /* subtle inner sheen */
+      transition: box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+
+    /* Focus state: gentle halo and slightly brighter border */
+    .field:focus {
+      outline: none;
+      border-color: rgba(255,255,255,0.22);
+      box-shadow:
+        0 2px 10px rgba(11,99,216,0.08),                     /* soft bluish halo */
+        0 1px 0 rgba(255,255,255,0.02) inset;
+    }
+
+    /* apply to native inputs, textarea, and closed select */
+    input[type="text"].field, input[type="number"].field, textarea.field, select.field {
+      font-family: inherit;
+    }
+
+    input[type="text"].field, input[type="number"].field {
+      height:42px;
+    }
+
+    textarea.field { min-height:140px; resize:vertical; } /* bio box size */
+
+    /* Make the closed select look like other inputs (transparent subtle gradient), keep custom chevron */
+    select.field{
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath fill='%23f5f9ff' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 12px 8px;
+      padding-right: 38px; /* space for chevron */
+    }
+
+    /* Keep options highly readable when the native dropdown opens */
+    select.field option{
+      color: var(--admiral);
+      background: #ffffff;
+      font-weight:600;
+    }
+
+    .row { display:flex; gap:12px; }
+    .row .col { flex:1; }
+
+    .actions { display:flex; justify-content:flex-end; gap:12px; margin-top:14px; }
+    .btn {
+      padding:10px 14px; border-radius:10px; font-weight:700; cursor:pointer; border:none;
+      background: linear-gradient(90deg, var(--berry), var(--indigo)); color:#fff;
+      box-shadow: 0 12px 30px rgba(11,99,216,0.12);
+    }
+    .btn.secondary {
+      background: transparent; color:var(--ice); border:1px solid rgba(255,255,255,0.06);
+    }
+
+    .small-muted { font-size:13px; color:var(--muted); }
+
+    .bio-meta {
+      margin-top:8px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:8px;
+    }
+    .word-count {
+      font-size:13px;
+      color:var(--muted);
+    }
+    .word-count.warn {
+      color:#ffb3b3; /* light red when over limit */
+      font-weight:700;
+    }
+
+    .bio-warning {
+      margin-top:8px;
+      color:#ffdddd;
+      background: rgba(255,0,0,0.06);
+      padding:8px 10px;
+      border-radius:8px;
+      font-size:13px;
+      display:none;
+    }
+
+    /* file input invisible but focusable */
+    input[type="file"].hidden { display:none; }
+
+    /* responsive tweaks */
+    @media (max-width:520px){
+      .avatar-wrap{ width:180px; height:180px; border:6px solid #ffffff; box-shadow: 0 12px 30px rgba(2,10,30,0.35); }
+      .avatar-wrap img, .profile-placeholder{ width: 100%; height: 100%; }
+      .plus-overlay{ width:32px; height:32px; right:-16px; font-size:18px; border-width:2px; }
+      .avatar-name { font-size:18px; }
+      .wrap{ padding:18px; }
+    }
+
+    /* toast */
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      background: rgba(6,43,90,0.95);
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(2,10,30,0.3);
+      z-index: 9999;
+    }
+  </style>
+</head>
+<body>
+  <!-- Site title outside the dark card, centered at the top -->
+  <div class="site-title">Care Companion</div>
+
+  <div class="wrap" role="main" aria-labelledby="pageTitle">
+    <header class="hdr">
+      <div>
+        <h1 id="pageTitle">Create your profile — Step 1</h1>
+        <p class="small-muted">Start with a friendly photo and a short bio. We’ll ask for more details next.</p>
+      </div>
+      <div class="small-muted">
+        Signed in as:
+        <strong style="color:var(--ice)">
+          {% if user and user.role == 'caregiver' %}
+            Caregiver
+          {% else %}
+            Family
+          {% endif %}
+        </strong>
+      </div>
+    </header>
+
+    <form id="step1Form" method="post" action="{{ url_for('profile_step1') }}" enctype="multipart/form-data" class="main-grid" novalidate>
+      <!-- left: avatar -->
+      <aside class="left" aria-label="Profile photo">
+        <div class="avatar-wrap" id="avatarWrap" title="Click the plus to change profile photo">
+          {% if data and data.profile_photo %}
+            <img id="avatarImg" src="{{ url_for('uploaded_file', filename=data.profile_photo) }}" alt="Profile photo">
+          {% else %}
+            <div id="avatarPlaceholder" class="profile-placeholder" aria-hidden="true"></div>
+          {% endif %}
+          <div class="plus-overlay" id="avatarPlus" role="button" tabindex="0" aria-label="Add profile photo">+</div>
+        </div>
+
+        <input id="profilePhotoInput" class="hidden" name="profile_photo" type="file" accept="image/*">
+
+        <!-- replaced previous text with user's full name (larger font) -->
+        <div class="avatar-name" id="avatarName">
+          {% if user %}
+            {{ user.first_name }} {{ user.last_name }}
+          {% else %}
+            {{ session.get('user_name') or 'Your name' }}
+          {% endif %}
+        </div>
+      </aside>
+
+      <!-- right: form -->
+      <section class="right" aria-label="Profile information">
+        <label class="field-label" for="bio">Bio</label>
+        <textarea id="bio" name="bio" class="field" placeholder="Not more than 200 words">{{ data.get('bio','') }}</textarea>
+
+        <div class="bio-meta" aria-live="polite">
+          <div class="small-muted">We ask age & marital status to help families find the right match. This information is private and only shown in profile details when you choose.</div>
+          <div class="word-count" id="wordCount">0 / 200 words</div>
+        </div>
+
+        <div class="bio-warning" id="bioWarning" role="alert">Your bio exceeds 200 words. Please shorten it to 200 words or fewer.</div>
+
+        <div class="row" style="margin-top:12px;">
+          <div class="col">
+            <label class="field-label" for="marital_status">Marital status</label>
+            <select id="marital_status" name="marital_status" class="field">
+              <option value="">— select —</option>
+              <option value="Single" {% if data.get('marital_status')=='Single' %}selected{% endif %}>Single</option>
+              <option value="Married" {% if data.get('marital_status')=='Married' %}selected{% endif %}>Married</option>
+              <option value="Divorced" {% if data.get('marital_status')=='Divorced' %}selected{% endif %}>Divorced</option>
+              <option value="Widowed" {% if data.get('marital_status')=='Widowed' %}selected{% endif %}>Widowed</option>
+            </select>
+          </div>
+
+          <div class="col" style="max-width:140px;">
+            <label class="field-label" for="age">Age</label>
+            <input id="age" name="age" type="number" min="16" max="120" class="field" value="{{ data.get('age','') }}" placeholder="e.g., 32">
+          </div>
+        </div>
+
+        <div style="margin-top:12px;">
+          <!-- this text remains to explain purpose of the fields -->
+        </div>
+
+        <div class="actions">
+          <button type="button" class="btn secondary" id="saveDraft">Save draft</button>
+          <button type="submit" class="btn" id="nextBtn">Next</button>
+        </div>
+      </section>
+    </form>
+  </div>
+
+  <script>
+    (function(){
+      const avatarPlus = document.getElementById('avatarPlus');
+      const avatarInput = document.getElementById('profilePhotoInput');
+      let avatarImg = document.getElementById('avatarImg');          // may be null if no photo
+      let avatarPlaceholder = document.getElementById('avatarPlaceholder'); // may be null if photo exists
+      const form = document.getElementById('step1Form');
+      const saveDraft = document.getElementById('saveDraft');
+      const bioEl = document.getElementById('bio');
+      const wordCountEl = document.getElementById('wordCount');
+      const bioWarning = document.getElementById('bioWarning');
+
+      const WORD_LIMIT = 200;
+      let alertedOverLimit = false; // avoid repeated alerts while typing
+
+      // Only the plus overlay opens the file picker.
+      avatarPlus.addEventListener('click', ()=> avatarInput.click());
+      avatarPlus.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Enter' || ev.key === ' ' || ev.key === 'Spacebar') {
+          ev.preventDefault();
+          avatarInput.click();
+        }
+      });
+
+      function setPreview(srcBlobUrl){
+        if (avatarPlaceholder){
+          const img = document.createElement('img');
+          img.id = 'avatarImg';
+          img.src = srcBlobUrl;
+          img.alt = 'Profile photo';
+          img.style.borderRadius = '50%';
+          const wrap = document.getElementById('avatarWrap');
+          wrap.insertBefore(img, document.getElementById('avatarPlus'));
+          avatarPlaceholder.remove();
+          avatarPlaceholder = null;
+          avatarImg = img;
+          return;
+        }
+        if (avatarImg){
+          avatarImg.src = srcBlobUrl;
+        }
+      }
+
+      avatarInput.addEventListener('change', function(e){
+        const f = e.target.files[0];
+        if(!f) return;
+        if(!f.type.startsWith('image/')){
+          alert('Please choose an image file.');
+          avatarInput.value = '';
+          return;
+        }
+        const url = URL.createObjectURL(f);
+        setPreview(url);
+      });
+
+      // WORD COUNT / LIMIT HANDLING
+      function countWords(text){
+        if(!text) return 0;
+        const trimmed = text.trim();
+        if(!trimmed) return 0;
+        return trimmed.split(/\s+/).length;
+      }
+
+      function updateWordUI(){
+        const cnt = countWords(bioEl.value);
+        wordCountEl.textContent = `${cnt} / ${WORD_LIMIT} words`;
+        if(cnt > WORD_LIMIT){
+          wordCountEl.classList.add('warn');
+          bioWarning.style.display = 'block';
+          if(!alertedOverLimit){
+            alertedOverLimit = true;
+            alert(`Your bio exceeds ${WORD_LIMIT} words. Please shorten it.`);
+          }
+        } else {
+          wordCountEl.classList.remove('warn');
+          bioWarning.style.display = 'none';
+          alertedOverLimit = false;
+        }
+      }
+
+      updateWordUI();
+      bioEl.addEventListener('input', updateWordUI);
+
+      function showToast(msg, ms=1800){
+        const t = document.createElement('div');
+        t.className = 'toast';
+        t.textContent = msg;
+        document.body.appendChild(t);
+        setTimeout(()=> t.remove(), ms);
+      }
+
+      // Save draft — post via fetch; include a save_draft flag so server stores in session/draft
+      saveDraft.addEventListener('click', function(){
+        const cnt = countWords(bioEl.value);
+        if(cnt > WORD_LIMIT){
+          alert(`Cannot save: your bio exceeds ${WORD_LIMIT} words. Please shorten it before saving.`);
+          return;
+        }
+        const fd = new FormData(form);
+        fd.append('save_draft','1');
+        fetch(form.action, { method: 'POST', body: fd, credentials: 'same-origin' })
+          .then(resp => {
+            if(resp.redirected){
+              window.location.href = resp.url;
+            } else {
+              showToast('Draft saved.');
+            }
+          })
+          .catch(err => {
+            console.error('Save draft failed', err);
+            alert('Save failed: ' + (err && err.message ? err.message : err));
+          });
+      });
+
+      // Next / submit — validate client-side, then submit via fetch (appends submitted_via)
+      form.addEventListener('submit', function(ev){
+        ev.preventDefault();
+        const bio = bioEl.value.trim();
+        const ageEl = document.getElementById('age');
+        const age = ageEl ? ageEl.value.trim() : '';
+
+        const cnt = countWords(bio);
+        if(!bio){
+          alert('Please enter a short bio before continuing.');
+          return;
+        }
+        if(cnt > WORD_LIMIT){
+          alert(`Please shorten your bio to ${WORD_LIMIT} words or fewer.`);
+          return;
+        }
+        if(!age || isNaN(Number(age))){
+          alert('Please enter a valid age.');
+          return;
+        }
+
+        const fd = new FormData(form);
+        fd.append('submitted_via', 'client');
+        fetch(form.action, { method: 'POST', body: fd, credentials: 'same-origin' })
+          .then(resp => {
+            if(resp.redirected){
+              window.location.href = resp.url;
+            } else {
+              // fallback: navigate to step 2 or profile setup if server returns 200 without redirect
+              // prefer step2 route because 'Next' should go to the next step
+              window.location.href = "{{ url_for('profile_step2') }}";
+            }
+          })
+          .catch(err => {
+            console.error('Submission failed', err);
+            alert('Submission failed: ' + (err && err.message ? err.message : err));
+          });
+      });
+
+    })();
+  </script>
+</body>
+</html>

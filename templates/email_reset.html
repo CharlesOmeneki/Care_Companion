@@ -1,0 +1,151 @@
+<!-- templates/email_reset.html -->
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Reset your password</title>
+  <style>
+    /* Basic email-safe resets */
+    body { margin:0; padding:0; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; }
+    table { border-spacing:0; }
+    img { border:0; -ms-interpolation-mode:bicubic; display:block; max-width:100%; height:auto; }
+    a { color: inherit; text-decoration: none; }
+
+    /* Container */
+    .email-body {
+      background: linear-gradient(180deg,#0d47a1,#1976d2);
+      padding: 40px 16px;
+      font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-font-smoothing:antialiased;
+    }
+    .card {
+      max-width: 640px;
+      margin: 0 auto;
+      background: #ffffff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 12px 40px rgba(1, 22, 39, 0.2);
+    }
+
+    /* Header: no logo badge — only text heading like your verify-email style */
+    .header {
+      background: linear-gradient(135deg,#1976d2,#1e88e5);
+      padding: 28px 24px;
+      color: #fff;
+      display:block;
+    }
+    .header .title {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 0.2px;
+    }
+    .header .subtitle {
+      margin: 6px 0 0;
+      font-size: 13px;
+      color: rgba(255,255,255,0.92);
+      font-weight: 500;
+      opacity: 0.95;
+    }
+
+    .content {
+      padding:28px 28px 32px;
+      color: #0f1724;
+      line-height:1.5;
+    }
+    .greeting {
+      font-size:16px; margin:0 0 10px; color:#0f1724;
+    }
+    .lead {
+      color:#425066; margin:0 0 18px; font-size:14px;
+    }
+
+    .btn-wrap { text-align:center; margin:20px 0 10px; }
+    .cta {
+      display:inline-block;
+      background: linear-gradient(90deg,#1976d2,#1e88e5);
+      color:#fff;
+      padding:14px 22px;
+      border-radius:10px;
+      font-weight:800;
+      font-size:15px;
+      box-shadow: 0 12px 30px rgba(30,120,210,0.18);
+    }
+    .muted {
+      margin-top:14px;
+      color:#607089;
+      font-size:13px;
+    }
+    .fallback {
+      margin-top:18px; padding:12px; border-radius:8px; background:#f7fafc; color:#374151; font-size:13px;
+      word-break:break-word;
+    }
+    .footer {
+      background: #f5f7fb; color:#6b7280; padding:16px 24px; font-size:13px; text-align:center;
+      border-top: 1px solid rgba(15,23,36,0.04);
+    }
+
+    /* small screens */
+    @media (max-width:520px){
+      .content { padding:20px; }
+      .header { padding:18px 16px; }
+      .cta { width:100%; display:inline-block; box-sizing:border-box; padding:12px 18px; }
+    }
+  </style>
+</head>
+<body>
+  <table role="presentation" width="100%" class="email-body">
+    <tr>
+      <td align="center">
+        <table role="presentation" class="card" width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;">
+          <!-- header (text-only, like verify email) -->
+          <tr>
+            <td class="header" style="padding:28px 24px;">
+              <div style="max-width:640px;">
+                <h1 class="title">Care Companion</h1>
+                <div class="subtitle">Reset your password</div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- body -->
+          <tr>
+            <td class="content">
+              <p class="greeting">Hi {{ first_name or "there" }},</p>
+              <p class="lead">We received a request to reset the password for your Care Companion account. Click the button below to choose a new password. The link will expire in <strong>1 hour</strong>.</p>
+
+              <div class="btn-wrap" role="presentation">
+                <!-- CTA button -->
+                <a class="cta" href="{{ reset_url }}" target="_blank" rel="noopener">Reset my password</a>
+              </div>
+
+              <p class="muted">If the button above doesn't work, copy and paste the URL below into your browser:</p>
+
+              <div class="fallback" style="font-family:monospace; font-size:13px;">
+                {{ reset_url }}
+              </div>
+
+              <p class="muted" style="margin-top:18px;">If you did not request a password reset, you can safely ignore this email — no changes were made to your account.</p>
+
+              <p style="margin-top:22px; color:#374151; font-size:13px;">
+                Thanks,<br/>
+                The Care Companion Team
+              </p>
+            </td>
+          </tr>
+
+          <!-- footer -->
+          <tr>
+            <td class="footer">
+              Need help? Reply to this email or visit our <a href="{{ support_url or '#' }}" style="color:#1976d2; text-decoration:underline;">support page</a>.<br/>
+              &copy; {{ year }} Care Companion — All rights reserved.
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environments
+.venv/
+venv/
+
+# Environment variables
+.env
+
+# Local databases
+*.db
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Uploaded user files
+data/uploads/
+
+# IDE files
+.vscode/
+.idea/
+
+# Migration cache
+.mypy_cache/
+.pytest_cache/
+
+# Flask instance folder
+instance/
+
+# Web push notification keys
+data/vapid_private.pem
+data/vapid_public.key
+
+# Local JSON storage files
+data/*.jsonl
+
+# Unwanted scraped website assets
+static/images/men cc4_files/
+static/images/men cc4.html
+
+# Database backups
+*.db.bak
+*.db.bak2
+
+# Large media files
+static/images/*.mp4

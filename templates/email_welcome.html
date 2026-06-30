@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Welcome to Care Companion</title>
+  <style>
+    /* Basic resets for email clients */
+    body { margin:0; padding:0; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; background:#f5f8fc; font-family: Arial, Helvetica, sans-serif; color:#0f172a; }
+    table { border-collapse:collapse; }
+    img { border:0; display:block; max-width:100%; height:auto; }
+    .button { display:inline-block; padding:12px 18px; border-radius:10px; text-decoration:none; font-weight:700; font-size:15px; }
+    @media (max-width:480px) { .inner { padding:18px !important; } .h1 { font-size:20px !important; } .header-title{font-size:20px} }
+  </style>
+</head>
+<body style="background:#f5f8fc;">
+
+  <!-- Preheader (hidden preview) — controls the short snippet shown in inboxes -->
+  <span style="display:none; font-size:1px; color:#f5f8fc; line-height:1px; max-height:0; max-width:0; opacity:0; overflow:hidden;">
+    Welcome to Care Companion — Hi {{ first_name or "there" }}, welcome aboard — your profile is now published. You can browse connections, receive requests and respond to matches.
+  </span>
+
+  <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="min-width:320px;">
+    <tr>
+      <td align="center" style="padding:28px 12px;">
+        <table width="600" cellpadding="0" cellspacing="0" role="presentation" style="max-width:600px; background:#ffffff; border-radius:12px; overflow:hidden; box-shadow:0 10px 30px rgba(6,43,76,0.08);">
+
+          <!-- Blue header (logo removed; larger title) -->
+          <tr>
+            <td style="padding:26px 22px; background: linear-gradient(90deg,#2a86d4,#1e6fb8); text-align:left;">
+              <div style="color:#e6f6ff; font-weight:800; font-size:28px; line-height:1; letter-spacing:-0.4px; margin:0;">
+                Care Companion
+              </div>
+            </td>
+          </tr>
+
+          <!-- Main content -->
+          <tr>
+            <td class="inner" style="padding:26px 28px; background:linear-gradient(180deg, #ffffff, #fbfdff);">
+              <h1 class="h1" style="margin:0 0 12px; font-size:22px; color:#062b5a; letter-spacing:-0.2px;">
+                Welcome to Care Companion — your profile is live
+              </h1>
+
+              <p style="margin:0 0 14px; color:#334155; font-size:15px; line-height:1.5;">
+                Hi {{ first_name or "there" }}, welcome aboard 👋 — thanks for completing your profile. Your listing is now published and visible to families and caregivers.
+              </p>
+
+              <p style="margin:0 0 18px; color:#475569; font-size:14px; line-height:1.45;">
+                You can now browse connections, receive requests, and respond to matches. We recommend visiting your profile to confirm availability and contact details so requests reach you quickly.
+              </p>
+
+              <table cellpadding="0" cellspacing="0" role="presentation" style="margin-top:8px;">
+                <tr>
+                  <td>
+                    <!-- prefer home_url, fall back to profile_url -->
+                    <a class="button" href="{{ home_url or profile_url or '#' }}" style="background:linear-gradient(90deg,#2a86d4,#1e6fb8); color:#ffffff; border-radius:10px;">
+                      Proceed &#8594; Care Companion
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <p style="margin:18px 0 0; color:#64748b; font-size:13px;">
+                Need help? Reply to this email or visit our support page.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:16px 20px; background:#f1f7ff; text-align:center; color:#61748a; font-size:13px;">
+              <div style="max-width:520px; margin:0 auto;">
+                <div style="font-weight:700; color:#0f172a; margin-bottom:6px;">Care Companion</div>
+                <div style="margin-bottom:6px;">Helping families & caregivers connect safely.</div>
+                <div style="color:#94a3b8; font-size:12px;">© {{ current_year or "" }}</div>
+              </div>
+            </td>
+          </tr>
+        </table>
+
+        <div style="height:18px; line-height:18px; font-size:1px;">&nbsp;</div>
+
+        <table width="600" cellpadding="0" cellspacing="0" role="presentation" style="max-width:600px;">
+          <tr>
+            <td style="text-align:center; font-size:12px; color:#94a3b8;">
+              You received this email because you created an account at Care Companion. If this wasn't you, please ignore.
+            </td>
+          </tr>
+        </table>
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>

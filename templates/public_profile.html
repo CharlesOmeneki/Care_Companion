@@ -1,0 +1,876 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>{{ (profile.user.first_name ~ ' ' ~ profile.user.last_name) if (profile and profile.user) else (user.first_name ~ ' ' ~ user.last_name if user else 'Profile') }} — Care Companion</title>
+  <style>
+    :root{
+      --bg1:#041f44;
+      --bg2:#07306a;
+      --bg3:#0f4c9a;
+      --bg4:#1a66c8;
+      --panel:rgba(7, 22, 48, 0.72);
+      --panel-2:rgba(255,255,255,0.05);
+      --panel-border:rgba(255,255,255,0.10);
+      --admiral:#ffffff;
+      --indigo:#dfeaff;
+      --berry:#4aa3ff;
+      --navy:#0a2a66;
+      --ice:#f5f9ff;
+      --muted:#b7c8da;
+      --accent:#46d9ff;
+      --card-grad:linear-gradient(180deg, rgba(9,30,68,0.96), rgba(8,42,93,0.98));
+      --bg:linear-gradient(180deg,#06204a 0%,#0a2f65 42%,#0d4a92 100%);
+      --shadow:0 30px 80px rgba(2,10,28,0.34);
+      --shadow-soft:0 16px 34px rgba(2,10,28,0.18);
+    }
+
+    *{
+      box-sizing:border-box;
+      font-family:Inter,system-ui,-apple-system,Roboto,Arial;
+      -webkit-font-smoothing:antialiased;
+    }
+
+    html,body{
+      min-height:100%;
+      margin:0;
+    }
+
+    body{
+      min-height:100vh;
+      background:
+        radial-gradient(circle at top left, rgba(255,255,255,0.12), transparent 24%),
+        radial-gradient(circle at top right, rgba(70,217,255,0.12), transparent 20%),
+        radial-gradient(circle at bottom left, rgba(255,255,255,0.08), transparent 26%),
+        linear-gradient(180deg,#031836 0%, #062b5a 40%, #0c3e7f 100%);
+      color:var(--admiral);
+      padding:28px;
+      display:flex;
+      align-items:flex-start;
+      justify-content:center;
+      overflow-x:hidden;
+      position:relative;
+    }
+
+    body::before,
+    body::after{
+      content:"";
+      position:fixed;
+      border-radius:50%;
+      pointer-events:none;
+      z-index:0;
+      filter:blur(16px);
+      opacity:.35;
+    }
+
+    body::before{
+      width:300px;
+      height:300px;
+      left:-90px;
+      top:-70px;
+      background:rgba(255,255,255,0.12);
+    }
+
+    body::after{
+      width:380px;
+      height:380px;
+      right:-140px;
+      bottom:-140px;
+      background:rgba(70,217,255,0.10);
+    }
+
+    .wrap{
+      width:min(1180px, 100%);
+      background:rgba(4, 18, 40, 0.58);
+      border:1px solid rgba(255,255,255,0.10);
+      border-radius:24px;
+      padding:22px;
+      color:var(--ice);
+      box-shadow:var(--shadow);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      position:relative;
+      z-index:1;
+    }
+
+    .page-top{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:16px;
+      margin-bottom:18px;
+      padding-bottom:14px;
+      border-bottom:1px solid rgba(255,255,255,0.08);
+    }
+
+    .page-top .title-block{
+      min-width:0;
+    }
+
+    .page-top .eyebrow{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:7px 12px;
+      border-radius:999px;
+      background:rgba(70,217,255,0.10);
+      color:var(--accent);
+      border:1px solid rgba(70,217,255,0.18);
+      font-weight:800;
+      font-size:12px;
+      letter-spacing:.03em;
+      margin-bottom:10px;
+      width:max-content;
+    }
+
+    .page-top h1{
+      margin:0;
+      font-size:32px;
+      line-height:1.15;
+      letter-spacing:-0.04em;
+      color:#fff;
+    }
+
+    .page-top p{
+      margin:8px 0 0;
+      color:var(--muted);
+      line-height:1.6;
+      font-size:14px;
+      max-width:70ch;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns:320px 1fr;
+      gap:18px;
+      align-items:start;
+    }
+
+    /* left card */
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03));
+      padding:18px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,0.08);
+      box-shadow:var(--shadow-soft);
+      position:sticky;
+      top:18px;
+    }
+
+    .avatar{
+      width:188px;
+      height:188px;
+      border-radius:50%;
+      overflow:hidden;
+      margin:4px auto 14px;
+      border:6px solid rgba(70,217,255,0.95);
+      background:#002a3a;
+      box-shadow:0 16px 40px rgba(0,0,0,0.24);
+    }
+
+    .avatar img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+    }
+
+    .name{
+      text-align:center;
+      font-weight:900;
+      font-size:22px;
+      color:#fff;
+      margin-bottom:4px;
+      letter-spacing:-0.03em;
+      word-break:break-word;
+    }
+
+    .role{
+      text-align:center;
+      font-weight:800;
+      color:var(--accent);
+      margin-bottom:8px;
+      text-transform:capitalize;
+    }
+
+    .muted{
+      text-align:center;
+      color:var(--muted);
+      font-size:13px;
+      line-height:1.5;
+      word-break:break-word;
+    }
+
+    .actions{
+      display:flex;
+      gap:10px;
+      justify-content:center;
+      flex-wrap:wrap;
+      margin-top:14px;
+    }
+
+    .btn{
+      padding:11px 14px;
+      border-radius:12px;
+      font-weight:800;
+      background:linear-gradient(90deg, #1d4ed8, #2b3d9a);
+      color:#fff;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:8px;
+      box-shadow:0 12px 26px rgba(17, 64, 160, 0.28);
+      transition:transform .18s ease, box-shadow .18s ease, filter .18s ease;
+      border:1px solid rgba(255,255,255,0.06);
+      min-width:120px;
+    }
+
+    .btn:hover{
+      transform:translateY(-1px);
+      filter:brightness(1.04);
+      box-shadow:0 16px 30px rgba(17, 64, 160, 0.34);
+    }
+
+    .ghost{
+      background:rgba(255,255,255,0.92);
+      color:#0b2c63;
+    }
+
+    .info{
+      margin-top:16px;
+      display:grid;
+      gap:10px;
+    }
+
+    .info .row{
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      padding:12px;
+      border-radius:12px;
+      background:rgba(255,255,255,0.03);
+      border:1px solid rgba(255,255,255,0.04);
+    }
+
+    .info .k{
+      color:var(--muted);
+      min-width:140px;
+      font-size:13px;
+      line-height:1.45;
+    }
+
+    .info .v{
+      font-weight:800;
+      color:var(--ice);
+      text-align:right;
+      font-size:13px;
+      line-height:1.45;
+      word-break:break-word;
+    }
+
+    /* right details */
+    .details{
+      padding:18px;
+      border-radius:18px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03));
+      border:1px solid rgba(255,255,255,0.08);
+      box-shadow:var(--shadow-soft);
+      min-width:0;
+    }
+
+    .section{
+      margin-bottom:20px;
+    }
+
+    .section h3{
+      margin:0 0 10px;
+      color:var(--accent);
+      font-size:18px;
+      letter-spacing:-0.02em;
+    }
+
+    .bio{
+      color:var(--ice);
+      font-weight:600;
+      line-height:1.65;
+      white-space:pre-wrap;
+      word-break:break-word;
+    }
+
+    .photos{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:10px;
+      margin-top:10px;
+    }
+
+    .photo{
+      width:100%;
+      padding-top:74%;
+      position:relative;
+      border-radius:14px;
+      overflow:hidden;
+      background:#07213a;
+      border:1px solid rgba(255,255,255,0.05);
+      box-shadow:0 10px 24px rgba(0,0,0,0.16);
+      cursor:pointer;
+    }
+
+    .photo img{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      transition:transform .18s ease;
+    }
+
+    .photo:hover img{
+      transform:scale(1.02);
+    }
+
+    .tiles{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:12px;
+    }
+
+    .tile{
+      padding:14px 12px;
+      border-radius:14px;
+      background:rgba(255,255,255,0.04);
+      text-align:center;
+      border:1px solid rgba(255,255,255,0.05);
+      min-width:0;
+    }
+
+    .tile .label{
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.45;
+    }
+
+    .tile .value{
+      margin-top:8px;
+      font-weight:900;
+      color:var(--ice);
+      line-height:1.45;
+      word-break:break-word;
+    }
+
+    .tag{
+      display:inline-block;
+      padding:7px 11px;
+      border-radius:999px;
+      background:rgba(70,217,255,0.10);
+      color:var(--accent);
+      font-weight:800;
+      margin-right:8px;
+      margin-bottom:8px;
+      border:1px solid rgba(70,217,255,0.12);
+    }
+
+    .back-row{
+      display:flex;
+      justify-content:flex-end;
+      margin-bottom:10px;
+    }
+
+    .back-row .btn{
+      min-width:0;
+    }
+
+    /* modal */
+    .pp-img-modal{
+      position:fixed;
+      inset:0;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      background:rgba(0,0,0,0.88);
+      z-index:13000;
+      padding:12px;
+    }
+
+    .pp-img-modal.show{
+      display:flex;
+    }
+
+    .pp-img-modal .pp-frame{
+      width:100%;
+      height:100%;
+      max-width:100%;
+      max-height:100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:visible;
+      background:transparent;
+      border-radius:10px;
+      padding:0;
+    }
+
+    .pp-img-modal img{
+      display:block;
+      width:auto;
+      height:auto;
+      max-width:calc(100vw - 8px);
+      max-height:calc(100vh - 8px);
+      object-fit:contain;
+      border-radius:8px;
+      box-shadow:0 20px 70px rgba(0,0,0,0.75);
+      image-rendering:auto;
+    }
+
+    @media(max-width:1100px){
+      .wrap{
+        width:min(100%, 1040px);
+      }
+
+      .grid{
+        grid-template-columns:300px 1fr;
+      }
+
+      .photos{
+        grid-template-columns:repeat(3,1fr);
+      }
+
+      .tiles{
+        grid-template-columns:repeat(2,1fr);
+      }
+    }
+
+    @media(max-width:980px){
+      body{
+        padding:14px;
+      }
+
+      .wrap{
+        padding:16px;
+        border-radius:20px;
+      }
+
+      .page-top{
+        flex-direction:column;
+        align-items:flex-start;
+      }
+
+      .page-top h1{
+        font-size:28px;
+      }
+
+      .grid{
+        grid-template-columns:1fr;
+      }
+
+      .card{
+        position:relative;
+        top:0;
+      }
+
+      .avatar{
+        width:150px;
+        height:150px;
+      }
+
+      .photos{
+        grid-template-columns:repeat(3,1fr);
+      }
+
+      .tiles{
+        grid-template-columns:repeat(2,1fr);
+      }
+
+      .info .row{
+        align-items:flex-start;
+      }
+    }
+
+    @media(max-width:640px){
+      body{
+        padding:10px;
+      }
+
+      .wrap{
+        padding:14px;
+        border-radius:18px;
+      }
+
+      .page-top{
+        margin-bottom:14px;
+      }
+
+      .page-top h1{
+        font-size:24px;
+      }
+
+      .page-top p{
+        font-size:13px;
+      }
+
+      .card,
+      .details{
+        padding:14px;
+        border-radius:16px;
+      }
+
+      .avatar{
+        width:122px;
+        height:122px;
+        border-width:5px;
+      }
+
+      .name{
+        font-size:19px;
+      }
+
+      .actions{
+        flex-direction:column;
+        align-items:stretch;
+      }
+
+      .actions .btn{
+        width:100%;
+        min-width:0;
+      }
+
+      .info .row{
+        flex-direction:column;
+        gap:6px;
+      }
+
+      .info .k,
+      .info .v{
+        text-align:left;
+        min-width:0;
+      }
+
+      .photos{
+        grid-template-columns:repeat(2,1fr);
+        gap:8px;
+      }
+
+      .tiles{
+        grid-template-columns:1fr;
+        gap:10px;
+      }
+
+      .tile{
+        text-align:left;
+      }
+
+      .back-row{
+        justify-content:stretch;
+      }
+
+      .back-row .btn{
+        width:100%;
+      }
+
+      .section h3{
+        font-size:17px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap" role="main">
+    {# Determine who the "subject" is (the profile being viewed). Fall back to current user if profile.user missing #}
+    {% set subject = (profile.user if (profile and profile.user) else (user if user else None)) %}
+    {% set viewed_role = (profile.role if (profile and profile.role) else (subject.role if (subject and subject.role) else '')) %}
+
+    {# When a caregiver is viewing a family profile, present it the same as families view caregivers #}
+    {% set effective_viewed_role = viewed_role %}
+    {% if user and user.role == 'caregiver' and viewed_role == 'family' %}
+      {% set effective_viewed_role = 'caregiver' %}
+    {% endif %}
+
+    <div class="page-top">
+      <div class="title-block">
+        <div class="eyebrow">Profile view</div>
+        <h1>{{ (subject.first_name ~ ' ' ~ subject.last_name) if subject else (user.first_name ~ ' ' ~ user.last_name if user else 'Profile') }}</h1>
+        <p>Review profile details, photos, availability, and care information in a clean mobile-friendly layout.</p>
+      </div>
+    </div>
+
+    <div class="grid">
+
+      <!-- LEFT: summary card -->
+      <aside class="card" aria-label="Profile summary">
+        <div class="avatar">
+          {% if profile and profile.profile_photo and profile.profile_photo|trim and '.' in profile.profile_photo %}
+            <img src="{{ url_for('uploaded_file', filename=profile.profile_photo) }}" alt="{{ subject.first_name if subject else 'User' }} avatar">
+          {% elif subject and subject.profile_photo and subject.profile_photo|trim and '.' in subject.profile_photo %}
+            <img src="{{ url_for('uploaded_file', filename=subject.profile_photo) }}" alt="{{ subject.first_name if subject else 'User' }} avatar">
+          {% else %}
+            <img src="{{ url_for('static', filename='default-avatar.png') }}" alt="avatar">
+          {% endif %}
+        </div>
+
+        <div class="name">{{ (subject.first_name ~ ' ' ~ subject.last_name) if subject else (user.first_name ~ ' ' ~ user.last_name if user else 'Unknown') }}</div>
+        <div class="role">{{ (viewed_role|capitalize) if viewed_role else (subject.role|capitalize if subject and subject.role else '') }}</div>
+        <div class="muted">{{ (profile.location if profile and profile.location else (subject.location if subject and subject.location else 'Location not provided')) }}</div>
+
+        <div class="actions">
+          <a class="btn" href="{{ url_for('connections') }}"><i class="fa-solid fa-handshake"></i> Connect</a>
+          {# Message button (replaced Network) - href unchanged to avoid altering other logic #}
+          <a class="btn ghost" id="messageBtn"
+             href="{% if subject and subject.id %}{{ url_for('chat_page', other_id=subject.id) }}{% else %}{{ url_for('connections') }}{% endif %}">
+            Message
+          </a>
+        </div>
+
+        <div class="info" aria-hidden="false">
+          {% if effective_viewed_role == 'caregiver' %}
+            <div class="row"><div class="k">Experience</div><div class="v">{{ (profile.experience_years is not none and (profile.experience_years ~ ' years')) or '—' }}</div></div>
+            <div class="row"><div class="k">Languages</div><div class="v">{{ profile.languages or '—' }}</div></div>
+            <div class="row"><div class="k">Availability</div><div class="v">{{ profile.availability or '—' }}</div></div>
+            <div class="row"><div class="k">Salary</div><div class="v">{{ profile.hourly_rate or '—' }}</div></div>
+          {% else %}
+            <div class="row"><div class="k">Type of care needed</div><div class="v">{{ profile.care_needed or '—' }}</div></div>
+
+            <div class="row"><div class="k">Number of dependents</div><div class="v">{{ profile.number_of_dependents or '—' }}</div></div>
+
+            <div class="row"><div class="k">Preferred schedule</div><div class="v">{{ profile.preferred_schedule or '—' }}</div></div>
+
+            <div class="row"><div class="k">Salary budget</div>
+              <div class="v">
+                {% set raw_budget = (profile.hourly_budget if profile and profile.hourly_budget else '') %}
+                {% if raw_budget %}
+                  {% if raw_budget is string and raw_budget|replace(',','') is number %}
+                    NGN {{ raw_budget|replace(',','') }} / monthly
+                  {% else %}
+                    {{ raw_budget }}
+                  {% endif %}
+                {% else %}
+                  —
+                {% endif %}
+              </div>
+            </div>
+          {% endif %}
+        </div>
+      </aside>
+
+      <!-- RIGHT: details -->
+      <section class="details" aria-label="Profile details">
+
+        <div class="back-row">
+          {%- set return_url = request.args.get('return') -%}
+          <a class="btn ghost" href="{{ return_url if return_url else url_for('connections') }}">Back to list</a>
+        </div>
+
+        <div class="section">
+          <h3>About</h3>
+          <div class="bio">{{ profile.bio or 'No bio provided.' }}</div>
+        </div>
+
+        <div class="section">
+          <h3>Photos</h3>
+          <div class="photos">
+            {% set srcs = [] %}
+            {% if profile and profile.other_photos %}
+              {% for p_raw in profile.other_photos.split(',') %}
+                {% set p = p_raw.strip() %}
+                {% if p and '.' in p %}
+                  {% do srcs.append(p) %}
+                {% endif %}
+              {% endfor %}
+            {% endif %}
+
+            {% if profile and profile.profile_photo and profile.profile_photo|trim and ('.' in profile.profile_photo) %}
+              {% if profile.profile_photo not in srcs %}
+                <div class="photo"><img src="{{ url_for('uploaded_file', filename=profile.profile_photo) }}" alt="photo"></div>
+              {% endif %}
+            {% endif %}
+
+            {% for p in srcs %}
+              <div class="photo"><img src="{{ url_for('uploaded_file', filename=p) }}" alt="photo {{ loop.index }}"></div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>Key details</h3>
+          <div class="tiles">
+            {% if effective_viewed_role == 'caregiver' %}
+              <div class="tile"><div class="label">Marital status</div><div class="value">{{ profile.marital_status or '—' }}</div></div>
+              <div class="tile"><div class="label">Age</div><div class="value">{{ profile.age or '—' }}</div></div>
+
+              {% set age_raw = (profile.preferred_age) if profile else None %}
+              {% if age_raw %}
+                {% set _age_key = (age_raw|string).replace('_',' ').replace('-', ' ').strip().lower() %}
+                {% set _age_map = {
+                  'children': 'Children (1–12)',
+                  'teenagers': 'Teenagers (13–17)',
+                  'adults': 'Adults (18–64)',
+                  'seniors': 'Seniors (65+)',
+                  'all ages': 'All ages',
+                  'all_ages': 'All ages',
+                  'all-ages': 'All ages',
+                  'other': 'Other / Mixed'
+                } %}
+                <div class="tile"><div class="label">Preferred recipient age</div><div class="value">{{ _age_map.get(_age_key) or age_raw }}</div></div>
+              {% else %}
+                <div class="tile"><div class="label">Preferred recipient age</div><div class="value">—</div></div>
+              {% endif %}
+
+              <div class="tile"><div class="label">Disability</div><div class="value">
+                {% set dis_raw = (profile.disability if profile and (profile.disability is defined) else None) %}
+                {% set dis_details = (profile.disability_details if profile and (profile.disability_details is defined) else None) %}
+                {% if dis_raw %}
+                  {% set s = (dis_raw|string).lower().strip() %}
+                  {% if s in ['no','none','false','0','n','off',''] %}
+                    No
+                  {% elif s in ['yes','true','1','y','on'] %}
+                    {% if dis_details and dis_details|string|trim %}
+                      Yes - {{ dis_details|string|trim }}
+                    {% else %}
+                      Yes
+                    {% endif %}
+                  {% else %}
+                    {% if dis_details and dis_details|string|trim %}
+                      {{ dis_raw|string|capitalize }} - {{ dis_details|string|trim }}
+                    {% else %}
+                      {{ dis_raw|string|capitalize }}
+                    {% endif %}
+                  {% endif %}
+                {% else %}
+                  —
+                {% endif %}
+              </div></div>
+
+              <div class="tile"><div class="label">Willing to travel</div><div class="value">{{ (profile.willing_to_travel is not none and (profile.willing_to_travel|capitalize)) or '—' }}</div></div>
+
+            {% else %}
+              <div class="tile"><div class="label">Preferred gender</div><div class="value">
+                {%- set raw_gender = (profile.preferred_gender if profile else None) -%}
+                {%- if raw_gender -%}
+                  {%- set g = (raw_gender|string).strip() -%}
+                  {%- set lower = g|lower -%}
+                  {%- if lower in ['female','f'] -%}
+                    Female
+                  {%- elif lower in ['male','m'] -%}
+                    Male
+                  {%- elif lower in ['no_preference','no-preference','no preference','no_pref','none','no pref',''] -%}
+                    No preference
+                  {%- else -%}
+                    {{ g.replace('_',' ').replace('-',' ') | title }}
+                  {%- endif -%}
+                {%- else -%}
+                  No preference
+                {%- endif -%}
+              </div></div>
+
+              <div class="tile"><div class="label">Household notes</div><div class="value">{{ profile.household_info or 'None' }}</div></div>
+              <div class="tile"><div class="label">Medical needs</div><div class="value">{{ profile.medical_needs or 'None' }}</div></div>
+              <div class="tile"><div class="label">Languages</div><div class="value">{{ profile.languages or '—' }}</div></div>
+              <div class="tile"><div class="label">Location</div><div class="value">{{ profile.location or '—' }}</div></div>
+
+            {% endif %}
+          </div>
+        </div>
+
+      </section>
+    </div>
+  </div>
+
+  <style id="pp-img-modal-style">
+    .photo, .photo img { cursor: pointer; }
+
+    .pp-img-modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.88);
+      z-index: 13000;
+      padding: 12px;
+    }
+
+    .pp-img-modal.show { display:flex; }
+
+    .pp-img-modal .pp-frame {
+      width: 100%;
+      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow: visible;
+      background: transparent;
+      border-radius: 10px;
+      padding: 0;
+    }
+
+    .pp-img-modal img {
+      display:block;
+      width: auto;
+      height: auto;
+      max-width: calc(100vw - 8px);
+      max-height: calc(100vh - 8px);
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 20px 70px rgba(0,0,0,0.75);
+      image-rendering: auto;
+    }
+  </style>
+
+  <div id="ppImgModal" class="pp-img-modal" role="dialog" aria-hidden="true">
+    <div class="pp-frame" role="document" aria-label="Photo preview">
+      <img id="ppImgModalImg" src="" alt="Photo preview" decoding="async" />
+    </div>
+  </div>
+
+  <script>
+  (function(){
+    const modal = document.getElementById('ppImgModal');
+    const modalImg = document.getElementById('ppImgModalImg');
+
+    function showModal(src){
+      if(!modal || !modalImg || !src) return;
+      modalImg.style.width = '';
+      modalImg.style.height = '';
+      modalImg.style.maxWidth = '';
+      modalImg.style.maxHeight = '';
+      modalImg.src = src;
+      modal.classList.add('show');
+      modal.setAttribute('aria-hidden','false');
+      modalImg.onload = function(){ try { modalImg.style.transform = ''; } catch(e){} };
+    }
+
+    function hideModal(){
+      if(!modal || !modalImg) return;
+      modal.classList.remove('show');
+      modal.setAttribute('aria-hidden','true');
+      try { modalImg.src = ''; } catch(e){}
+      modalImg.onload = null;
+    }
+
+    document.addEventListener('click', function(e){
+      const ph = e.target.closest && e.target.closest('.photo');
+      if(!ph) return;
+      const img = ph.querySelector && ph.querySelector('img');
+      if(img && img.src) { e.preventDefault(); showModal(img.src); }
+    }, true);
+
+    if(modal){
+      modal.addEventListener('click', function(e){
+        if(e.target === modal || e.target === modalImg || (e.target.closest && e.target.closest('.pp-frame') && e.target !== modalImg)){
+          hideModal();
+        }
+      }, false);
+    }
+
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape' || e.key === 'Esc') hideModal();
+    });
+
+    window.__pp_profile_img_viewer = { show: showModal, hide: hideModal };
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,1227 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Live chat — Care Companion</title>
+
+  <!-- Fonts & icons (Playfair + Poppins for header, Inter for chat) -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
+  <style>
+    /* =========================
+       Header (scoped) styles
+       ========================= */
+    #cc-header {
+      font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+      margin: 18px auto;
+      max-width: 1100px;
+      padding: 0 18px 12px;
+    }
+    #cc-header .top-banner{
+      width:100%;
+      background: linear-gradient(90deg, #6A5CFA, #2153FF);
+      color:#fff;
+      text-align:center;
+      padding:10px 14px;
+      font-weight:700;
+      border-radius:12px;
+      box-shadow: 0 8px 30px rgba(33,83,255,0.12);
+      margin-bottom:12px;
+      font-size:14px;
+    }
+    #cc-header .off-white-section{
+      display:flex;
+      align-items:center;
+      gap:18px;
+      padding:12px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:12px;
+      border: 1px solid rgba(255,255,255,0.03);
+      color: #e6f4ff;
+      position:relative;
+    }
+    #cc-header .brand { display:flex; align-items:center; gap:12px; flex-shrink:0; }
+    #cc-header .brand img { width:88px; height:56px; object-fit:contain; filter: drop-shadow(0 6px 20px rgba(0,0,0,0.5)); border-radius:6px; }
+    #cc-header .brand-name { font-weight:800; color:#eaf4ff; font-size:18px; }
+    #cc-header .brand-tag { font-size:12px; color:rgba(230,245,255,0.75); }
+    #cc-header .nav-menu { margin-left:20px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+    #cc-header .nav-menu a {
+      color: rgba(255,255,255,0.92);
+      padding:8px 10px; border-radius:10px; font-weight:600; font-size:14px;
+      transition: transform 220ms cubic-bezier(.2,.9,.3,1), box-shadow 220ms;
+    }
+    #cc-header .nav-menu a[aria-current="page"]{
+      background: linear-gradient(90deg,#2153FF,#3B6FF6);
+      color:#fff;
+      box-shadow:0 10px 30px rgba(33,83,255,0.12);
+    }
+    #cc-header .nav-menu a:hover{ transform:translateY(-3px); box-shadow:0 12px 36px rgba(33,83,255,0.08); }
+    #cc-header .top-right-controls {
+      position: absolute;
+      right: 1px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 40;
+    }
+    @media (max-width:900px) {
+      #cc-header .top-right-controls { right:12px; top:auto; bottom:12px; transform:none; }
+    }
+    .profile-dropdown { position: relative; display:inline-block; }
+    .profile-btn {
+      display:inline-flex; align-items:center; gap:8px; background:transparent; border:0; padding:6px; cursor:pointer; color:#151b54;
+    }
+    .profile-btn .avatar { width:38px; height:38px; border-radius:999px; object-fit:cover; border:2px solid rgba(0,0,0,0.06); box-shadow:0 6px 18px rgba(0,0,0,0.12); background:#fff; display:block; }
+    .profile-btn .chev { font-size:12px; color: rgba(21,27,84,0.9); }
+    .dropdown-menu {
+      position:absolute; right:0; top:calc(100% + 8px); min-width:160px;
+      background:#fff; color:#0b2a66; border-radius:10px; box-shadow:0 14px 34px rgba(6,27,60,0.12);
+      padding:6px; display:none; flex-direction:column; gap:4px; overflow:hidden;
+    }
+    .dropdown-menu.show { display:flex; }
+    .menu-item{
+      display:block; text-decoration:none; color:inherit; padding:8px 10px; border-radius:8px; font-weight:600; background:transparent; cursor:pointer;
+    }
+    .menu-item:hover{ background: rgba(142,130,254,0.08); }
+
+    /* =========================
+       CHAT PAGE styles (original)
+       ========================= */
+    :root{
+      --bg:#07102a; --panel:#0f2a66; --muted:#bcd7ff; --accent:#2153ff; --accent-2:#4f7ef7;
+      --surface:#07183a; font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      --cc-header-h: 132px;
+    }
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--surface),#05102a);color:#eaf4ff;}
+    body { overflow-x: hidden; }
+
+    .wrap{
+      max-width:1100px;
+      margin:18px auto 28px;
+      padding:18px;
+      display:grid;
+      grid-template-columns: 1fr 360px;
+      gap:20px;
+      align-items:start;
+    }
+    @media(max-width:980px){ .wrap{grid-template-columns:1fr; padding:12px;} }
+
+    /* Left panel (conversation) */
+    .card{
+      background:linear-gradient(180deg,#06102a, rgba(255,255,255,0.02));
+      border:1px solid rgba(127,196,255,0.04);
+      border-radius:12px;
+      box-shadow: 0 18px 48px rgba(2,8,40,0.6);
+      overflow:hidden;
+    }
+    .conv-header{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:14px 16px;
+      border-bottom:1px solid rgba(255,255,255,0.03);
+      flex-wrap:wrap;
+    }
+    .conv-title{font-weight:800;font-size:18px;}
+    .conv-sub{font-size:13px;color:var(--muted);margin-top:4px;}
+    .messages{
+      height:64vh;
+      min-height:320px;
+      padding:14px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      scroll-behavior: auto;
+    }
+    .msg{max-width:82%;padding:10px 12px;border-radius:12px;font-size:14px;line-height:1.3;word-break:break-word;}
+    .msg.user{align-self:flex-end;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#07102a;border-bottom-right-radius:4px;}
+    .msg.agent{align-self:flex-start;background:rgba(255,255,255,0.03);color:var(--muted);border-bottom-left-radius:4px;}
+    .msg.system{align-self:center;background:transparent;color:var(--muted);font-size:13px;padding:6px 10px;border-radius:8px;border:1px dashed rgba(255,255,255,0.03);}
+
+    .composer{
+      display:flex;
+      gap:8px;
+      padding:12px;
+      border-top:1px solid rgba(255,255,255,0.02);
+      align-items:center;
+      background: rgba(7,16,42,0.1);
+    }
+    .composer input{
+      flex:1;
+      padding:12px;
+      border-radius:12px;
+      border:1px solid rgba(255,255,255,0.04);
+      background:rgba(255,255,255,0.02);
+      color:#eaf4ff;
+      font-size:15px;
+      min-width:0;
+    }
+    .btn{
+      padding:10px 14px;
+      border-radius:12px;
+      border:0;
+      background:linear-gradient(90deg,var(--accent),var(--accent-2));
+      color:white;
+      font-weight:800;
+      cursor:pointer;
+    }
+
+    /* End chat button */
+    .end-chat-btn{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      padding:10px 14px;
+      border:0;
+      border-radius:999px;
+      background: linear-gradient(135deg, #ff5f6d, #ee3d4a);
+      color:#fff;
+      font-weight:800;
+      font-size:14px;
+      cursor:pointer;
+      box-shadow: 0 10px 24px rgba(238,61,74,0.28);
+      transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
+      white-space:nowrap;
+    }
+    .end-chat-btn:hover{
+      transform: translateY(-2px);
+      box-shadow: 0 14px 28px rgba(238,61,74,0.34);
+      filter: brightness(1.03);
+    }
+    .end-chat-btn:active{
+      transform: translateY(0);
+    }
+    .end-chat-btn:disabled{
+      opacity:0.55;
+      cursor:not-allowed;
+      box-shadow:none;
+      transform:none;
+    }
+
+    /* Right panel (context) */
+    .meta{padding:14px;}
+    .meta h4{margin:0 0 8px 0;font-size:15px;}
+    .meta p{color:var(--muted);font-size:13px;}
+    .small{font-size:13px;color:var(--muted);}
+    .topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 0 8px;}
+    .badge{background:#223bff;padding:6px 10px;border-radius:999px;font-weight:800}
+
+    .conv-actions{
+      margin-left:auto;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    .header-meta-group{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+
+    /* Typing indicator styles */
+    .typing { display:flex; align-items:center; gap:8px; padding:8px 12px; border-radius:12px; font-style:italic; font-size:13px;}
+    .typing.agent { align-self:flex-start; background:rgba(255,255,255,0.02); color:var(--muted); }
+    .typing.user { align-self:flex-end; background:linear-gradient(90deg,var(--accent),var(--accent-2)); color:#07102a; }
+    .dots { width:36px; height:12px; display:inline-block; position:relative; }
+    .dots span { display:block; position:absolute; width:8px; height:8px; border-radius:50%; top:0; animation: bounce 1s infinite; background:rgba(255,255,255,0.7); opacity:0.9; }
+    .dots span:nth-child(1){ left:0; animation-delay:0s }
+    .dots span:nth-child(2){ left:12px; animation-delay:0.15s }
+    .dots span:nth-child(3){ left:24px; animation-delay:0.3s }
+    @keyframes bounce {
+      0% { transform: translateY(0); opacity:0.6 }
+      50% { transform: translateY(-6px); opacity:1 }
+      100% { transform: translateY(0); opacity:0.6 }
+    }
+
+    /* waiting placeholder internals */
+    .waiting-text { font-weight:600; color:var(--muted); }
+    .waiting-dots { color:var(--muted); font-weight:700; }
+
+  @media (max-width: 900px) {
+  html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+  }
+
+  body {
+    display: block;
+  }
+
+  /* Hide the entire top header on mobile */
+  #cc-header {
+    display: none !important;
+  }
+
+  /* Pin the chat area to the screen */
+  .wrap {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100dvh;
+    max-width: 100%;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden;
+    display: block !important;
+  }
+
+  .card {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .meta {
+    display: none !important;
+  }
+
+  .conv-header {
+    flex: 0 0 auto;
+    padding: 12px 14px;
+    gap: 10px;
+  }
+
+  .conv-title {
+    font-size: 16px;
+    line-height: 1.2;
+  }
+
+  .conv-sub {
+    font-size: 12px;
+  }
+
+  .header-meta-group {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .conv-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .messages {
+    flex: 1 1 auto;
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    padding: 14px 12px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .composer {
+    flex: 0 0 auto;
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+    padding: 10px;
+    background: linear-gradient(180deg, rgba(7,16,42,0.92), rgba(7,16,42,0.98));
+    backdrop-filter: blur(10px);
+  }
+
+  .composer input {
+    font-size: 16px;
+    padding: 13px 14px;
+    border-radius: 12px;
+    min-width: 0;
+  }
+
+  .btn {
+    padding: 12px 14px;
+    border-radius: 12px;
+    white-space: nowrap;
+  }
+
+  .end-chat-btn {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .msg {
+    max-width: 92%;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 520px) {
+  .conv-header {
+    padding: 10px 10px;
+  }
+
+  .messages {
+    padding: 12px 10px;
+  }
+
+  .composer {
+    padding: 10px;
+    gap: 8px;
+    flex-direction: row;
+  }
+
+  .composer input {
+    font-size: 16px;
+  }
+
+  .btn {
+    min-width: 76px;
+  }
+
+  .end-chat-btn {
+    width: auto;
+  }
+}  
+  </style>
+</head>
+<body
+  data-logged-in="{{ 1 if session.get('user_id') else 0 }}"
+  data-user-role="{{ user.role if user else '' }}"
+  data-profile-published="{{ 1 if (user and user.profile and user.profile.published) else 0 }}"
+>
+
+  <!-- TOP BANNER (copied from about.html) -->
+  <header id="cc-header" aria-label="Care Companion header">
+    <div class="top-banner" role="banner">
+      Concerned about a senior loved one living alone? Care Companion connects families with trusted caregivers.
+    </div>
+
+    <div class="off-white-section" role="navigation" aria-label="Primary navigation">
+      <div class="brand">
+        <img src="{{ url_for('static', filename='images/caregiver_logo.png') }}" alt="Care Companion logo" />
+        <div>
+          <div class="brand-name">Care Companion</div>
+          <div class="brand-tag">Find trusted caregivers near you</div>
+        </div>
+      </div>
+
+      <nav class="nav-menu" aria-label="Primary links">
+        <a href="{{ url_for('home') }}">Home</a>
+        <a id="navFindCaregiver" href="/find-caregiver">Find Caregiver</a>
+        <a id="navFindFamily" href="/find-family">Find Family</a>
+        <a href="{{ url_for('how_it_works') }}">How It Works</a>
+        <a href="{{ url_for('about') }}">About Us</a>
+        <a id="loginLink" href="{{ url_for('login') }}">Login</a>
+        <a id="registerLink" href="{{ url_for('register') }}">Sign Up</a>
+      </nav>
+
+      <!-- Profile dropdown (right side) -->
+      <div class="top-right-controls">
+        <div class="profile-dropdown" id="profileDropdown">
+          <button id="profileBtn" class="profile-btn" aria-haspopup="true" aria-expanded="false" title="Open profile menu">
+            <img
+              class="avatar"
+              src="{{ url_for('uploaded_file', filename=(user.profile.profile_photo|basename)) if (user and user.profile and user.profile.profile_photo) else ( url_for('uploaded_file', filename=(user.profile_photo|basename)) if (user and user.profile_photo) else url_for('static', filename='images/avatar cc.jfif') ) }}"
+              alt="Profile"
+            >
+            <span class="chev" aria-hidden="true">▾</span>
+          </button>
+
+          <div class="dropdown-menu" id="profileMenu" role="menu" aria-hidden="true">
+            <a class="menu-item" href="{{ url_for('profile_setup') }}?suppress_overlay=1" role="menuitem">My profile</a>
+            <a class="menu-item" href="{{ url_for('contact') }}" role="menuitem">Contact Us</a>
+            <a id="logoutLink" class="menu-item" href="{{ url_for('logout') }}" role="menuitem" data-method="get">Log out</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+  <!-- END TOP BANNER -->
+
+  <main class="wrap" role="main">
+    <div class="card" aria-live="polite" role="log" id="chatCard">
+      <div class="conv-header">
+        <div style="width:48px;height:48px;border-radius:10px;background:linear-gradient(90deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-weight:800;">CC</div>
+        <div>
+          <div class="conv-title">Care Companion — Live chat</div>
+          <div class="conv-sub" id="convSub">Connect with our team in real time.</div>
+        </div>
+
+        <div class="conv-actions">
+          <div class="header-meta-group">
+            <div class="small">Ref: <strong id="chatRefEl" style="font-weight:700">-</strong></div>
+            <div class="badge" id="roleBadge">Visitor</div>
+          </div>
+          <button id="endChatBtn" class="end-chat-btn" type="button" aria-label="End chat">
+            <i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>
+            <span>End Chat</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="messages" id="messages" tabindex="0">
+        <!-- messages appended here -->
+      </div>
+
+      <div class="composer" role="form" aria-label="Chat composer">
+        <input id="inputText" placeholder="Type a message (e.g. 'I need a caregiver tomorrow')" aria-label="Message input" autocomplete="off" />
+        <button class="btn" id="sendBtn">Send</button>
+      </div>
+    </div>
+
+    <aside class="card meta" aria-label="Chat info">
+      <h4>How this works</h4>
+      <p class="small">Click Send to notify our staff. If staff are online they will join the chat and reply in real time. If not, they'll receive email notifications with a link to open this chat.</p>
+
+      <div style="margin-top:12px;">
+        <h4>Quick actions</h4>
+        <p class="small">Use this link to contact us directly.</p>
+        <p style="margin-top:10px;">
+          <a href="/contact" class="btn" style="display:inline-block;text-decoration:none;">Contact Us</a>
+        </p>
+      </div>
+
+      <div style="margin-top:18px;">
+        <h4>Transcript</h4>
+        <p class="small" id="transcriptNote">Transcript is stored for agents to review.</p>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Profile dropdown script (for header) -->
+  <script>
+  (function(){
+    const btn = document.getElementById('profileBtn');
+    const menu = document.getElementById('profileMenu');
+    if(!btn || !menu) return;
+
+    function openMenu() {
+      menu.classList.add('show');
+      menu.setAttribute('aria-hidden','false');
+      btn.setAttribute('aria-expanded','true');
+      const first = menu.querySelector('.menu-item');
+      if(first && typeof first.focus === 'function') first.focus();
+    }
+    function closeMenu() {
+      menu.classList.remove('show');
+      menu.setAttribute('aria-hidden','true');
+      btn.setAttribute('aria-expanded','false');
+    }
+
+    btn.addEventListener('click', function(e){
+      e.stopPropagation();
+      if(menu.classList.contains('show')) closeMenu(); else openMenu();
+    });
+
+    document.addEventListener('click', function(){ closeMenu(); });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape' || e.key === 'Esc') closeMenu();
+    });
+
+    menu.addEventListener('click', function(e){ e.stopPropagation(); });
+
+    // Hide Login link if server indicates logged-in user
+    (function(){
+      const login = document.getElementById('loginLink');
+      if(!login) return;
+      try {
+        const bodyFlag = document.body.getAttribute('data-logged-in');
+        if(bodyFlag !== null && (String(bodyFlag) === '1' || String(bodyFlag).toLowerCase() === 'true')) {
+          login.style.display = 'none';
+        }
+      } catch(e){}
+    })();
+  })();
+  </script>
+
+  <!-- CHAT SCRIPT: socket loader + chat logic -->
+  <script>
+  (function(){
+    // Keep the mobile chat area sized to the visible header
+    function syncHeaderHeight(){
+      try {
+        const header = document.getElementById('cc-header');
+        if(!header) return;
+        const h = Math.ceil(header.getBoundingClientRect().height || header.offsetHeight || 0);
+        document.documentElement.style.setProperty('--cc-header-h', h + 'px');
+      } catch(e){}
+    }
+
+    window.addEventListener('load', syncHeaderHeight);
+    window.addEventListener('resize', syncHeaderHeight);
+    window.addEventListener('orientationchange', syncHeaderHeight);
+    if (document.readyState !== 'loading') syncHeaderHeight();
+    else document.addEventListener('DOMContentLoaded', syncHeaderHeight);
+
+    // loader: try local socket.io then CDN then continue
+    function loadScript(src, cb, errCb){
+      const s = document.createElement('script');
+      s.src = src; s.async = true;
+      s.onload = cb; s.onerror = errCb;
+      document.head.appendChild(s);
+    }
+    const localPath = '/socket.io/socket.io.js';
+    const cdnPath = 'https://cdn.socket.io/4.6.1/socket.io.min.js';
+
+    function initChatClient(){
+      const CHAT_REF = "{{ chat_ref|e }}";
+      const IS_AGENT = {{ 'true' if is_agent else 'false' }};
+
+      function createLocalRef(){ return 'local-' + Math.random().toString(36).slice(2,10) + Date.now().toString(36).slice(-5); }
+      const chatRef = CHAT_REF && CHAT_REF.length ? CHAT_REF : createLocalRef();
+
+      const roleBadge = document.getElementById('roleBadge');
+      roleBadge.textContent = IS_AGENT ? 'Agent' : 'Visitor';
+      document.getElementById('chatRefEl').textContent = chatRef;
+
+      const messagesEl = document.getElementById('messages');
+      const input = document.getElementById('inputText');
+      const sendBtn = document.getElementById('sendBtn');
+      const endChatBtn = document.getElementById('endChatBtn');
+      const convSub = document.getElementById('convSub');
+
+      let agentPresent = false;
+      let chatEnded = false;
+
+      function dbg(...args){ console.debug('[chat]', ...args); }
+
+      function stickToBottom(){
+        requestAnimationFrame(() => {
+          try { messagesEl.scrollTop = messagesEl.scrollHeight; } catch(e){}
+        });
+      }
+
+      function setChatEndedUI(reason){
+        chatEnded = true;
+        try { input.disabled = true; } catch(e){}
+        try { sendBtn.disabled = true; } catch(e){}
+        try { endChatBtn.disabled = true; } catch(e){}
+        try { input.placeholder = 'Chat has ended'; } catch(e){}
+        if(convSub) convSub.textContent = reason || 'This chat has ended.';
+      }
+
+      // ---- append message (optimistic support exists elsewhere) ----
+      function appendMessage(who, text, ts, opts){
+        hideTyping(who);
+        const d = document.createElement('div');
+        d.className = (who === 'user') ? 'msg user' : (who === 'agent') ? 'msg agent' : 'msg system';
+        d.textContent = text;
+        if(ts) d.title = (new Date(ts)).toLocaleString();
+        if(opts && opts.clientId) {
+          d.setAttribute('data-client-msg-id', opts.clientId);
+          if(opts.pending) d.classList.add('pending');
+        }
+        messagesEl.appendChild(d);
+        stickToBottom();
+        dbg('appended', who, '-', text, opts && opts.clientId ? '(clientId:' + opts.clientId + ')' : '');
+        if(who === 'user' && !IS_AGENT){
+          setTimeout(()=> startWaitingAfterVisitor(), 0);
+        }
+        return d;
+      }
+
+      // ---- typing indicator helpers ----
+      function makeTypingEl(who){
+        const el = document.createElement('div');
+        el.className = 'typing ' + (who === 'agent' ? 'agent' : 'user');
+        el.setAttribute('data-typing', who);
+        const textSpan = document.createElement('span');
+        textSpan.className = 'typing-text';
+        textSpan.textContent = (who === 'agent' ? 'Agent is typing…' : 'Visitor is typing…') + ' ';
+        const dotsSpan = document.createElement('span');
+        dotsSpan.className = 'dots';
+        dotsSpan.innerHTML = '<span></span><span></span><span></span>';
+        el.appendChild(textSpan);
+        el.appendChild(dotsSpan);
+        return el;
+      }
+      function showTyping(who){
+        if(messagesEl.querySelector('.typing[data-typing="'+who+'"]')) return;
+        messagesEl.appendChild(makeTypingEl(who));
+        stickToBottom();
+      }
+      function hideTyping(who){
+        const el = messagesEl.querySelector('.typing[data-typing="'+who+'"]');
+        if(el) el.remove();
+      }
+
+      // ---- top placeholder (if agent not present yet) ----
+      function showAgentPlaceholder(){
+        if(messagesEl.querySelector('#agentPlaceholder')) return;
+        const d = document.createElement('div');
+        d.id = 'agentPlaceholder';
+        d.className = 'msg agent';
+        d.textContent = 'An agent will join you shortly — it usually takes about 5 minutes for an agent to respond.';
+        messagesEl.insertBefore(d, messagesEl.firstChild);
+        dbg('showAgentPlaceholder inserted');
+      }
+      function removeAgentPlaceholder(){
+        const ph = document.getElementById('agentPlaceholder');
+        if(ph){
+          ph.remove();
+          dbg('removeAgentPlaceholder removed');
+        }
+      }
+
+      // ---- waiting placeholder after visitor message ----
+      let waitingEl = null;
+      let waitingInterval = null;
+
+      function createWaitingElDom(){
+        const el = document.createElement('div');
+        el.id = 'waitingAgentAfterVisitor';
+        el.className = 'msg agent';
+        const textSpan = document.createElement('span');
+        textSpan.className = 'waiting-text';
+        textSpan.textContent = 'waiting for an agent';
+        const dotsSpan = document.createElement('span');
+        dotsSpan.className = 'waiting-dots';
+        dotsSpan.style.marginLeft = '8px';
+        dotsSpan.textContent = '.';
+        el.appendChild(textSpan);
+        el.appendChild(dotsSpan);
+        return el;
+      }
+
+      function startWaitingAfterVisitor(){
+        if(agentPresent){ dbg('agentPresent -> not starting waiting placeholder'); return; }
+        if(waitingEl){ dbg('waiting placeholder already present'); return; }
+
+        waitingEl = createWaitingElDom();
+        let dots = 0;
+
+        function tick(){
+          dots = (dots % 3) + 1;
+          const ds = waitingEl.querySelector('.waiting-dots');
+          if(ds) ds.textContent = '.'.repeat(dots);
+          stickToBottom();
+        }
+
+        tick();
+
+        const visitorMsgs = Array.from(messagesEl.querySelectorAll('.msg.user'));
+        if(visitorMsgs.length){
+          const lastVisitor = visitorMsgs[visitorMsgs.length - 1];
+          lastVisitor.insertAdjacentElement('afterend', waitingEl);
+          dbg('started waiting placeholder after last visitor message');
+        } else {
+          messagesEl.appendChild(waitingEl);
+          dbg('started waiting placeholder appended to end (no visitor messages)');
+        }
+
+        waitingInterval = setInterval(tick, 600);
+      }
+
+      function stopWaitingAfterVisitor(reason){
+        if(waitingInterval){
+          clearInterval(waitingInterval);
+          waitingInterval = null;
+        }
+        if(waitingEl){
+          waitingEl.remove();
+          waitingEl = null;
+          dbg('stopped waiting placeholder (' + (reason || 'unknown') + ')');
+        }
+      }
+
+      // ---- transcript loader ----
+      async function loadTranscript(){
+        try {
+          const res = await fetch('/api/chat_transcript?ref=' + encodeURIComponent(chatRef));
+          const j = await res.json();
+          if(!j || !j.ok) {
+            appendMessage('system', 'No transcript available yet.');
+            return;
+          }
+          messagesEl.innerHTML = '';
+          (j.messages || []).forEach(m => {
+            if(m.who === 'system' && /participant joined/i.test(m.text)) return;
+            appendMessage(m.who === 'user' ? 'user' : (m.who === 'agent' ? 'agent' : 'system'), m.text, m.ts);
+            if(m.who === 'agent') agentPresent = true;
+          });
+          stickToBottom();
+          dbg('transcript loaded, messages:', (j.messages || []).length);
+        } catch(e){
+          appendMessage('system', 'Could not load transcript (offline).');
+          console.warn(e);
+        }
+      }
+
+      // ---- dedupe fallback helper ----
+      function isDuplicateIncoming(who, text, ts){
+        const selector = (who === 'user') ? '.msg.user' : (who === 'agent') ? '.msg.agent' : '.msg.system';
+        const els = messagesEl.querySelectorAll(selector);
+        if(!els.length) return false;
+        const last = els[els.length - 1];
+        const lastText = (last.textContent || '').trim();
+        if(!lastText) return false;
+        if(lastText === (text || '').trim()){
+          try {
+            const now = Date.now();
+            const lastTitle = last.title || '';
+            if(lastTitle){
+              const lastTs = new Date(lastTitle).getTime();
+              if(!isNaN(lastTs) && Math.abs(now - lastTs) < 7000) return true;
+            } else {
+              if(last.classList.contains('pending')) return true;
+              return true;
+            }
+          } catch(e){ return true; }
+        }
+        return false;
+      }
+
+      // ---- socket wiring (if io exists) ----
+      let socket = null;
+      if(typeof io !== 'undefined'){
+        try {
+          socket = io();
+          socket.on('connect', function(){
+            dbg('socket connected');
+            socket.emit('join_room', { chat_ref: chatRef });
+            if(IS_AGENT) socket.emit('agent_join', { chat_ref: chatRef });
+          });
+          socket.on('disconnect', function(){ dbg('socket disconnected'); });
+
+          socket.on('new_message', function(payload){
+            try {
+              const text = payload.text || payload.message || '';
+              if((payload.who === 'system' || !payload.who) && /participant joined|joined the chat/i.test(text)){
+                dbg('ignored system join message:', text);
+                return;
+              }
+
+              const who = payload.who === 'user' ? 'user' : (payload.who === 'agent' ? 'agent' : 'system');
+
+              if(payload.client_msg_id){
+                const el = messagesEl.querySelector('[data-client-msg-id="'+payload.client_msg_id+'"]');
+                if(el){
+                  el.classList.remove('pending');
+                  if(payload.time || payload.ts) el.title = (new Date(payload.time || payload.ts)).toLocaleString();
+                  dbg('confirmed optimistic message (client_msg_id):', payload.client_msg_id);
+                  if(who === 'agent'){
+                    agentPresent = true;
+                    stopWaitingAfterVisitor('agent confirmed');
+                    removeAgentPlaceholder();
+                  }
+                  return;
+                }
+              }
+
+              if(isDuplicateIncoming(who, text, payload.time || payload.ts)){
+                dbg('deduped incoming message (content match):', text);
+                if(who === 'agent'){
+                  agentPresent = true;
+                  stopWaitingAfterVisitor('agent replied (dedupe)');
+                  removeAgentPlaceholder();
+                }
+                return;
+              }
+
+              appendMessage(who, text, payload.time || payload.ts);
+              if(who === 'agent'){
+                agentPresent = true;
+                stopWaitingAfterVisitor('agent replied');
+                removeAgentPlaceholder();
+              }
+            } catch(e){ console.warn(e); }
+          });
+
+          socket.on('agent_joined', function(){
+            dbg('agent_joined event');
+            agentPresent = true;
+            removeAgentPlaceholder();
+            stopWaitingAfterVisitor('agent joined');
+            showTyping('agent');
+            setTimeout(()=> hideTyping('agent'), 1600);
+          });
+          socket.on('agent_left', function(){
+            appendMessage('system','Agent left the chat.');
+            agentPresent = false;
+          });
+          socket.on('agent_typing', function(){ showTyping('agent'); });
+          socket.on('agent_stop_typing', function(){ hideTyping('agent'); });
+          socket.on('visitor_typing', function(){ showTyping('user'); });
+          socket.on('visitor_stop_typing', function(){ hideTyping('user'); });
+
+        } catch(e){
+          console.warn('socket.io init failed (caught)', e);
+          socket = null;
+        }
+      } else {
+        dbg('socket.io client not available — running without real-time features');
+      }
+
+      // ---- send message ----
+      async function sendMessage(text){
+        if(chatEnded) return;
+        if(!text || !text.trim()) return;
+        const trimmed = text.trim();
+        const clientMsgId = 'c-' + Date.now() + '-' + Math.random().toString(36).slice(2,8);
+        appendMessage(IS_AGENT ? 'agent' : 'user', trimmed, new Date().toISOString(), { clientId: clientMsgId, pending: true });
+
+        if(!IS_AGENT) startWaitingAfterVisitor();
+        stickToBottom();
+
+        try {
+          if(socket && socket.connected){
+            if(IS_AGENT) socket.emit('agent_message', { chat_ref: chatRef, text: trimmed, client_msg_id: clientMsgId });
+            else socket.emit('visitor_message', { chat_ref: chatRef, text: trimmed, client_msg_id: clientMsgId });
+            if(!IS_AGENT && socket && socket.connected) socket.emit('visitor_stop_typing', { chat_ref: chatRef });
+            return;
+          }
+        } catch(e){ console.warn('socket send failed', e); }
+
+        try {
+          await fetch('/api/chat_message', {
+            method:'POST',
+            headers:{ 'Content-Type':'application/json' },
+            body: JSON.stringify({ chat_ref: chatRef, text: trimmed, who: IS_AGENT ? 'agent' : 'user', client_msg_id: clientMsgId })
+          });
+        } catch(e){ console.warn('fallback POST failed', e); }
+      }
+
+      async function endChat(){
+        if(chatEnded) return;
+        const ok = window.confirm('End this chat now?');
+        if(!ok) return;
+
+        try {
+          if(socket && socket.connected) socket.emit('end_chat', { chat_ref: chatRef, ended_by: IS_AGENT ? 'agent' : 'user' });
+        } catch(e){
+          console.warn(e);
+        }
+
+        try {
+          await fetch('/api/end_chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_ref: chatRef, ended_by: IS_AGENT ? 'agent' : 'user' })
+          });
+        } catch(e){
+          console.warn('end chat POST failed', e);
+        }
+
+        stopWaitingAfterVisitor('chat ended');
+        removeAgentPlaceholder();
+        appendMessage('system', 'This chat has ended.');
+        setChatEndedUI('Chat ended successfully.');
+
+        setTimeout(() => {
+          window.location.replace("{{ url_for('home') }}");
+        }, 800);
+      }
+
+      // ---- wire send UI ----
+      sendBtn.addEventListener('click', function(){
+        const v = input.value || '';
+        if(!v.trim()){
+          input.focus();
+          return;
+        }
+        sendMessage(v);
+        input.value = '';
+        stickToBottom();
+        input.focus();
+      });
+
+      input.addEventListener('keydown', function(e){
+        if(e.key === 'Enter'){
+          e.preventDefault();
+          sendBtn.click();
+        }
+      });
+
+      if(endChatBtn) endChatBtn.addEventListener('click', endChat);
+
+      // ---- typing detection ----
+      if(!IS_AGENT){
+        let typingTimeout = null, typingSent = false;
+
+        function sendVisitorTyping(){
+          try {
+            if(!socket || !socket.connected) return;
+            if(!typingSent){
+              socket.emit('visitor_typing', { chat_ref: chatRef });
+              typingSent = true;
+            }
+            if(typingTimeout) clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(()=> {
+              if(socket && socket.connected) socket.emit('visitor_stop_typing', { chat_ref: chatRef });
+              typingSent = false;
+            }, 1500);
+          } catch(e){ console.warn(e); }
+        }
+
+        input.addEventListener('input', function(){ sendVisitorTyping(); });
+        sendBtn.addEventListener('click', function(){
+          if(socket && socket.connected) {
+            socket.emit('visitor_stop_typing', { chat_ref: chatRef });
+          }
+        });
+      } else {
+        let agentTypingTimeout = null, agentTypingSent = false;
+
+        function sendAgentTyping(){
+          try {
+            if(!socket || !socket.connected) return;
+            if(!agentTypingSent){
+              socket.emit('agent_typing', { chat_ref: chatRef });
+              agentTypingSent = true;
+            }
+            if(agentTypingTimeout) clearTimeout(agentTypingTimeout);
+            agentTypingTimeout = setTimeout(()=> {
+              if(socket && socket.connected) socket.emit('agent_stop_typing', { chat_ref: chatRef });
+              agentTypingSent = false;
+            }, 1500);
+          } catch(e){ console.warn(e); }
+        }
+
+        input.addEventListener('input', function(){ sendAgentTyping(); });
+        sendBtn.addEventListener('click', function(){
+          if(socket && socket.connected) {
+            socket.emit('agent_stop_typing', { chat_ref: chatRef });
+          }
+        });
+      }
+
+      // ---- initial load ----
+      loadTranscript().then(()=> {
+        if(!CHAT_REF) appendMessage('system', 'Welcome — start typing to notify our team.');
+        if(!IS_AGENT){
+          const hasAgentMsg = !!messagesEl.querySelector('.msg.agent');
+          if(!hasAgentMsg){
+            startWaitingAfterVisitor();
+            showAgentPlaceholder();
+          }
+        } else {
+          agentPresent = true;
+        }
+        stickToBottom();
+        syncHeaderHeight();
+      });
+
+      if(IS_AGENT) input.focus();
+      window.addEventListener('beforeunload', ()=> stopWaitingAfterVisitor('unload'));
+    } // end initChatClient
+
+    // loader flow
+    loadScript(localPath, function(){
+      console.debug('[chat] loaded local socket.io client');
+      initChatClient();
+    }, function(){
+      console.warn('[chat] failed to load local socket.io client, trying CDN...');
+      loadScript(cdnPath, function(){
+        console.debug('[chat] loaded socket.io from CDN');
+        initChatClient();
+      }, function(){
+        console.warn('[chat] CDN load failed; starting chat without socket.io');
+        initChatClient();
+      });
+    });
+  })();
+  </script>
+
+   <!-- ROLE-BASED BLOCK MODALS & LOGIC (paste before </body>) -->
+<style>
+/* Shared modal styles (keeps look consistent with About page) */
+.cc-modal-inline {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 20000;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+}
+.cc-modal-inline.show { display:flex; }
+.cc-modal-card {
+  width:100%;
+  max-width:520px;
+  margin:16px;
+  border-radius:12px;
+  background: linear-gradient(180deg,#fff,#f6f8ff);
+  box-shadow: 0 20px 60px rgba(8,18,60,0.18);
+  padding:18px;
+  color:#072049;
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+}
+.cc-modal-left{
+  width:56px;
+  height:56px;
+  border-radius:12px;
+  background:linear-gradient(180deg,#e6e9ff,#cfcfff);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:700;
+  color:#24307a
+}
+.cc-modal-content h3{margin:0 0 6px;font-size:18px}
+.cc-modal-content p{margin:0;font-size:14px;color:#0b2a66;opacity:.95}
+.cc-modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:12px}
+.cc-btn-primary{background:linear-gradient(90deg,#3b6cff,#6aa8ff);color:#fff;padding:10px 14px;border-radius:10px;border:0;font-weight:700;cursor:pointer}
+.cc-btn-ghost{background:transparent;border:1px solid rgba(11,42,90,0.06);padding:10px 12px;border-radius:10px;color:#0b2a66;font-weight:700;cursor:pointer}
+@media(max-width:520px){
+  .cc-modal-left{display:none}
+  .cc-modal-actions{flex-direction:column}
+  .cc-btn-primary,.cc-btn-ghost{width:100%}
+}
+</style>
+
+<!-- Caregiver-block modal -->
+<div id="caregiverBlockedModal" class="cc-modal-inline" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="cc-modal-card" role="document" aria-labelledby="cbTitle" aria-describedby="cbDesc">
+    <div class="cc-modal-left" aria-hidden="true">i</div>
+    <div class="cc-modal-content" style="flex:1">
+      <h3 id="cbTitle">Access restricted</h3>
+      <p id="cbDesc">Sorry — caregivers cannot view the <strong>Find Caregiver</strong> page. You can browse families instead.</p>
+      <div class="cc-modal-actions">
+        <button id="cbCloseBtn" class="cc-btn-ghost" type="button">Close</button>
+        <button id="cbViewFamiliesBtn" class="cc-btn-primary" type="button">View Families</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Family-block modal -->
+<div id="familyBlockedModal" class="cc-modal-inline" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="cc-modal-card" role="document" aria-labelledby="fbTitle" aria-describedby="fbDesc">
+    <div class="cc-modal-left" aria-hidden="true">i</div>
+    <div class="cc-modal-content" style="flex:1">
+      <h3 id="fbTitle">Access restricted</h3>
+      <p id="fbDesc">Sorry — families cannot view the <strong>Find Family</strong> page. You can browse caregivers instead.</p>
+      <div class="cc-modal-actions">
+        <button id="fbCloseBtn" class="cc-btn-ghost" type="button">Close</button>
+        <button id="fbViewCaregiversBtn" class="cc-btn-primary" type="button">View Caregivers</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  // Read server flags from body data attributes
+  function readFlags() {
+    const b = document.body;
+    const loggedAttr = String(b.getAttribute('data-logged-in') || '').toLowerCase();
+    const roleAttr = String(b.getAttribute('data-user-role') || '').toLowerCase();
+    const pubAttr = String(b.getAttribute('data-profile-published') || '').toLowerCase();
+    return {
+      isLogged: (loggedAttr === '1' || loggedAttr === 'true'),
+      role: roleAttr,
+      isPublished: (pubAttr === '1' || pubAttr === 'true')
+    };
+  }
+
+  function shouldBlockCaregiver() {
+    const f = readFlags();
+    return f.isLogged && f.role === 'caregiver' && f.isPublished;
+  }
+  function shouldBlockFamily() {
+    const f = readFlags();
+    return f.isLogged && f.role === 'family' && f.isPublished;
+  }
+
+  const caregiverModal = document.getElementById('caregiverBlockedModal');
+  const caregiverClose = document.getElementById('cbCloseBtn');
+  const caregiverViewFamilies = document.getElementById('cbViewFamiliesBtn');
+
+  const familyModal = document.getElementById('familyBlockedModal');
+  const familyClose = document.getElementById('fbCloseBtn');
+  const familyViewCaregivers = document.getElementById('fbViewCaregiversBtn');
+
+  function openModal(modalEl, primaryFocusEl) {
+    if (!modalEl) return;
+    modalEl.classList.add('show');
+    modalEl.setAttribute('aria-hidden', 'false');
+    modalEl._previousActive = document.activeElement;
+    setTimeout(()=> { try { primaryFocusEl && primaryFocusEl.focus(); } catch(e){} }, 30);
+    document.addEventListener('keydown', onKeyDown);
+  }
+  function closeModal(modalEl) {
+    if (!modalEl) return;
+    modalEl.classList.remove('show');
+    modalEl.setAttribute('aria-hidden', 'true');
+    document.removeEventListener('keydown', onKeyDown);
+    try {
+      if (modalEl._previousActive && typeof modalEl._previousActive.focus === 'function') {
+        modalEl._previousActive.focus();
+      }
+    } catch(e){}
+  }
+  function onKeyDown(e) {
+    if (e.key === 'Escape' || e.key === 'Esc') {
+      if (caregiverModal && caregiverModal.classList.contains('show')) closeModal(caregiverModal);
+      if (familyModal && familyModal.classList.contains('show')) closeModal(familyModal);
+    }
+  }
+
+  document.addEventListener('click', function (ev) {
+    if (ev.ctrlKey || ev.metaKey || ev.button === 1) return;
+    const el = ev.target;
+    if (!el) return;
+    const a = el.closest ? el.closest('a, button') : null;
+    if (!a) return;
+    const href = a.getAttribute && a.getAttribute('href') || '';
+    const id = a.id || '';
+    const classes = a.className || '';
+
+    const wantsCaregiver = (href.indexOf('/find-caregiver') !== -1 || id === 'navFindCaregiver' || (classes && classes.indexOf('find-care') !== -1));
+    const wantsFamily = (href.indexOf('/find-family') !== -1 || id === 'navFindFamily' || (classes && classes.indexOf('find-jobs') !== -1));
+
+    if (wantsCaregiver && shouldBlockCaregiver()) {
+      ev.preventDefault(); ev.stopPropagation();
+      openModal(caregiverModal, caregiverViewFamilies);
+      return;
+    }
+    if (wantsFamily && shouldBlockFamily()) {
+      ev.preventDefault(); ev.stopPropagation();
+      openModal(familyModal, familyViewCaregivers);
+      return;
+    }
+  }, { capture: true });
+
+  if (caregiverClose) caregiverClose.addEventListener('click', ()=> closeModal(caregiverModal));
+  if (caregiverViewFamilies) caregiverViewFamilies.addEventListener('click', ()=> { window.location.href = '/find-family'; });
+
+  if (familyClose) familyClose.addEventListener('click', ()=> closeModal(familyModal));
+  if (familyViewCaregivers) familyViewCaregivers.addEventListener('click', ()=> { window.location.href = '/find-caregiver'; });
+
+})();
+</script>
+<!-- END role-block modals & logic -->
+
+<script>
+(function () {
+  const HOME_URL = "{{ url_for('home') }}";
+  const isMobile = window.matchMedia && window.matchMedia('(max-width: 900px)').matches;
+
+  if (!isMobile) return;
+
+  function armBackToHome() {
+    try {
+      history.pushState({ cc_livechat_guard: true }, '', window.location.href);
+    } catch (e) {}
+  }
+
+  armBackToHome();
+
+  window.addEventListener('popstate', function () {
+    try {
+      window.location.replace(HOME_URL);
+    } catch (e) {
+      window.location.href = HOME_URL;
+    }
+  });
+})();
+</script>
+</body>
+</html>

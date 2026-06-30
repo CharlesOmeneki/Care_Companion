@@ -1,0 +1,66 @@
+{% extends "base_admin.html" %} 
+
+{% block title %}Admin login — Care Companion{% endblock %}
+
+{% block header %}Care Companion — Admin Login{% endblock %}
+
+{% block content %}
+  <style>
+    @media (max-width: 600px) {
+      .admin-login-card {
+        width: calc(100% - 24px) !important;
+        max-width: 100% !important;
+        margin: 12px auto !important;
+        padding: 18px !important;
+        border-radius: 14px !important;
+      }
+
+      .admin-login-title {
+        font-size: 18px !important;
+      }
+
+      .admin-login-form {
+        gap: 12px !important;
+      }
+
+      .admin-login-actions {
+        flex-direction: column !important;
+        gap: 10px !important;
+      }
+
+      .admin-login-actions .btn,
+      .admin-login-actions a.btn {
+        width: 100% !important;
+      }
+
+      .admin-login-card input {
+        font-size: 16px !important; /* prevents iOS zoom on focus */
+        padding: 12px !important;
+      }
+
+      .admin-login-note {
+        font-size: 12px !important;
+        line-height: 1.5 !important;
+      }
+    }
+  </style>
+
+  <div class="admin-login-card" style="max-width:440px;margin:10px auto;background:linear-gradient(180deg,var(--card),#072a4e);padding:22px;border-radius:12px;box-shadow:0 10px 30px rgba(2,6,23,0.6)">
+    <h2 class="admin-login-title" style="margin:0 0 12px;color:white;font-size:20px">Enter admin password</h2>
+
+    <form method="post" class="admin-login-form" style="display:grid;gap:10px;">
+      <label style="font-size:13px;color:var(--muted)">Password
+        <input name="password" type="password" autocomplete="current-password"
+               style="width:100%;padding:12px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:white" required>
+      </label>
+
+      <div class="admin-login-actions" style="display:flex;gap:10px">
+        <button class="btn" type="submit">Sign in</button>
+        <!-- BACK button now points to 'home' endpoint -->
+        <a class="btn ghost" href="{{ url_for('home') }}" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center">Back</a>
+      </div>
+    </form>
+
+    <p class="admin-login-note" style="margin-top:12px;color:rgba(255,255,255,0.6);font-size:13px">Only authorized personnel should sign in. To change the admin password edit the `ADMIN_PASSWORD` constant in <code>app.py</code>.</p>
+  </div>
+{% endblock %}

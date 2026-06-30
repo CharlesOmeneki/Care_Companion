@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Connections — Care Companion</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    :root{
+      --admiral: #062b5a;
+      --muted:  #7f8fa6;
+      --accent-start: #1e5fbf;
+      --accent-end:   #2b3d9a;
+      --card-bg: #ffffff;
+      --card-border: rgba(6,43,90,0.06);
+      --shadow: 0 12px 30px rgba(6,43,90,0.06);
+      --radius: 12px;
+    }
+
+    *{box-sizing:border-box;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial; -webkit-font-smoothing:antialiased;}
+    html,body{height:100%;margin:0;color:var(--admiral);}    
+    body{background: linear-gradient(180deg, #062b5a 0%, #0a2a66 18%, rgba(15,59,93,0.8) 28%, rgba(232,245,255,0.75) 52%, #e9f4ff 100%); padding:44px 20px; -webkit-font-smoothing:antialiased;}
+
+    .page-wrap{max-width:1120px;margin:0 auto;background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.95));border-radius:calc(var(--radius) + 6px);padding:26px;box-shadow: 0 20px 60px rgba(2,10,30,0.18);border: 1px solid rgba(255,255,255,0.06);}
+    .page-accent {height:8px;width:100%;border-radius:8px;margin-bottom:18px;background: linear-gradient(90deg, var(--accent-start), var(--accent-end));box-shadow: 0 6px 20px rgba(30,95,191,0.12);}    
+
+    header.hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;gap:12px;}    
+    header.hdr h1{margin:0;font-size:22px;color:var(--admiral);}    
+    header.hdr p{margin:0;color:var(--muted);font-size:13px;}    
+
+    .list{display:flex;flex-direction:column;gap:14px;}
+
+    .card{display:flex;align-items:center;gap:16px;background:var(--card-bg);border-radius:12px;padding:14px 16px;border:1px solid var(--card-border);box-shadow:var(--shadow);transition: transform .14s ease, box-shadow .14s ease;}
+    .card:hover{ transform: translateY(-4px); box-shadow: 0 18px 40px rgba(6,43,90,0.12); }
+
+    .avatar{width:84px;height:84px;flex:0 0 84px;border-radius:10px;overflow:hidden;background:linear-gradient(180deg,#eef6ff,#ffffff);border:1px solid rgba(6,43,90,0.04);display:flex;align-items:center;justify-content:center;}
+    .avatar img{width:100%;height:100%;object-fit:cover;display:block;}
+
+    .content{display:flex;flex-direction:column;gap:6px;flex:1 1 auto;min-width:0;}
+    .content h3{margin:0;font-size:16px;color:var(--admiral);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .content .meta-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+    .content .muted{color:var(--muted);font-size:13px;}
+    .tags{font-size:13px;color:var(--muted);margin-top:6px;}
+    .tags span{display:inline-block;margin-right:12px;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;}
+
+    /* small inline flag placed next to/under the location text (not covering photo) */
+    .country-flag-inline{display:inline-flex;align-items:center;gap:6px;margin-left:8px;}
+    .country-flag-inline img{width:22px;height:14px;object-fit:cover;border-radius:2px;border:1px solid #fff;box-shadow:0 1px 2px rgba(0,0,0,0.08);}
+    .country-flag-inline .flag-emoji{font-size:12px;line-height:1}
+
+    .actions{display:flex;gap:10px;align-items:center;justify-self:end;flex:0 0 auto;}
+    .btn{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(90deg,var(--accent-start),var(--accent-end));color:#fff;padding:8px 12px;border-radius:10px;text-decoration:none;font-weight:700;border:0;cursor:pointer;white-space:nowrap;}
+    .btn.secondary{background:transparent;color:var(--admiral);border:1px solid var(--card-border);font-weight:700;}
+    .btn.chat{background:transparent;color:var(--accent-start);border:1px solid rgba(30,95,191,0.12);padding:8px 10px;border-radius:10px;}
+
+    .right-meta{color:var(--muted);font-size:13px;min-width:80px;text-align:right;}
+
+    @media (max-width:980px){.avatar{width:72px;height:72px;flex:0 0 72px;} .card{padding:12px;} .right-meta{display:none;}}    
+    @media (max-width:640px){.page-wrap{padding:16px;} .card{flex-direction:column;align-items:flex-start;} .actions{width:100%;justify-content:space-between;margin-top:8px;} .right-meta{display:block;width:100%;text-align:left;margin-top:6px;color:var(--muted);}}
+
+    .empty{padding:24px;text-align:center;color:var(--muted);background:#fff;border-radius:10px;border:1px dashed rgba(6,43,90,0.04);}  
+  </style>
+
+ <!-- Image zoom (updated: prevents whole-page zoom) -->
+<style>
+  /* overlay */
+  .cc-zoom-overlay{
+    position:fixed;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(0,0,0,0.78);
+    z-index:9999;
+    opacity:0;
+    transition:opacity .18s ease;
+    cursor:zoom-out;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .cc-zoom-overlay.cc-open{ opacity:1; }
+
+  .cc-zoom-container{
+    max-width:92vw;
+    max-height:92vh;
+    overflow:auto;
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .cc-zoom-img{
+    display:block;
+    max-width:100%;
+    max-height:100%;
+    width:auto;
+    height:auto;
+    object-fit:contain;
+    transform:scale(.96);
+    transition:transform .28s cubic-bezier(.2,.9,.2,1);
+    user-select:none;
+    -webkit-user-drag:none;
+    touch-action:manipulation;
+    cursor:zoom-out;
+  }
+  .cc-zoom-overlay.cc-open .cc-zoom-img{ transform:scale(1); }
+
+  .cc-zoom-caption{
+    margin-top:10px;
+    color: #fff;
+    font-size:13px;
+    text-align:center;
+    opacity:.92;
+    max-width:92vw;
+    padding:0 12px;
+    pointer-events:none;
+  }
+
+  /* When overlay is open, disable the .card transform/transition so only the image animates.
+     This targets your existing .card rule and is intentionally minimal. */
+  html.cc-zoom-open .card {
+    transform: none !important;
+    transition: none !important;
+    will-change: auto !important;
+  }
+
+  /* Optionally prevent pointer events on underlying page content while overlay present */
+  html.cc-zoom-open .page-wrap { pointer-events: none; }
+</style>
+
+
+
+
+
+
+</head>
+<body>
+  <div class="page-wrap" role="main" aria-labelledby="pageTitle">
+    <div class="page-accent" aria-hidden="true"></div>
+
+    <div class="container">
+      {% set _ = get_flashed_messages() %}
+
+      <header class="hdr">
+        <div>
+          <h1 id="pageTitle">Connections</h1>
+          <p>Showing <strong>{{ target|capitalize }}</strong> profiles for you.</p>
+        </div>
+        <div class="header-actions">
+           <a href="{{ url_for('profile_setup', enable_actions='1', suppress_overlay='1') }}" class="btn secondary" style="text-decoration:none;" onclick="(function(){try{localStorage.setItem('profile_published_hidden','1');localStorage.setItem('profile_published_overlay_seen','1');}catch(e){}window.location.replace('{{ url_for('profile_setup', enable_actions='1', suppress_overlay='1') }}');})(); return false;">Back to preview</a>
+        </div>
+      </header>
+
+      {% if not profiles %}
+        <div class="empty">No {{ target }} profiles found yet.</div>
+      {% else %}
+        <section class="list" aria-live="polite">
+          {% for p in profiles %}
+            <article class="card" role="article" aria-labelledby="p-{{ p.id }}">
+              <div class="avatar" aria-hidden="false">
+                {% if p.profile_photo %}
+                  <img src="{{ url_for('uploaded_file', filename=p.profile_photo) }}" alt="avatar for {{ p.user.first_name if p.user else 'user' }}">
+                {% else %}
+                  <img src="{{ url_for('static', filename='default-avatar.png') }}" alt="default avatar">
+                {% endif %}
+              </div>
+
+              <div class="content">
+                <h3 id="p-{{ p.id }}">{{ (p.user.first_name ~ ' ' ~ p.user.last_name) if p.user else 'Unnamed' }}</h3>
+                <div class="meta-row">
+                  <div class="muted location-text">{{ p.location or 'Location not provided' }}</div>
+                  {% if p.care_needed and target == 'family' %}
+                    <div class="muted">• Care needed: {{ p.care_needed }}</div>
+                  {% endif %}
+                </div>
+
+                <div class="tags" title="Profiles tags">
+                  {% if p.services %}<span title="Services">Services: {{ p.services }}</span>{% endif %}
+                  {% if p.specialties and target == 'caregiver' %}<span title="Specialties">Specialties: {{ p.specialties }}</span>{% endif %}
+                </div>
+              </div>
+
+              <div class="actions" aria-hidden="false">
+                <a class="btn" href="{% if p.user %}{{ url_for('view_public_profile', user_id=p.user.id) }}{% else %}#{% endif %}" title="View profile of {{ p.user.first_name if p.user else '' }}"><i class="fa-solid fa-eye" aria-hidden="true"></i> View profile</a>
+
+                {% if p.user %}
+                  <a class="btn chat"
+                     href="{{ url_for('chat_page', other_id=p.user.id) }}"
+                     title="Message {{ p.user.first_name }}"
+                     data-user-id="{{ p.user.id }}">
+                    <i class="fa-solid fa-comment-dots" aria-hidden="true"></i> Message
+                  </a>
+                {% else %}
+                  <a class="btn chat" href="#" aria-disabled="true" title="No user available">
+                    <i class="fa-solid fa-comment-dots" aria-hidden="true"></i> Message
+                  </a>
+                {% endif %}
+ 
+                <div class="right-meta" aria-hidden="false">{{ p.languages or '' }}</div>
+              </div>
+            </article>
+          {% endfor %}
+        </section>
+      {% endif %}
+    </div>
+  </div>
+
+  <script>
+    window.addEventListener('pageshow', function (e) {
+      try { localStorage.setItem('profile_published_hidden','1'); localStorage.setItem('profile_published_overlay_seen','1'); } catch (err) {}
+    });
+  </script>
+
+  <!-- FLAG: client-only, small flags placed next to/under the location text. Full country list included. -->
+  <script>
+  (function(){
+    // Full (extensive) mapping of normalized country names -> ISO2
+    const NAME_TO_ISO = {
+      "afghanistan":"af","aland islands":"ax","albania":"al","algeria":"dz","american samoa":"as","andorra":"ad","angola":"ao","anguilla":"ai","antarctica":"aq","antigua and barbuda":"ag","argentina":"ar","armenia":"am","aruba":"aw","australia":"au","austria":"at","azerbaijan":"az",
+      "bahamas":"bs","bahrain":"bh","bangladesh":"bd","barbados":"bb","belarus":"by","belgium":"be","belize":"bz","benin":"bj","bermuda":"bm","bhutan":"bt","bolivia":"bo","bonaire":"bq","bosnia and herzegovina":"ba","botswana":"bw","bouvet island":"bv","brazil":"br","british indian ocean territory":"io","british virgin islands":"vg","brunei":"bn","bulgaria":"bg","burkina faso":"bf","burundi":"bi",
+      "cabo verde":"cv","cambodia":"kh","cameroon":"cm","canada":"ca","cayman islands":"ky","central african republic":"cf","chad":"td","chile":"cl","china":"cn","christmas island":"cx","cocos islands":"cc","colombia":"co","comoros":"km","congo":"cg","congo (democratic republic)":"cd","costa rica":"cr","cote d'ivoire":"ci","ivory coast":"ci","croatia":"hr","cuba":"cu","curacao":"cw","cyprus":"cy","czech republic":"cz","czechia":"cz",
+      "denmark":"dk","djibouti":"dj","dominica":"dm","dominican republic":"do","ecuador":"ec","egypt":"eg","el salvador":"sv","equatorial guinea":"gq","eritrea":"er","estonia":"ee","eswatini":"sz","ethiopia":"et","falkland islands":"fk","faroe islands":"fo","fiji":"fj","finland":"fi","france":"fr","french guiana":"gf","french polynesia":"pf","french southern territories":"tf",
+      "gabon":"ga","gambia":"gm","georgia":"ge","germany":"de","ghana":"gh","gibraltar":"gi","greece":"gr","greenland":"gl","grenada":"gd","guadeloupe":"gp","guam":"gu","guatemala":"gt","guernsey":"gg","guinea":"gn","guinea-bissau":"gw","guyana":"gy",
+      "haiti":"ht","heard island and mcdonald islands":"hm","holy see":"va","honduras":"hn","hong kong":"hk","hungary":"hu","iceland":"is","india":"in","indonesia":"id","iran":"ir","iraq":"iq","ireland":"ie","isle of man":"im","israel":"il","italy":"it",
+      "jamaica":"jm","japan":"jp","jersey":"je","jordan":"jo","kazakhstan":"kz","kenya":"ke","kiribati":"ki","kosovo":"xk","kuwait":"kw","kyrgyzstan":"kg","laos":"la","latvia":"lv","lebanon":"lb","lesotho":"ls","liberia":"lr","libya":"ly","liechtenstein":"li","lithuania":"lt","luxembourg":"lu",
+      "macao":"mo","macedonia":"mk","north macedonia":"mk","madagascar":"mg","malawi":"mw","malaysia":"my","maldives":"mv","mali":"ml","malta":"mt","marshall islands":"mh","martinique":"mq","mauritania":"mr","mauritius":"mu","mayotte":"yt","mexico":"mx","micronesia":"fm","moldova":"md","monaco":"mc","mongolia":"mn","montenegro":"me","montserrat":"ms","morocco":"ma","mozambique":"mz","myanmar":"mm",
+      "namibia":"na","nauru":"nr","nepal":"np","netherlands":"nl","new caledonia":"nc","new zealand":"nz","nicaragua":"ni","niger":"ne","nigeria":"ng","niue":"nu","norfolk island":"nf","north korea":"kp","northern mariana islands":"mp","norway":"no","oman":"om","pakistan":"pk","palau":"pw","palestine":"ps","panama":"pa","papua new guinea":"pg","paraguay":"py","peru":"pe","philippines":"ph","pitcairn":"pn","poland":"pl","portugal":"pt","puerto rico":"pr",
+      "qatar":"qa","reunion":"re","romania":"ro","russia":"ru","russian federation":"ru","rwanda":"rw",
+      "saint barthelemy":"bl","saint helena":"sh","saint kitts and nevis":"kn","saint lucia":"lc","saint martin":"mf","saint pierre and miquelon":"pm","saint vincent and the grenadines":"vc","samoa":"ws","san marino":"sm","sao tome and principe":"st","saudi arabia":"sa","senegal":"sn","serbia":"rs","seychelles":"sc","sierra leone":"sl","singapore":"sg","sint maarten":"sx","slovakia":"sk","slovenia":"si","solomon islands":"sb","somalia":"so","south africa":"za","south korea":"kr","south sudan":"ss","spain":"es","sri lanka":"lk","sudan":"sd","suriname":"sr","svalbard and jan mayen":"sj","sweden":"se","switzerland":"ch","syria":"sy",
+      "taiwan":"tw","tajikistan":"tj","tanzania":"tz","thailand":"th","timor-leste":"tl","togo":"tg","tokelau":"tk","tonga":"to","trinidad and tobago":"tt","tunisia":"tn","turkey":"tr","turkmenistan":"tm","turks and caicos islands":"tc","tuvalu":"tv","uganda":"ug","ukraine":"ua","united arab emirates":"ae","united kingdom":"gb","united states":"us","united states of america":"us","usa":"us","us":"us","uruguay":"uy","uzbekistan":"uz","vanuatu":"vu","venezuela":"ve","vietnam":"vn","virgin islands":"vi","wallis and futuna":"wf","western sahara":"eh","yemen":"ye","zambia":"zm","zimbabwe":"zw",
+
+      // Common short-forms
+      "england":"gb","scotland":"gb","wales":"gb","britain":"gb","uk":"gb","u.k.":"gb","u.s.":"us","u.s.a.":"us","america":"us"
+    };
+
+    function normalize(v){ if(!v) return ''; v = String(v).trim().toLowerCase(); v = v.replace(/\([^)]*\)/g,''); v = v.replace(/[\.]+$/,''); v = v.replace(/\s{2,}/g,' '); v = v.replace(/[_]/g,' '); return v; }
+
+    function tryMapNameToIso(name){ if(!name) return null; name = normalize(name); if(!name) return null; if(/^[a-z]{2}$/.test(name)) return name; if(NAME_TO_ISO[name]) return NAME_TO_ISO[name]; const words = name.split(/\s+/); if(words.length>1){ const lastTwo = (words.slice(-2).join(' ')).trim(); if(NAME_TO_ISO[lastTwo]) return NAME_TO_ISO[lastTwo]; const last = words[words.length-1]; if(NAME_TO_ISO[last]) return NAME_TO_ISO[last]; } return null; }
+
+    function countryCodeToEmoji(cc){ if(!cc || cc.length!==2) return ''; const A = 0x41; const first = 0x1F1E6 + (cc.toUpperCase().charCodeAt(0)-A); const second = 0x1F1E6 + (cc.toUpperCase().charCodeAt(1)-A); return String.fromCodePoint(first, second); }
+
+    function appendSmallFlagToLocation(locationNode, iso){
+      if(!locationNode || !iso) return;
+      // avoid duplicate
+      if(locationNode.querySelector('.country-flag-inline')) return;
+      const container = document.createElement('span');
+      container.className = 'country-flag-inline';
+      const img = document.createElement('img');
+      img.src = 'https://flagcdn.com/w20/' + iso + '.png';
+      img.alt = iso.toUpperCase();
+      img.onerror = function(){ container.removeChild(img); const em = document.createElement('span'); em.className = 'flag-emoji'; em.textContent = countryCodeToEmoji(iso); container.appendChild(em); };
+      container.appendChild(img);
+      // prefer to append inline next to the location text
+      locationNode.appendChild(container);
+    }
+
+    function isoFromLocationString(raw){ if(!raw) return null; // split on slash/comma/pipe/separators
+      const parts = raw.split(/[\/|,]/).map(p=>normalize(p)).filter(Boolean);
+      for(let i=parts.length-1;i>=0;i--){ const iso = tryMapNameToIso(parts[i]); if(iso) return iso; }
+      // try whole
+      const whole = normalize(raw); const isoWhole = tryMapNameToIso(whole); if(isoWhole) return isoWhole;
+      // common heuristics
+      if(/united states|usa|u s a|u s$/i.test(raw)) return 'us';
+      if(/united kingdom|uk|great britain|england|scotland/i.test(raw)) return 'gb';
+      const words = whole.split(/\s+/);
+      if(words.length>=2){ const lastTwo = (words.slice(-2).join(' ')).trim(); const iso2 = tryMapNameToIso(lastTwo); if(iso2) return iso2; }
+      return null; }
+
+    function renderFlags(){ document.querySelectorAll('.card').forEach(function(card){ try{
+        // find location node (first .muted .location-text ideally)
+        let locationNode = card.querySelector('.location-text');
+        if(!locationNode) locationNode = card.querySelector('.muted');
+        // allow server-provided data-country-code too
+        let candidate = '';
+        if(card.dataset && card.dataset.countryCode) candidate = card.dataset.countryCode;
+        if(!candidate && locationNode) candidate = locationNode.textContent || locationNode.innerText || '';
+        if(!candidate){ // try tags or alt
+          const tags = card.querySelector('.tags'); if(tags && tags.textContent) candidate = tags.textContent.trim();
+        }
+        if(!candidate){ const altimg = card.querySelector('.avatar img'); if(altimg && altimg.alt) candidate = altimg.alt; }
+        if(!candidate) return;
+        const iso = isoFromLocationString(candidate);
+        if(!iso) return;
+        appendSmallFlagToLocation(locationNode || card.querySelector('.content'), iso);
+      }catch(e){ console.error('flag render error', e); } }); }
+
+    if(document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', renderFlags); } else { renderFlags(); }
+    const observer = new MutationObserver((mut)=>{ let added=false; for(const m of mut){ if(m.addedNodes && m.addedNodes.length){ added=true; break; } } if(added) renderFlags(); });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+  })();
+  </script>
+
+
+
+<script>
+(function(){
+  let _prevBodyOverflow = null;
+
+  function lockBodyScroll(){
+    _prevBodyOverflow = document.body.style.overflow || '';
+    document.body.style.overflow = 'hidden';
+  }
+  function unlockBodyScroll(){
+    if(_prevBodyOverflow !== null) document.body.style.overflow = _prevBodyOverflow;
+    _prevBodyOverflow = null;
+  }
+
+  function openZoom(src, alt){
+    if(!src) return;
+    if(document.querySelector('.cc-zoom-overlay')) return;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'cc-zoom-overlay';
+    overlay.setAttribute('role','dialog');
+    overlay.setAttribute('aria-modal','true');
+    overlay.tabIndex = -1;
+
+    const container = document.createElement('div');
+    container.className = 'cc-zoom-container';
+
+    const img = document.createElement('img');
+    img.className = 'cc-zoom-img';
+    img.src = src;
+    img.alt = alt || '';
+    img.loading = 'eager';
+    img.draggable = false;
+
+    container.appendChild(img);
+    overlay.appendChild(container);
+
+    if(alt && String(alt).trim()){
+      const cap = document.createElement('div');
+      cap.className = 'cc-zoom-caption';
+      cap.textContent = alt;
+      overlay.appendChild(cap);
+    }
+
+    function close(){
+      overlay.classList.remove('cc-open');
+      document.documentElement.classList.remove('cc-zoom-open'); // restore page behavior
+      overlay.addEventListener('transitionend', function onEnd(){
+        overlay.removeEventListener('transitionend', onEnd);
+        if(overlay.parentNode) overlay.parentNode.removeChild(overlay);
+      }, { once: true });
+      document.removeEventListener('keydown', keyHandler);
+      unlockBodyScroll();
+    }
+
+    function keyHandler(e){
+      if(e.key === 'Escape') close();
+    }
+
+    // clicking anywhere on overlay closes (including image)
+    overlay.addEventListener('click', function(e){
+      // only close; don't let the click bubble to page
+      e.stopPropagation();
+      e.preventDefault();
+      close();
+    });
+
+    // ensure clicks on the image do not bubble to the underlying .card
+    img.addEventListener('click', function(ev){
+      ev.stopPropagation();
+      ev.preventDefault();
+      // also close on image click (like many modern sites)
+      close();
+    });
+
+    document.body.appendChild(overlay);
+    // add guard on html to temporarily disable transforming cards and block pointer events
+    document.documentElement.classList.add('cc-zoom-open');
+    lockBodyScroll();
+    requestAnimationFrame(function(){
+      overlay.classList.add('cc-open');
+      overlay.focus();
+      document.addEventListener('keydown', keyHandler);
+    });
+  }
+
+  // Delegate clicks on .avatar img (works for dynamically-added cards too)
+  document.addEventListener('click', function(e){
+    // stop propagation early for events that start on the image so parent .card styles don't trigger
+    const el = e.target;
+    const avatarImg = el.closest ? el.closest('.avatar img') : null;
+    if(!avatarImg) return;
+    // prevent default and stop propagation to avoid triggering card :active behaviors
+    e.preventDefault();
+    e.stopPropagation();
+    // Use the rendered src (works with your url_for uploaded/static src)
+    openZoom(avatarImg.src, avatarImg.alt || '');
+  }, false);
+})();
+</script>
+<!-- End updated image zoom -->
+
+
+
+</body>
+</html>

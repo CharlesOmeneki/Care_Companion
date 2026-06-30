@@ -1,0 +1,2082 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Profile Step 2 — Care Companion</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    /* Keep same palette / feel as step1 */
+/* --- REPLACE the existing :root block in profile_step2.html with this exact block --- */
+:root{
+  --admiral: #062b5a;   /* deep navy */
+  --indigo:  #2b3d9a;   /* indigo */
+  --berry:   #1e5fbf;   /* berry-blue */
+  --navy:    #0a2a66;   /* navy */
+  --ice:     #f5f9ff;   /* pale */
+  --muted:   #a6bacf;
+  --accent:  #00d4ff;   /* small accent */
+  --card:    linear-gradient(180deg, rgba(8,30,66,0.9), rgba(11,51,120,0.95));
+}
+    
+    *{box-sizing:border-box;font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;}
+    body{
+      margin:0;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-direction:column;
+      background: #151b54; 
+      color:#fff;
+      -webkit-font-smoothing:antialiased;
+      padding:28px 16px;
+    }
+
+    .site-title { font-weight:800; font-size:28px; color:#ffffff;  margin-bottom:14px; letter-spacing:0.6px; text-align:center; }
+    @media (max-width:520px){ .site-title { font-size:20px; margin-bottom:10px; } }
+
+    .wrap{
+      width:920px; max-width:94%;
+      background: var(--card);
+      border-radius:16px; padding:26px;
+      box-shadow: 0 30px 80px rgba(6, 27, 60, 0.35);
+      border: 1px solid rgba(255,255,255,0.04);
+    }
+
+    header.hdr{ display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:18px; }
+    header.hdr h1{ margin:0; font-size:20px; color:var(--ice); letter-spacing:0.2px; }
+    header.hdr p{ margin:0; color:var(--muted); font-size:13px; }
+
+    .form-col { display:block; width:100%; }
+
+    label.field-label { display:block; font-weight:700; margin-bottom:8px; color:var(--ice); }
+    .field {
+      width:100%; padding:10px 12px; border-radius:10px;
+      border:1px solid rgba(255,255,255,0.12);
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      color:var(--ice); font-size:14px;
+      margin-bottom:12px;
+    }
+    .field:focus { outline:none; border-color: rgba(255,255,255,0.22); box-shadow: 0 2px 10px rgba(11,99,216,0.08); }
+
+    .field.warn { border-color: var(--warn); box-shadow: 0 0 0 4px var(--warn-bg); }
+
+    .small-hint { font-size:13px; color:var(--muted); margin-top:4px; margin-bottom:12px; }
+
+    /* make dropdown text more visible without changing dropdown background */
+    select.field {
+      color: var(--ice);
+      font-weight: 700;
+      -webkit-font-smoothing:antialiased;
+    }
+    select.field option {
+      color: var(--navy);
+      font-weight: 600;
+    }
+
+    .row { display:flex; gap:12px; }
+    .row .col { flex:1; }
+
+    .hint { font-size:13px; color:var(--muted); margin-top:6px; }
+
+    .actions { display:flex; justify-content:flex-end; gap:12px; margin-top:6px; }
+    .btn { padding:10px 14px; border-radius:10px; font-weight:700; cursor:pointer; border:none; background: linear-gradient(90deg, var(--berry), var(--indigo)); color:#fff; box-shadow: 0 12px 30px rgba(11,99,216,0.12); }
+    .btn.secondary { background: transparent; color:var(--ice); border:1px solid rgba(255,255,255,0.06); }
+
+    .chk-grid { display:grid; grid-template-columns: repeat(2, 1fr); gap:8px; margin-bottom:12px; }
+    .chk { display:flex; gap:8px; align-items:center; padding:8px 10px; border-radius:8px; background:rgba(255,255,255,0.01); border:1px solid rgba(255,255,255,0.02); color:var(--ice); }
+
+    .availability-days { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
+    .day { padding:6px 8px; border-radius:6px; background:rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.04); color:var(--ice); font-weight:700; cursor:pointer; display:flex; align-items:center; gap:6px; }
+
+    .required-note { font-size:13px; color:var(--muted); margin-bottom:10px; }
+    @media (max-width:880px){ .row { flex-direction:column; } .chk-grid { grid-template-columns: 1fr; } .availability-days{ gap:6px; } }
+
+    /* simple toast for draft saved */
+    .toast {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      background: rgba(6,43,90,0.95);
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(2,10,30,0.3);
+      z-index: 9999;
+    }
+
+    .muted-note { font-size:13px; color:var(--muted); margin-top:4px; margin-bottom:12px; }
+
+    .warn-text { color: var(--warn); font-weight:700; font-size:13px; margin-top:6px; display:none; }
+    .warn-text.show { display:block; }
+
+    /* convenience utility used in templates */
+    .small-muted { color: var(--muted); font-size:13px; }
+
+
+
+
+@media (max-width: 880px) {
+  body{
+    padding:16px 10px;
+    justify-content:flex-start;
+  }
+
+  .site-title{
+    font-size:22px;
+    margin-bottom:12px;
+  }
+
+  .wrap{
+    width:100%;
+    max-width:100%;
+    padding:16px;
+    border-radius:14px;
+  }
+
+  header.hdr{
+    flex-direction:column;
+    align-items:flex-start;
+    gap:8px;
+    margin-bottom:14px;
+  }
+
+  header.hdr h1{
+    font-size:18px;
+    line-height:1.2;
+  }
+
+  header.hdr p,
+  .small-muted,
+  .small-hint,
+  .hint,
+  .required-note,
+  .muted-note{
+    font-size:12px;
+  }
+
+  .form-col{
+    width:100%;
+  }
+
+  .row{
+    flex-direction:column;
+    gap:12px;
+  }
+
+  .row .col{
+    width:100%;
+  }
+
+  .field{
+    width:100%;
+    font-size:14px;
+    padding:11px 12px;
+  }
+
+  textarea.field{
+    min-height:110px;
+  }
+
+  .actions{
+    flex-direction:column-reverse;
+    gap:10px;
+    justify-content:stretch;
+    margin-top:14px;
+  }
+
+  .actions .btn{
+    width:100%;
+  }
+
+  .chk-grid{
+    grid-template-columns:1fr;
+    gap:8px;
+  }
+
+  .chk{
+    padding:10px;
+    font-size:13px;
+    align-items:flex-start;
+  }
+
+  .availability-days{
+    gap:8px;
+  }
+
+  .day{
+    width:100%;
+    justify-content:flex-start;
+    padding:10px 10px;
+    font-size:13px;
+  }
+
+  /* salary rows and similar multi-input rows stack nicely */
+  .row[style*="align-items:center"] > div,
+  .row[style*="align-items:center"] .col{
+    width:100% !important;
+    max-width:100% !important;
+  }
+}
+
+@media (max-width: 520px) {
+  body{
+    padding:12px 8px;
+  }
+
+  .site-title{
+    font-size:20px;
+    margin-bottom:10px;
+  }
+
+  .wrap{
+    padding:14px;
+  }
+
+  header.hdr h1{
+    font-size:17px;
+  }
+
+  .field{
+    font-size:13px;
+    padding:10px 11px;
+  }
+
+  .btn{
+    padding:11px 12px;
+    font-size:14px;
+  }
+
+  .availability-days{
+    gap:6px;
+  }
+
+  .day{
+    font-size:12px;
+  }
+
+  .chk{
+    font-size:12px;
+  }
+
+  .toast{
+    right:10px;
+    left:10px;
+    bottom:10px;
+    width:auto;
+    text-align:center;
+  }
+}
+
+.loading-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.45);
+    display:none;
+    justify-content:center;
+    align-items:center;
+    z-index:99999;
+}
+
+.loading-overlay.show{
+    display:flex;
+}
+
+.loader{
+    width:55px;
+    height:55px;
+    border:6px solid rgba(255,255,255,.3);
+    border-top:6px solid #ffffff;
+    border-radius:50%;
+    animation:spin .8s linear infinite;
+}
+
+@keyframes spin{
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+
+
+  </style>
+</head>
+<body>
+
+  <!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loader"></div>
+</div> 
+
+  <div class="site-title">Care Companion</div>
+
+  <div class="wrap" role="main" aria-labelledby="pageTitle">
+    <header class="hdr">
+      <div>
+        <h1 id="pageTitle">Create your profile — Step 2</h1>
+        <p class="small-muted">Continue setting up your account. Fields marked required must be completed.</p>
+      </div>
+      <div class="small-muted">
+        Signed in as:
+        <strong style="color:var(--ice)">
+          {% if user and user.role == 'caregiver' %}
+            Caregiver
+          {% else %}
+            Family
+          {% endif %}
+        </strong>
+      </div>
+    </header>
+
+    <form id="step2Form" method="post" action="{{ url_for('profile_step2') }}" class="form-col" novalidate enctype="multipart/form-data">
+      
+
+      {% if user and user.role == 'caregiver' %}
+        <!-- CAREGIVER: single-column questions (left untouched as requested) -->
+        <label class="field-label" for="experience_years">Years of experience *</label>
+        <input id="experience_years" name="experience_years" type="number" min="0" class="field" required value="{{ data.get('experience_years','') }}">
+
+        <label class="field-label" for="specialties">Specialty / Skills *</label>
+        <!-- NOTE: values updated to canonical tokens (use _care suffix where appropriate) -->
+        <select id="specialties" name="specialties" class="field" required>
+          <option value="">— select your specialty —</option>
+          <option value="dementia_care" {% if data.get('specialties') in ['dementia_care','dementia'] %}selected{% endif %}>Dementia care</option>
+          <option value="pediatric_care" {% if data.get('specialties') in ['pediatric_care','pediatric'] %}selected{% endif %}>Pediatric care</option>
+          <option value="post_op_care" {% if data.get('specialties') in ['post_op_care','post_op'] %}selected{% endif %}>Post-operative care</option>
+          <option value="palliative_care" {% if data.get('specialties') in ['palliative_care','palliative'] %}selected{% endif %}>Palliative care</option>
+          <option value="companionship" {% if data.get('specialties')=='companionship' %}selected{% endif %}>Companionship</option>
+          <option value="mobility_assistance" {% if data.get('specialties') in ['mobility_assistance','mobility'] %}selected{% endif %}>Mobility assistance</option>
+          <option value="medication_management" {% if data.get('specialties') in ['medication_management','medication'] %}selected{% endif %}>Medication management</option>
+          <option value="wound_care" {% if data.get('specialties') in ['wound_care','wound'] %}selected{% endif %}>Wound care</option>
+          <option value="alzheimers_care" {% if data.get('specialties') in ['alzheimers_care','alzheimers'] %}selected{% endif %}>Alzheimer's care</option>
+          <option value="infant_care" {% if data.get('specialties') in ['infant_care','infant'] %}selected{% endif %}>Infant care</option>
+          <option value="other" {% if data.get('specialties')=='other' %}selected{% endif %}>Others (please specify)</option>
+        </select>
+
+        <div id="specialtiesOtherWrap" style="display: {% if data.get('specialties')=='other' %}block{% else %}none{% endif %};">
+          <label class="field-label" for="specialties_other">If Others, specify (max 21 chars)</label>
+          <input id="specialties_other" name="specialties_other" type="text" class="field" maxlength="21" placeholder="e.g., Speech therapy" value="{{ data.get('specialties_other','') }}">
+          <div class="muted-note">Maximum 21 characters.</div>
+        </div>
+
+        
+ 
+
+        <!-- Structured salary input (preferred) + legacy hidden fields -->
+        <label class="field-label">Salary (structured) *</label>
+        <div class="row" style="align-items:center;">
+          <div class="col">
+            <input id="salary_amount" name="salary_amount" type="text" inputmode="numeric" class="field" placeholder="Amount (e.g., 200)" value="{{ data.get('salary_amount', '') }}">
+            <div class="small-hint">Enter numbers only — thousands separators will be added automatically in preview.</div>
+          </div>
+          <div style="width:180px;">
+            <select id="salary_currency" name="salary_currency" class="field" required>
+              <option value="">Currency</option>
+              <option value="NGN" {% if data.get('salary_currency')=='NGN' %}selected{% endif %}>NGN — Naira</option>
+              <option value="USD" {% if data.get('salary_currency')=='USD' %}selected{% endif %}>USD — US Dollar</option>
+              <option value="EUR" {% if data.get('salary_currency')=='EUR' %}selected{% endif %}>EUR — Euro</option>
+              <option value="GBP" {% if data.get('salary_currency')=='GBP' %}selected{% endif %}>GBP — British Pound</option>
+              <option value="CAD" {% if data.get('salary_currency')=='CAD' %}selected{% endif %}>CAD — Canadian Dollar</option>
+              <option value="AUD" {% if data.get('salary_currency')=='AUD' %}selected{% endif %}>AUD — Australian Dollar</option>
+              <option value="ZAR" {% if data.get('salary_currency')=='ZAR' %}selected{% endif %}>ZAR — South African Rand</option>
+              <option value="GHS" {% if data.get('salary_currency')=='GHS' %}selected{% endif %}>GHS — Ghana Cedi</option>
+              <option value="KES" {% if data.get('salary_currency')=='KES' %}selected{% endif %}>KES — Kenyan Shilling</option>
+              <option value="INR" {% if data.get('salary_currency')=='INR' %}selected{% endif %}>INR — Indian Rupee</option>
+            </select>
+          </div>
+          <div style="width:160px;">
+            <select id="salary_frequency" name="salary_frequency" class="field" required>
+              <option value="">Frequency</option>
+              <option value="monthly" {% if data.get('salary_frequency')=='monthly' %}selected{% endif %}>Monthly</option>
+              <option value="weekly" {% if data.get('salary_frequency')=='weekly' %}selected{% endif %}>Weekly</option>
+              <option value="hourly" {% if data.get('salary_frequency')=='hourly' %}selected{% endif %}>Hourly</option>
+              <option value="daily" {% if data.get('salary_frequency')=='daily' %}selected{% endif %}>Daily</option>
+            </select>
+          </div>
+        </div>
+        <div class="small-hint">Example: choose <strong>USD</strong>, amount <strong>200</strong>, frequency <strong>monthly</strong> → displays as <em>$200/monthly</em>.</div>
+
+        <!-- Legacy/backwards-compatible fields (kept hidden and automatically filled by JS) -->
+        <input type="hidden" id="salary_free_hidden" name="salary" value="{{ data.get('salary', data.get('hourly_rate','')) }}">
+        <input type="hidden" id="hourly_rate_hidden" name="hourly_rate" value="{{ data.get('hourly_rate','') }}">
+
+        <!-- Willing to travel select (yes/no) -->
+        <label class="field-label" for="willing_to_travel">Willing to travel *</label>
+        <select id="willing_to_travel" name="willing_to_travel" class="field" required>
+          <option value="">— select —</option>
+          <option value="yes" {% if data.get('willing_to_travel')=='yes' %}selected{% endif %}>Yes</option>
+          <option value="no" {% if data.get('willing_to_travel')=='no' %}selected{% endif %}>No</option>
+        </select>
+
+        <label class="field-label">Services you offer *</label>
+        <div class="chk-grid" id="servicesGrid" role="radiogroup" aria-label="Services offered">
+          <label class="chk"><input class="services_radio" type="radio" name="services_radio" value="companionship" {% if 'companionship' in (data.get('services','')|default('')) %}checked{% endif %}> Companionship</label>
+          <label class="chk"><input class="services_radio" type="radio" name="services_radio" value="personal_care" {% if 'personal_care' in (data.get('services','')|default('')) %}checked{% endif %}> Personal care</label>
+          <label class="chk"><input class="services_radio" type="radio" name="services_radio" value="medication" {% if 'medication' in (data.get('services','')|default('')) %}checked{% endif %}> Medication reminders</label>
+          <label class="chk"><input class="services_radio" type="radio" name="services_radio" value="meal_prep" {% if 'meal_prep' in (data.get('services','')|default('')) %}checked{% endif %}> Meal prep</label>
+
+          <!-- added more options to reach 7+ -->
+          <label class="chk"><input class="services_radio" type="radio" name="services_radio" value="light_housekeeping" {% if 'light_housekeeping' in (data.get('services','')|default('')) %}checked{% endif %}> Light housekeeping</label>
+          <label class="chk"><input class="services_radio" type="radio" name="services_radio" value="transportation" {% if 'transportation' in (data.get('services','')|default('')) %}checked{% endif %}> Transportation</label>
+          <label class="chk"><input class="services_radio" type="radio" name="services_radio" value="respite_care" {% if 'respite_care' in (data.get('services','')|default('')) %}checked{% endif %}> Respite care</label>
+
+          <!-- Others radio -->
+          <label class="chk"><input id="services_other_chk" class="services_radio" type="radio" name="services_radio" value="other" {% if data.get('services_other') %}checked{% endif %}> Others</label>
+        </div>
+
+        <!-- Hidden canonical field that the server expects: we populate this via JS before save/submit -->
+        <input type="hidden" id="services_hidden" name="services" value="{{ data.get('services') or (data.get('services_other') if data.get('services_other') else '') }}">
+
+        <div id="servicesOtherWrap" style="display: {% if data.get('services_other') %}block{% else %}none{% endif %}; margin-bottom:12px;">
+          <label class="field-label" for="services_other">If Others, specify (max 21 chars)</label>
+          <input id="services_other" name="services_other" type="text" class="field" maxlength="21" placeholder="e.g., Speech therapy" value="{{ data.get('services_other','') }}">
+          <div class="muted-note">Maximum 21 characters. You may select only one service.</div>
+        </div>
+
+        <label class="field-label" for="preferred_age">Preferred care recipient age groups *</label>
+        <select id="preferred_age" name="preferred_age" class="field" required>
+          <option value="">— select age group —</option>
+          <option value="Children" {% if data.get('preferred_age')=='Children' %}selected{% endif %}>Children (1–12)</option>
+          <option value="Teenagers" {% if data.get('preferred_age')=='Teenagers' %}selected{% endif %}>Teenagers (13–17)</option>
+          <option value="Adults" {% if data.get('preferred_age')=='Adults' %}selected{% endif %}>Adults (18–64)</option>
+          <option value="Seniors" {% if data.get('preferred_age')=='Seniors' %}selected{% endif %}>Seniors (65+)</option>
+          <option value="All_ages" {% if data.get('preferred_age')=='All_ages' %}selected{% endif %}>All ages</option>
+          <option value="Other" {% if data.get('preferred_age')=='Other' %}selected{% endif %}>Other / Mixed</option>
+        </select>
+
+        <label class="field-label" for="disability_yesno">Disability? *</label>
+        <select id="disability_yesno" name="disability" class="field" required>
+          <option value="">— select —</option>
+          <option value="no" {% if data.get('disability') in [None,'','no','none'] %}selected{% endif %}>No</option>
+          <option value="yes" {% if data.get('disability')=='yes' or data.get('disability_details') %}selected{% endif %}>Yes</option>
+        </select>
+
+        <div id="disabilityDetailsWrap" style="display: {% if data.get('disability')=='yes' or data.get('disability_details') %}block{% else %}none{% endif %};">
+          <label class="field-label" for="disability_details">If yes, specify (max 21 chars)</label>
+          <input id="disability_details" name="disability_details" type="text" class="field" maxlength="21" placeholder="e.g., Mobility impairment" value="{{ data.get('disability_details','') }}">
+          <div class="muted-note">Maximum 21 characters.</div>
+        </div>
+
+        <label class="field-label">Availability *</label>
+
+        <!-- Days selector -->
+        <div class="availability-days" aria-label="Availability days">
+{% set raw_ad = data.get('availability_days') %}
+{% if raw_ad is iterable and raw_ad is not string %}
+  {% set ad = raw_ad %}
+{% elif raw_ad %}
+  {% set ad = raw_ad.split(',') %}
+{% else %}
+  {% set ad = [] %}
+{% endif %}
+
+          <label class="day"><input type="checkbox" name="availability_days" value="Mon" {% if 'Mon' in ad %}checked{% endif %}> Mon</label>
+          <label class="day"><input type="checkbox" name="availability_days" value="Tue" {% if 'Tue' in ad %}checked{% endif %}> Tue</label>
+          <label class="day"><input type="checkbox" name="availability_days" value="Wed" {% if 'Wed' in ad %}checked{% endif %}> Wed</label>
+          <label class="day"><input type="checkbox" name="availability_days" value="Thu" {% if 'Thu' in ad %}checked{% endif %}> Thu</label>
+          <label class="day"><input type="checkbox" name="availability_days" value="Fri" {% if 'Fri' in ad %}checked{% endif %}> Fri</label>
+          <label class="day"><input type="checkbox" name="availability_days" value="Sat" {% if 'Sat' in ad %}checked{% endif %}> Sat</label>
+          <label class="day"><input type="checkbox" name="availability_days" value="Sun" {% if 'Sun' in ad %}checked{% endif %}> Sun</label>
+
+          <label class="day"><input id="monSunBox" type="checkbox" name="availability_days" value="Mon-Sun" {% if 'All' in ad or 'Mon-Sun' in ad %}checked{% endif %}> Mon-Sun</label>
+        </div>
+
+        <div class="row">
+          <div class="col">
+            <label class="field-label" for="availability_start">Start time *</label>
+            <input id="availability_start" name="availability_start" type="time" class="field" required value="{{ data.get('availability_start','') }}">
+          </div>
+          <div class="col">
+            <label class="field-label" for="availability_end">End time *</label>
+            <input id="availability_end" name="availability_end" type="time" class="field" required value="{{ data.get('availability_end','') }}">
+          </div>
+        </div>
+        <div class="small-hint">Example: select Mon-Fri and set Start <strong>08:00</strong>, End <strong>18:00</strong> → displays as <em>Mon-Fri, 8am–6pm</em>.</div>
+
+        <!-- Hidden combined availability used by preview + client mirroring -->
+        <input type="hidden" id="availability_hidden" name="availability" value="{{ data.get('availability','') }}">
+
+        <label class="field-label" for="languages">Languages you speak *</label>
+        <input id="languages" name="languages" type="text" class="field" required value="{{ data.get('languages','') }}" placeholder="e.g., English, French">
+
+        <!-- Location split into City/Country for better structure; JS will combine into hidden 'location' field -->
+        <div class="row">
+          <div class="col">
+            <label class="field-label" for="location_city">State *</label>
+            <input id="location_city" name="location_city" type="text" class="field" required value="{{ data.get('location_city', '') }}" placeholder="e.g., New York">
+          </div>
+          <div class="col">
+            <label class="field-label" for="location_country">Country *</label>
+            <input id="location_country" name="location_country" type="text" class="field" required value="{{ data.get('location_country', '') }}" placeholder="e.g., United States">
+          </div>
+        </div>
+        <div class="small-hint">Location will be shown like <strong>New York/United States</strong>.</div>
+
+        <!-- Hidden combined location used by server -->
+        <input type="hidden" id="location_combined" name="location" value="{{ data.get('location','') }}">
+
+      {% else %}
+        <!-- FAMILY: questions (modified: care_needed are radios so user can select only one) -->
+        <label class="field-label">Type(s) of care needed * (select one)</label>
+        <div class="chk-grid" id="careNeededGrid">
+          <!-- changed values to human-friendly labels (no underscores) -->
+          <label class="chk"><input type="radio" name="care_needed" value="Elderly care" {% if 'elderly_care' in (data.get('care_needed','')|default('')) or data.get('care_needed')=='Elderly care' %}checked{% endif %}> Elderly care</label>
+          <label class="chk"><input type="radio" name="care_needed" value="Child care" {% if 'child_care' in (data.get('care_needed','')|default('')) or data.get('care_needed')=='Child care' %}checked{% endif %}> Child care</label>
+          <label class="chk"><input type="radio" name="care_needed" value="Special needs" {% if 'special_needs' in (data.get('care_need','')|default('')) or data.get('care_needed')=='Special needs' %}checked{% endif %}> Special needs</label>
+          <label class="chk"><input type="radio" name="care_needed" value="Post-op recovery" {% if 'post_op' in (data.get('care_needed','')|default('')) or data.get('care_needed')=='Post-op recovery' %}checked{% endif %}> Post-op recovery</label>
+
+          <!-- Extra items to reach 7+ -->
+          <label class="chk"><input type="radio" name="care_needed" value="Infant care" {% if 'infant_care' in (data.get('care_needed','')|default('')) or data.get('care_needed')=='Infant care' %}checked{% endif %}> Infant care</label>
+          <label class="chk"><input type="radio" name="care_needed" value="Dementia care" {% if 'dementia_care' in (data.get('care_needed','')|default('')) or data.get('care_needed')=='Dementia care' %}checked{% endif %}> Dementia care</label>
+          <label class="chk"><input type="radio" name="care_needed" value="Companionship" {% if 'companionship' in (data.get('care_needed','')|default('')) or data.get('care_needed')=='Companionship' %}checked{% endif %}> Companionship</label>
+
+          <!-- Others radio -->
+          <label class="chk"><input id="care_needed_other_chk" type="radio" name="care_needed" value="other" {% if data.get('care_needed_other') %}checked{% endif %}> Others</label>
+        </div>
+
+        <div id="careNeededOtherWrap" style="display: {% if data.get('care_needed_other') %}block{% else %}none{% endif %}; margin-bottom:12px;">
+          <label class="field-label" for="care_needed_other">If Others, specify (max 21 chars)</label>
+          <input id="care_needed_other" name="care_needed_other" type="text" class="field" maxlength="21" placeholder="e.g., Companion care" value="{{ data.get('care_needed_other','') }}">
+          <div class="muted-note">Maximum 21 characters.</div>
+        </div>
+
+        <div class="row">
+          <div class="col">
+            <label class="field-label" for="number_of_dependents">Number of dependents *</label>
+            <input id="number_of_dependents" name="number_of_dependents" type="number" min="0" class="field" required value="{{ data.get('number_of_dependents','') }}">
+          </div>
+          <div class="col">
+            <!-- REPLACED: caret hours per week -> preferred caregiver age -->
+            <label class="field-label" for="preferred_caregiver_age">Preferred caregiver age *</label>
+            <select id="preferred_caregiver_age" name="preferred_caregiver_age" class="field" required>
+              <option value="">— select preferred caregiver age —</option>
+              <option value="18-25" {% if data.get('preferred_caregiver_age')=='18-25' %}selected{% endif %}>18–25</option>
+              <option value="26-35" {% if data.get('preferred_caregiver_age')=='26-35' %}selected{% endif %}>26–35</option>
+              <option value="36-45" {% if data.get('preferred_caregiver_age')=='36-45' %}selected{% endif %}>36–45</option>
+              <option value="46-60" {% if data.get('preferred_caregiver_age')=='46-60' %}selected{% endif %}>46–60</option>
+              <option value="60+" {% if data.get('preferred_caregiver_age')=='60+' %}selected{% endif %}>60+</option>
+              <option value="no_pref" {% if data.get('preferred_caregiver_age')=='no_pref' %}selected{% endif %}>No preference</option>
+            </select>
+          </div>
+        </div>
+
+        <label class="field-label" for="preferred_schedule">Preferred schedule *</label>
+        <div class="availability-days" aria-label="Preferred schedule days">
+{% set raw_ps = data.get('preferred_schedule') %}
+{% if raw_ps is iterable and raw_ps is not string %}
+  {% set ps = raw_ps %}
+{% elif raw_ps %}
+  {% set ps = raw_ps.split(',') %}
+{% else %}
+  {% set ps = [] %}
+{% endif %}
+
+          <label class="day"><input type="checkbox" name="preferred_schedule_days" value="Mon" {% if 'Mon' in ps %}checked{% endif %}> Mon</label>
+          <label class="day"><input type="checkbox" name="preferred_schedule_days" value="Tue" {% if 'Tue' in ps %}checked{% endif %}> Tue</label>
+          <label class="day"><input type="checkbox" name="preferred_schedule_days" value="Wed" {% if 'Wed' in ps %}checked{% endif %}> Wed</label>
+          <label class="day"><input type="checkbox" name="preferred_schedule_days" value="Thu" {% if 'Thu' in ps %}checked{% endif %}> Thu</label>
+          <label class="day"><input type="checkbox" name="preferred_schedule_days" value="Fri" {% if 'Fri' in ps %}checked{% endif %}> Fri</label>
+          <label class="day"><input type="checkbox" name="preferred_schedule_days" value="Sat" {% if 'Sat' in ps %}checked{% endif %}> Sat</label>
+          <label class="day"><input type="checkbox" name="preferred_schedule_days" value="Sun" {% if 'Sun' in ps %}checked{% endif %}> Sun</label>
+
+          <label class="day"><input id="prefMonSunBox" type="checkbox" name="preferred_schedule_days" value="Mon-Sun" {% if 'All' in ps or 'Mon-Sun' in ps %}checked{% endif %}> Mon-Sun</label>
+        </div>
+
+        <div class="row">
+          <div class="col">
+            <label class="field-label" for="preferred_schedule_start">Start time *</label>
+            <input id="preferred_schedule_start" name="preferred_schedule_start" type="time" class="field" required value="{{ data.get('preferred_schedule_start','') }}">
+          </div>
+          <div class="col">
+            <label class="field-label" for="preferred_schedule_end">End time *</label>
+            <input id="preferred_schedule_end" name="preferred_schedule_end" type="time" class="field" required value="{{ data.get('preferred_schedule_end','') }}">
+          </div>
+        </div>
+        <div class="small-hint">Example: select Mon-Fri and set Start <strong>08:00</strong>, End <strong>18:00</strong> → displays as <em>Mon-Fri, 8am–6pm</em>.</div>
+
+        <!-- Hidden combined preferred_schedule (keeps backend compatibility) -->
+        <input type="hidden" id="preferred_schedule_hidden" name="preferred_schedule" value="{{ data.get('preferred_schedule','') }}">
+
+        <!-- Salary budget (structured like caregiver salary) -->
+        <label class="field-label">Salary budget (structured) *</label>
+        <div class="row" style="align-items:center;">
+          <div class="col">
+            <input id="family_salary_amount" name="family_salary_amount" type="text" inputmode="numeric" class="field" placeholder="Amount (e.g., 200)" value="{{ data.get('family_salary_amount', '') }}">
+            <div class="small-hint">Enter numbers only — thousands separators will be added automatically in preview.</div>
+          </div>
+          <div style="width:180px;">
+            <select id="family_salary_currency" name="family_salary_currency" class="field" required>
+              <option value="">Currency</option>
+              <option value="NGN" {% if data.get('family_salary_currency')=='NGN' %}selected{% endif %}>NGN — Naira</option>
+              <option value="USD" {% if data.get('family_salary_currency')=='USD' %}selected{% endif %}>USD — US Dollar</option>
+              <option value="EUR" {% if data.get('family_salary_currency')=='EUR' %}selected{% endif %}>EUR — Euro</option>
+              <option value="GBP" {% if data.get('family_salary_currency')=='GBP' %}selected{% endif %}>GBP — British Pound</option>
+              <option value="CAD" {% if data.get('family_salary_currency')=='CAD' %}selected{% endif %}>CAD — Canadian Dollar</option>
+              <option value="AUD" {% if data.get('family_salary_currency')=='AUD' %}selected{% endif %}>AUD — Australian Dollar</option>
+              <option value="ZAR" {% if data.get('family_salary_currency')=='ZAR' %}selected{% endif %}>ZAR — South African Rand</option>
+              <option value="GHS" {% if data.get('family_salary_currency')=='GHS' %}selected{% endif %}>GHS — Ghana Cedi</option>
+              <option value="KES" {% if data.get('family_salary_currency')=='KES' %}selected{% endif %}>KES — Kenyan Shilling</option>
+              <option value="INR" {% if data.get('family_salary_currency')=='INR' %}selected{% endif %}>INR — Indian Rupee</option>
+            </select>
+          </div>
+          <div style="width:160px;">
+            <select id="family_salary_frequency" name="family_salary_frequency" class="field" required>
+              <option value="">Frequency</option>
+              <option value="monthly" {% if data.get('family_salary_frequency')=='monthly' %}selected{% endif %}>Monthly</option>
+              <option value="weekly" {% if data.get('family_salary_frequency')=='weekly' %}selected{% endif %}>Weekly</option>
+              <option value="hourly" {% if data.get('family_salary_frequency')=='hourly' %}selected{% endif %}>Hourly</option>
+              <option value="daily" {% if data.get('family_salary_frequency')=='daily' %}selected{% endif %}>Daily</option>
+            </select>
+          </div>
+        </div>
+        <div class="small-hint">Example: choose <strong>USD</strong>, amount <strong>200</strong>, frequency <strong>monthly</strong> → displays as <em>$200/monthly</em>.</div>
+
+        <!-- Hidden combined field to preserve old 'hourly_budget' backend key -->
+        <input type="hidden" id="hourly_budget_hidden" name="hourly_budget" value="{{ data.get('hourly_budget','') }}">
+
+        <label class="field-label" for="preferred_gender">Preferred caregiver gender *</label>
+        <select id="preferred_gender" name="preferred_gender" class="field" required>
+          <option value="">— select —</option>
+          <option value="female" {% if data.get('preferred_gender')=='female' %}selected{% endif %}>Female</option>
+          <option value="male" {% if data.get('preferred_gender')=='male' %}selected{% endif %}>Male</option>
+          <!-- changed token to 'no_preference' so stored value reads clearly -->
+          <option value="no_preference" {% if data.get('preferred_gender')=='no_preference' %}selected{% endif %}>No preference</option>
+        </select>
+
+        <!-- HOUSEHOLD and MEDICAL (limited to 40 characters, live counters + visual warning) -->
+        <label class="field-label" for="household_info">Household info / notes *</label>
+                               
+<textarea id="household_info" name="household_info" class="field" required placeholder="Describe the household, pets, parking, access needs" maxlength="17">{{ data.get('household_info','') }}</textarea>
+<div class="muted-note">
+  Maximum 17 characters.
+  <span id="household_counter" class="small-hint" aria-live="polite">
+    {{ (data.get('household_info','')|length if data.get('household_info') else 0) }}/17
+  </span>
+</div>
+<div id="household_warn" class="warn-text">Maximum 17 characters reached</div>
+
+<label class="field-label" for="medical_needs">Medical needs (if any) *</label>
+<textarea id="medical_needs" name="medical_needs" class="field" required placeholder="Any medical conditions, equipment, medications" maxlength="17">{{ data.get('medical_needs','') }}</textarea>
+<div class="muted-note">
+  Maximum 17 characters.
+  <span id="medical_counter" class="small-hint" aria-live="polite">
+    {{ (data.get('medical_needs','')|length if data.get('medical_needs') else 0) }}/17
+  </span>
+</div>
+<div id="medical_warn" class="warn-text">Maximum 17 characters reached</div> 
+
+        <label class="field-label" for="languages">Preferred languages *</label>
+        <input id="languages" name="languages" type="text" class="field" required value="{{ data.get('languages','') }}" placeholder="e.g., English, French">
+
+        <div class="row">
+          <div class="col">
+            <label class="field-label" for="location_city">State *</label>
+            <input id="location_city" name="location_city" type="text" class="field" required value="{{ data.get('location_city','') }}" placeholder="e.g., New York">
+          </div>
+          <div class="col">
+            <label class="field-label" for="location_country">Country *</label>
+            <input id="location_country" name="location_country" type="text" class="field" required value="{{ data.get('location_country','') }}" placeholder="e.g., United States">
+          </div>
+        </div>
+        <input type="hidden" id="location_combined" name="location" value="{{ data.get('location','') }}">
+
+      {% endif %}
+
+    <div class="actions">
+    <button type="button" class="btn secondary" id="backBtn">Back</button>
+
+    <button
+        type="button"
+        class="btn secondary"
+        id="saveDraft"
+        style="display:none;">
+        Save draft
+    </button>
+
+    <button type="submit" class="btn" id="nextBtn">
+    <span id="nextBtnText">Next</span>
+    <span id="nextBtnLoader" style="display:none;">
+        <i class="fas fa-spinner fa-spin"></i> Please wait...
+    </span>
+</button>
+   </div>
+    </form>
+  </div>
+
+     <script>window.__USER_ID__ = {{ (user.id if user is defined and user else '_anon') | tojson }};</script>
+  <script src="{{ url_for('static', filename='js/profile-sync.js') }}"></script>
+ 
+
+  <script>
+    (function(){
+      try{
+        const MAX_FREE_TEXT = 17; 
+
+        const form = document.getElementById('step2Form');
+        const saveDraft = document.getElementById('saveDraft');
+        const backBtn = document.getElementById('backBtn');
+
+        const nextBtn = document.getElementById('nextBtn');
+        const loadingOverlay = document.getElementById('loadingOverlay'); 
+
+        
+        const nextBtnText = document.getElementById('nextBtnText');
+        const nextBtnLoader = document.getElementById('nextBtnLoader');  
+
+        const salaryAmount = document.getElementById('salary_amount');
+        const salaryCurrency = document.getElementById('salary_currency');
+        const salaryFrequency = document.getElementById('salary_frequency');
+        const salaryFreeHidden = document.getElementById('salary_free_hidden');
+        const hourlyHidden = document.getElementById('hourly_rate_hidden');
+
+        // FAMILY-specific salary fields
+        const familySalaryAmount = document.getElementById('family_salary_amount');
+        const familySalaryCurrency = document.getElementById('family_salary_currency');
+        const familySalaryFrequency = document.getElementById('family_salary_frequency');
+        const hourlyBudgetHidden = document.getElementById('hourly_budget_hidden');
+
+        const cityEl = document.getElementById('location_city');
+        const countryEl = document.getElementById('location_country');
+        const locationCombined = document.getElementById('location_combined');
+
+        // availability (caregiver) elements
+        const monSunBox = document.getElementById('monSunBox');
+        const dayCheckboxes = Array.from(document.querySelectorAll('input[name="availability_days"]'));
+        const specialtiesEl = document.getElementById('specialties');
+        const specialtiesOtherWrap = document.getElementById('specialtiesOtherWrap');
+        const specialtiesOtherInput = document.getElementById('specialties_other');
+
+        // services radios (UI) and canonical hidden field
+        const servicesRadios = Array.from(document.querySelectorAll('.services_radio'));
+        const servicesOtherChk = document.getElementById('services_other_chk');
+        const servicesOtherWrap = document.getElementById('servicesOtherWrap');
+        const servicesOtherInput = document.getElementById('services_other');
+        const servicesHidden = document.getElementById('services_hidden'); // canonical field
+
+        // preferred schedule (family) elements
+        const prefMonSunBox = document.getElementById('prefMonSunBox');
+        const prefDayCheckboxes = Array.from(document.querySelectorAll('input[name="preferred_schedule_days"]'));
+        const prefStart = document.getElementById('preferred_schedule_start');
+        const prefEnd = document.getElementById('preferred_schedule_end');
+        const preferredScheduleHidden = document.getElementById('preferred_schedule_hidden');
+
+        // disability (caregiver)
+        const disabilitySelect = document.getElementById('disability_yesno');
+        const disabilityDetailsWrap = document.getElementById('disabilityDetailsWrap');
+        const disabilityDetailsInput = document.getElementById('disability_details');
+
+        // Care-needed (family) elements (now radios)
+        const careInputs = Array.from(document.querySelectorAll('#careNeededGrid input[type="radio"][name="care_needed"]'));
+        const careOtherRadio = document.getElementById('care_needed_other_chk');
+        const careOtherWrap = document.getElementById('careNeededOtherWrap');
+        const careOtherInput = document.getElementById('care_needed_other');
+
+        // Hidden availability canonical
+        const availabilityHidden = document.getElementById('availability_hidden');
+        const availabilityStart = document.getElementById('availability_start');
+        const availabilityEnd = document.getElementById('availability_end');
+
+        // Legacy -> canonical mapping for specialties (converts older tokens like "wound" to "wound_care")
+        const specialtiesLegacyMap = {
+          'wound': 'wound_care',
+          'infant': 'infant_care',
+          'post_op': 'post_op_care',
+          'pediatric': 'pediatric_care',
+          'dementia': 'dementia_care',
+          'palliative': 'palliative_care',
+          'mobility': 'mobility_assistance',
+          'medication': 'medication_management',
+          'alzheimers': 'alzheimers_care'
+        };
+
+        // Local storage helpers (use per-user prefixed storage when available)
+        function lsGet(key){
+          try {
+            if (window.__userLS && typeof window.__userLS.get === 'function') {
+              // __userLS.get returns parsed JSON when possible; normalize to string if necessary
+              var v = window.__userLS.get(key, null);
+              if (typeof v === 'object' && v !== null) return JSON.stringify(v);
+              return v;
+            }
+            return localStorage.getItem(key);
+          } catch(e){ return null; }
+        }
+
+        function lsSet(key, value){
+          try {
+            // Normalize undefined/null => remove
+           if (value === null || typeof value === 'undefined') {
+             if (window.__userLS && typeof window.__userLS.remove === 'function') {
+               window.__userLS.remove(key);
+           } else {
+             localStorage.removeItem(key);
+           }
+           return;
+        }
+
+       // Use __userLS.set for per-user keys (it writes only prefixed keys)
+       if (window.__userLS && typeof window.__userLS.set === 'function') {
+         // pass raw strings or objects
+         try {
+            // If value looks like JSON string, attempt to parse to preserve type
+            var out = value;
+            try { out = JSON.parse(value); } catch (e) { out = value; }
+            window.__userLS.set(key, out);
+            return;
+         } catch (e) { /* fallback to localStorage below */ }
+       }
+
+       // Fallback: plain localStorage set
+       localStorage.setItem(key, String(value));
+     } catch(e){}
+   }
+ 
+
+
+
+
+
+
+
+
+
+
+
+        // If server provided a combined location (like "City/Country") but city/country inputs are empty,
+        // split it on "/" and populate the two fields so the user sees the values.
+        (function prefillLocationFromCombined(){
+          try{
+            if(locationCombined && locationCombined.value && cityEl && countryEl){
+              const hasCity = (cityEl.value || "").trim() !== "";
+              const hasCountry = (countryEl.value || "").trim() !== "";
+              if(!hasCity && !hasCountry){
+                const parts = locationCombined.value.split('/');
+                if(parts.length >= 2){
+                  cityEl.value = parts[0].trim();
+                  countryEl.value = parts.slice(1).join('/').trim();
+                }
+              }
+            }
+          }catch(e){ console.warn('prefillLocationFromCombined failed', e); }
+        })();
+
+        function combineLocation() {
+          try{
+            const c = (cityEl && cityEl.value || "").trim();
+            const co = (countryEl && countryEl.value || "").trim();
+            if(c && co){
+              // build combined location as City/Country
+              locationCombined.value = `${c}/${co}`;
+            } else {
+              // leave previous value (server-provided) intact if both not present
+              locationCombined.value = (locationCombined.value || "");
+            }
+          }catch(e){
+            console.warn('combineLocation failed', e);
+          }
+        }
+
+        function syncLegacySalary() {
+          try{
+            const amt = (salaryAmount && salaryAmount.value || "").trim();
+            const cur = (salaryCurrency && salaryCurrency.value || "").trim();
+            const freq = (salaryFrequency && salaryFrequency.value || "").trim();
+
+            if(amt && cur && freq){
+              const val = `${cur} ${amt} / ${freq}`;
+              if(salaryFreeHidden) salaryFreeHidden.value = val;
+              if(hourlyHidden) hourlyHidden.value = val;
+            }
+          }catch(e){ console.warn('syncLegacySalary failed', e); }
+        }
+
+        // Sync family salary fields into hidden "hourly_budget" (keeps backend compatibility)
+        function syncFamilySalary(){
+          try{
+            if(!hourlyBudgetHidden) return;
+            const amt = (familySalaryAmount && familySalaryAmount.value || "").trim();
+            const cur = (familySalaryCurrency && familySalaryCurrency.value || "").trim();
+            const freq = (familySalaryFrequency && familySalaryFrequency.value || "").trim();
+            if(amt && cur && freq){
+              hourlyBudgetHidden.value = `${cur} ${amt} / ${freq}`;
+            }
+          }catch(e){ console.warn('syncFamilySalary failed', e); }
+        }
+
+        // Build preferred_schedule hidden string from selected days + times (keeps backend compatibility)
+        function buildPreferredScheduleString(){
+          try{
+            if(!preferredScheduleHidden) return;
+            const checkedDays = Array.from(document.querySelectorAll('input[name="preferred_schedule_days"]:checked')).map(n=>n.value);
+            const start = (prefStart && prefStart.value) || '';
+            const end = (prefEnd && prefEnd.value) || '';
+            if(checkedDays.length === 0){
+              // leave previous value
+              preferredScheduleHidden.value = preferredScheduleHidden.value || '';
+              return;
+            }
+            // compress consecutive days to ranges for nicer display (simple approach)
+            const order = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+            const indices = checkedDays.map(d=>order.indexOf(d)).filter(i=>i>=0).sort((a,b)=>a-b);
+            let daysStr = '';
+            if(indices.length === 7 || checkedDays.includes('Mon-Sun')){
+              daysStr = 'Mon-Sun';
+            } else if(indices.length >= 2){
+              const ranges = [];
+              let startIdx = indices[0];
+              let lastIdx = indices[0];
+              for(let i=1;i<indices.length;i++){
+                if(indices[i] === lastIdx+1){ lastIdx = indices[i]; }
+                else { ranges.push([startIdx,lastIdx]); startIdx = indices[i]; lastIdx = indices[i]; }
+              }
+              ranges.push([startIdx,lastIdx]);
+              daysStr = ranges.map(r => r[0]===r[1] ? order[r[0]] : `${order[r[0]]}-${order[r[1]]}`).join(', ');
+            } else {
+              daysStr = order[indices[0]];
+            }
+            let timeStr = '';
+            if(start && end){
+              function to12(t){
+                const [hh,mm] = t.split(':');
+                let h = Number(hh);
+                const ampm = h>=12 ? 'pm' : 'am';
+                h = h % 12; if(h===0) h = 12;
+                return `${h}${mm===''||mm==='00' ? '' : ':'+mm}${ampm}`;
+              }
+              timeStr = `${to12(start)}–${to12(end)}`;
+            }
+            preferredScheduleHidden.value = (timeStr ? `${daysStr}, ${timeStr}` : `${daysStr}`);
+          }catch(e){ console.warn('buildPreferredScheduleString failed', e); }
+        }
+
+        // Build availability string (caregiver) from selected days + times for preview + localStorage
+        function buildAvailabilityString(){
+          try{
+            if(!availabilityHidden) return;
+            const checkedDays = Array.from(document.querySelectorAll('input[name="availability_days"]:checked')).map(n=>n.value);
+            const start = (availabilityStart && availabilityStart.value) || '';
+            const end = (availabilityEnd && availabilityEnd.value) || '';
+            if(checkedDays.length === 0 && (!start || !end)){
+              // leave previous value intact if no info
+              availabilityHidden.value = availabilityHidden.value || '';
+              lsSet('profile_availability', availabilityHidden.value || '');
+              return;
+            }
+            const order = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+            const indices = checkedDays.map(d=>order.indexOf(d)).filter(i=>i>=0).sort((a,b)=>a-b);
+            let daysStr = '';
+            if(indices.length === 7 || checkedDays.includes('Mon-Sun')){
+              daysStr = 'Mon-Sun';
+            } else if(indices.length >= 2){
+              const ranges = [];
+              let startIdx = indices[0];
+              let lastIdx = indices[0];
+              for(let i=1;i<indices.length;i++){
+                if(indices[i] === lastIdx+1){ lastIdx = indices[i]; }
+                else { ranges.push([startIdx,lastIdx]); startIdx = indices[i]; lastIdx = indices[i]; }
+              }
+              ranges.push([startIdx,lastIdx]);
+              daysStr = ranges.map(r => r[0]===r[1] ? order[r[0]] : `${order[r[0]]}-${order[r[1]]}`).join(', ');
+            } else if(indices.length === 1){
+              daysStr = order[indices[0]];
+            } else {
+              // fallback: join raw checkedDays
+              daysStr = checkedDays.join(',');
+            }
+            let timeStr = '';
+            if(start && end){
+              function to12(t){
+                const [hh,mm] = t.split(':');
+                let h = Number(hh);
+                const ampm = h>=12 ? 'pm' : 'am';
+                h = h % 12; if(h===0) h = 12;
+                return `${h}${mm===''||mm==='00' ? '' : ':'+mm}${ampm}`;
+              }
+              timeStr = `${to12(start)}–${to12(end)}`;
+            }
+            const final = (timeStr ? `${daysStr}, ${timeStr}` : `${daysStr}`);
+            availabilityHidden.value = final;
+            // Mirror to localStorage for immediate preview reflection
+            lsSet('profile_availability', final || '');
+          }catch(e){ console.warn('buildAvailabilityString failed', e); }
+        }
+
+        // Normalize specialties before saving/submission so the backend and preview template always get canonical tokens
+        function normalizeSpecialties() {
+          try{
+            if(!specialtiesEl) return;
+            const v = specialtiesEl.value;
+            if(!v) return;
+            if(specialtiesLegacyMap[v]) specialtiesEl.value = specialtiesLegacyMap[v];
+            // if user selected 'other' and provided text, leave it as 'other' and server will read specialties_other
+          }catch(e){ console.warn('normalizeSpecialties failed', e); }
+        }
+
+        // Make Mon-Sun exclusive for a given set of checkboxes
+        function enforceMonSunExclusivityFor(nameSelector, monSunEl){
+          try{
+            const boxes = Array.from(document.querySelectorAll(nameSelector));
+            boxes.forEach(cb => {
+              cb.addEventListener('change', () => {
+                if(cb === monSunEl && cb.checked){
+                  boxes.forEach(other => { if(other !== monSunEl) other.checked = false; });
+                } else if(cb !== monSunEl && cb.checked){
+                  if(monSunEl) monSunEl.checked = false;
+                }
+              });
+            });
+          }catch(e){ console.warn('enforceMonSunExclusivityFor failed', e); }
+        }
+
+        // services UI change handler: update canonical hidden input and toggle Others input
+        function servicesChangeHandler(ev){
+          try{
+            // find selected radio (name services_radio)
+            const sel = document.querySelector('input[name="services_radio"]:checked');
+            let val = sel ? sel.value : '';
+            // If 'other' selected, prefer typed text (if present) — server expects services_other separately but showing typed text in canonical helps preview/draft
+            if(val === 'other'){
+              if(servicesOtherInput && servicesOtherInput.value.trim() !== ''){
+                servicesHidden.value = servicesOtherInput.value.trim();
+              } else {
+                servicesHidden.value = 'Other';
+              }
+              if(servicesOtherWrap) servicesOtherWrap.style.display = 'block';
+              if(servicesOtherInput) servicesOtherInput.setAttribute('required','required');
+            } else {
+              if(servicesOtherWrap) servicesOtherWrap.style.display = 'none';
+              if(servicesOtherInput) servicesOtherInput.removeAttribute('required');
+              servicesHidden.value = val || '';
+            }
+
+            // mirror to localStorage for immediate review page reflection
+            if(servicesHidden && servicesHidden.value){
+              lsSet('profile_services', servicesHidden.value);
+            } else {
+              lsSet('profile_services', '');
+            }
+          }catch(e){ console.warn('servicesChangeHandler failed', e); }
+        }
+
+        // care-needed (family): radios -> show/hide other text input
+        function careRadioChangeHandler(ev){
+          try{
+            const selected = document.querySelector('input[name="care_needed"]:checked');
+            if(selected && selected.value === 'other'){
+              if(careOtherWrap) careOtherWrap.style.display = 'block';
+              if(careOtherInput) careOtherInput.setAttribute('required','required');
+            } else {
+              if(careOtherWrap) careOtherWrap.style.display = 'none';
+              if(careOtherInput) careOtherInput.removeAttribute('required');
+            }
+          }catch(e){ console.warn('careRadioChangeHandler failed', e); }
+        }
+
+        // Called before any save (draft or final) to ensure hidden fields are populated
+        function prepareForm() {
+          combineLocation();
+          syncLegacySalary();
+          syncFamilySalary();
+          buildPreferredScheduleString();
+          buildAvailabilityString(); // <-- ensure availability_hidden and LS are set
+          normalizeSpecialties();
+
+          // ensure other fields required state is synced
+          if(specialtiesEl && specialtiesEl.value === 'other'){
+            if(specialtiesOtherInput) specialtiesOtherInput.setAttribute('required','required');
+            if(specialtiesOtherWrap) specialtiesOtherWrap.style.display = 'block';
+          } else if(specialtiesOtherInput){
+            specialtiesOtherInput.removeAttribute('required');
+            if(specialtiesOtherWrap) specialtiesOtherWrap.style.display = 'none';
+          }
+
+          // services: canonical hidden field population and disable UI radios so only the canonical hidden gets submitted
+          try{
+            const selectedService = document.querySelector('input[name="services_radio"]:checked');
+            if(selectedService){
+              if(selectedService.value === 'other'){
+                if(servicesOtherInput && servicesOtherInput.value.trim() !== ''){
+                  servicesHidden.value = servicesOtherInput.value.trim();
+                } else {
+                  servicesHidden.value = 'Other';
+                }
+              } else {
+                servicesHidden.value = selectedService.value;
+              }
+            } else {
+              // No radio chosen — if services_other typed exists, use it
+              if(servicesOtherInput && servicesOtherInput.value.trim() !== ''){
+                servicesHidden.value = servicesOtherInput.value.trim();
+              } else {
+                servicesHidden.value = servicesHidden.value || '';
+              }
+            }
+
+            // Make sure the typed 'services_other' field required attribute is set only when 'other' is selected
+            if(servicesOtherChk && servicesOtherChk.checked){
+              if(servicesOtherInput) servicesOtherInput.setAttribute('required','required');
+              if(servicesOtherWrap) servicesOtherWrap.style.display = 'block';
+            } else if(servicesOtherInput){
+              servicesOtherInput.removeAttribute('required');
+              if(servicesOtherWrap) servicesOtherWrap.style.display = 'none';
+            }
+
+            // disable the UI radios before building FormData so we only submit the canonical hidden input 'services'
+            servicesRadios.forEach(r => { try{ r.disabled = true; }catch(e){} });
+          }catch(e){ console.warn('prepareForm services handling failed', e); }
+
+          if(disabilitySelect && disabilitySelect.value === 'yes'){
+            if(disabilityDetailsInput) disabilityDetailsInput.setAttribute('required','required');
+            if(disabilityDetailsWrap) disabilityDetailsWrap.style.display = 'block';
+          } else if(disabilityDetailsInput){
+            disabilityDetailsInput.removeAttribute('required');
+            if(disabilityDetailsWrap) disabilityDetailsWrap.style.display = 'none';
+          }
+
+          // care other
+          const selectedCare = document.querySelector('input[name="care_needed"]:checked');
+          if(selectedCare && selectedCare.value === 'other'){
+            if(careOtherInput) careOtherInput.setAttribute('required','required');
+            if(careOtherWrap) careOtherWrap.style.display = 'block';
+          } else if(careOtherInput){
+            careOtherInput.removeAttribute('required');
+            if(careOtherWrap) careOtherWrap.style.display = 'none';
+          }
+
+          // mirror specialties to localStorage for immediate reflection on profile_setup review
+          try{
+            if(specialtiesEl){
+              if(specialtiesEl.value === 'other'){
+                lsSet('profile_specialties', (specialtiesOtherInput && specialtiesOtherInput.value.trim()) || 'Other');
+              } else {
+                lsSet('profile_specialties', specialtiesEl.value || '');
+              }
+            }
+          }catch(e){ console.warn('prepareForm LS specialties failed', e); }
+        }
+
+        backBtn.addEventListener('click', ()=> { window.location.href = "{{ url_for('profile_step1') }}"; });
+    
+
+        function showToast(msg, duration=1800){
+          const t = document.createElement('div');
+          t.className = 'toast';
+          t.textContent = msg;
+          document.body.appendChild(t);
+          setTimeout(()=> t.remove(), duration);
+        }
+
+        // Initialize UI from localStorage (if present) — this fixes the problem where changes made previously don't reflect in review
+        (function hydrateFromLocalStorage(){
+          try{
+            // Specialties: prefer localStorage over server-sent value (so if user changed it previously it immediately shows)
+            const lsSpec = lsGet('profile_specialties');
+            if(specialtiesEl && lsSpec !== null && lsSpec !== ''){
+              // check whether lsSpec matches a known option value
+              const opt = Array.from(specialtiesEl.options).find(o => o.value === lsSpec);
+              if(opt){
+                specialtiesEl.value = lsSpec;
+                if(specialtiesOtherWrap) specialtiesOtherWrap.style.display = 'none';
+                if(specialtiesOtherInput) specialtiesOtherInput.removeAttribute('required');
+              } else {
+                // unknown token => treat as "other" typed value
+                const otherOpt = Array.from(specialtiesEl.options).find(o => o.value === 'other');
+                if(otherOpt){
+                  specialtiesEl.value = 'other';
+                  if(specialtiesOtherWrap) specialtiesOtherWrap.style.display = 'block';
+                  if(specialtiesOtherInput){
+                    specialtiesOtherInput.value = lsSpec;
+                    specialtiesOtherInput.removeAttribute('required'); // keep it non-required until user submits
+                  }
+                }
+              }
+            }
+
+            // Services: prefer localStorage value to set radio or other text
+            const lsServices = lsGet('profile_services');
+            if(lsServices !== null && lsServices !== ''){
+              // find a radio with that value
+              let matched = false;
+              servicesRadios.forEach(r => {
+                try{
+                  if(r.value === lsServices){
+                    r.checked = true;
+                    matched = true;
+                  } else {
+                    // uncheck others (defensive)
+                    r.checked = false;
+                  }
+                }catch(e){}
+              });
+              if(!matched){
+                // set "other" and populate typed field
+                const otherRadio = servicesRadios.find(r => r.value === 'other');
+                if(otherRadio){
+                  otherRadio.checked = true;
+                  if(servicesOtherWrap) servicesOtherWrap.style.display = 'block';
+                  if(servicesOtherInput){
+                    servicesOtherInput.value = lsServices;
+                    servicesOtherInput.removeAttribute('required');
+                  }
+                }
+              } else {
+                if(servicesOtherWrap) servicesOtherWrap.style.display = 'none';
+                if(servicesOtherInput) servicesOtherInput.removeAttribute('required');
+              }
+              // ensure canonical hidden value matches
+              if(servicesHidden) servicesHidden.value = lsServices;
+            } else {
+              // If no LS value but server provided a value, ensure canonical hidden holds it
+              if(servicesHidden && servicesHidden.value){
+                lsSet('profile_services', servicesHidden.value);
+              }
+            }
+
+            // Availability: hydrate from localStorage if present so preview updates immediately
+            const lsAvail = lsGet('profile_availability');
+            if(lsAvail !== null && lsAvail !== ''){
+              // put into hidden canonical and (best-effort) set the UI fields if possible
+              if(availabilityHidden) availabilityHidden.value = lsAvail;
+              lsSet('profile_availability', lsAvail);
+
+              // Best-effort: attempt to parse simple patterns like "Mon-Fri, 8am–6pm" to prefill checkboxes/time
+              try{
+                const parts = lsAvail.split(',');
+                // trim parts
+                const trimmed = parts.map(p => p.trim());
+                // days part could be the first section (e.g., "Mon-Fri" or "Mon" or "Mon, Tue")
+                const daysPart = trimmed[0] || '';
+                const timePart = trimmed.length > 1 ? trimmed.slice(1).join(',').trim() : '';
+                // populate day checkboxes if daysPart contains known tokens
+                if(daysPart){
+                  const dayTokens = [];
+                  if(daysPart.indexOf('-') !== -1){
+                    const ranges = daysPart.split(',');
+                    ranges.forEach(r => {
+                      const rr = r.trim();
+                      if(rr.indexOf('-') !== -1){
+                        const [a,b] = rr.split('-').map(x=>x.trim());
+                        // find indices
+                        const order = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+                        const ai = order.indexOf(a);
+                        const bi = order.indexOf(b);
+                        if(ai>=0 && bi>=0){
+                          for(let i=ai;i<=bi;i++) dayTokens.push(order[i]);
+                        }
+                      } else {
+                        dayTokens.push(rr);
+                      }
+                    });
+                  } else {
+                    // single or comma separated
+                    daysPart.split(',').forEach(d => {
+                      const dd = d.trim();
+                      if(dd) dayTokens.push(dd);
+                    });
+                  }
+                  if(dayTokens.length){
+                    // check corresponding checkboxes
+                    dayCheckboxes.forEach(cb => {
+                      try{
+                        cb.checked = dayTokens.includes(cb.value);
+                      }catch(e){}
+                    });
+                  }
+                }
+                // parse time like "8am–6pm" to "08:00" and "18:00" if possible (best-effort)
+                if(timePart){
+                  const t = timePart.split('–').map(x=>x.trim());
+                  function parse12To24(s){
+                    try{
+                      if(!s) return '';
+                      const m = s.match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)?$/i);
+                      if(!m) return '';
+                      let hh = parseInt(m[1],10);
+                      const mm = m[2] ? parseInt(m[2],10) : 0;
+                      const ampm = m[3] ? m[3].toLowerCase() : null;
+                      if(ampm){
+                        if(ampm === 'pm' && hh !== 12) hh += 12;
+                        if(ampm === 'am' && hh === 12) hh = 0;
+                      }
+                      return `${String(hh).padStart(2,'0')}:${String(mm).padStart(2,'0')}`;
+                    }catch(e){ return ''; }
+                  }
+                  if(t.length === 2){
+                    const s24 = parse12To24(t[0]);
+                    const e24 = parse12To24(t[1]);
+                    if(s24 && availabilityStart) availabilityStart.value = s24;
+                    if(e24 && availabilityEnd) availabilityEnd.value = e24;
+                  }
+                }
+              }catch(e){ /* non-fatal */ }
+            } else {
+              // if no LS avail but server provided availability, mirror it to LS
+              if(availabilityHidden && availabilityHidden.value){
+                lsSet('profile_availability', availabilityHidden.value);
+              }
+            }
+
+          }catch(e){ console.warn('hydrateFromLocalStorage failed', e); }
+        })();
+
+        // ---------- start: expose writeAllLS + initial write on load ----------
+        // Provide a named helper that mirrors the same canonical values into localStorage
+        // This ensures the preview page immediately reflects the latest draft when the user
+        // returns to preview or has it open in another tab.
+        function writeAllLS(){
+          try{
+            // Ensure hidden canonical fields are populated
+            prepareForm();
+
+            // Mirror specialties
+            try{
+              if(specialtiesEl){
+                if(specialtiesEl.value === 'other'){
+                  lsSet('profile_specialties', (specialtiesOtherInput && specialtiesOtherInput.value.trim()) || 'Other');
+                } else {
+                  lsSet('profile_specialties', specialtiesEl.value || '');
+                }
+              }
+            }catch(e){ console.warn('writeAllLS: specialties mirror failed', e); }
+
+            // Mirror services (canonical hidden)
+            try{
+              if(servicesHidden){
+                lsSet('profile_services', servicesHidden.value || '');
+              } else {
+                // fallback: if no canonical hidden, attempt compute from radios
+                const sel = document.querySelector('input[name="services_radio"]:checked');
+                if(sel){
+                  if(sel.value === 'other' && servicesOtherInput && servicesOtherInput.value.trim()){
+                    lsSet('profile_services', servicesOtherInput.value.trim());
+                  } else {
+                    lsSet('profile_services', sel.value || '');
+                  }
+                }
+              }
+            }catch(e){ console.warn('writeAllLS: services mirror failed', e); }
+
+            // Mirror availability canonical
+            try{
+              if(availabilityHidden){
+                lsSet('profile_availability', availabilityHidden.value || '');
+              } else {
+                // If hidden not present, build availability from inputs
+                buildAvailabilityString && buildAvailabilityString();
+              }
+            }catch(e){ console.warn('writeAllLS: availability mirror failed', e); }
+
+            // Mirror a couple of family keys if present
+            try{
+              // preferred schedule
+              if(preferredScheduleHidden) lsSet('profile_preferred_schedule', preferredScheduleHidden.value || '');
+              // hourly budget / salary budget (family)
+              if(hourlyBudgetHidden) lsSet('profile_hourly_budget', hourlyBudgetHidden.value || '');
+              // preferred gender
+              const pg = (document.getElementById('preferred_gender') || {}).value || '';
+              if(pg) lsSet('profile_preferred_gender', pg);
+              // languages
+              const langs = (document.getElementById('languages') || document.getElementById('languages_2') || {}).value || '';
+              if(langs) lsSet('profile_languages', langs);
+              // location combined (if computed)
+              if(locationCombined && locationCombined.value) lsSet('profile_location', locationCombined.value);
+            }catch(e){ console.warn('writeAllLS: family mirror failed', e); }
+
+          }catch(e){
+            console.warn('writeAllLS failed', e);
+          }
+        }
+
+        // Expose globally so other inline scripts or devtools can call it
+        try { window.__writeProfileDraft = writeAllLS; } catch(e){}
+
+        // Call once on load so preview (if open) can reflect the most-recent draft
+        try {
+          window.addEventListener('load', function(){ try{ writeAllLS(); }catch(e){} });
+        } catch(e){}
+
+        // ---------- end: expose writeAllLS + initial write on load ----------
+
+    if (window.__imageViewerVisible) { ev && ev.stopImmediatePropagation && ev.stopImmediatePropagation(); ev && ev.preventDefault && ev.preventDefault(); return; } // ImageViewer guard
+        saveDraft.addEventListener('click', function(){
+          try{
+            prepareForm();
+
+            // Mirror final canonical values to localStorage before saving so review reflects draft immediately
+            try{
+              // ensure specialties local mirror is set
+              if(specialtiesEl){
+                if(specialtiesEl.value === 'other'){
+                  lsSet('profile_specialties', (specialtiesOtherInput && specialtiesOtherInput.value.trim()) || 'Other');
+                } else {
+                  lsSet('profile_specialties', specialtiesEl.value || '');
+                }
+              }
+              // ensure services local mirror is set
+              if(servicesHidden){
+                lsSet('profile_services', servicesHidden.value || '');
+              }
+              // ensure availability mirror is set
+              if(availabilityHidden){
+                lsSet('profile_availability', availabilityHidden.value || '');
+              }
+            }catch(e){ console.warn('saveDraft LS mirror failed', e); }
+
+            const fd = new FormData(form);
+            fd.append('save_draft', '1');
+            fetch(form.action, { method: 'POST', body: fd, credentials: 'same-origin' })
+              .then(resp => {
+                // re-enable radios after posting so form still interactive
+                servicesRadios.forEach(r => { try{ r.disabled = false; }catch(e){} });
+
+                if(resp.redirected) {
+                  window.location.href = resp.url;
+                } else {
+                  showToast('Draft saved.');
+                }
+              })
+              .catch(err => { console.error(err); alert('Save failed: '+(err.message||err)); });
+          }catch(e){ console.error(e); alert('Save draft failed: '+e.message); }
+        });
+
+        form.addEventListener('submit', function(ev){
+          ev.preventDefault();
+
+          
+
+          try{
+            prepareForm();
+
+            function showErr(msg){ alert(msg); throw new Error(msg); }
+
+            const userRole = "{{ (user.role if user else '') }}";
+
+            if(userRole === 'caregiver'){
+              const expEl = document.getElementById('experience_years');
+              const exp = (expEl && String(expEl.value).trim()) || '';
+              const spec = (document.getElementById('specialties') && document.getElementById('specialties').value.trim()) || '';
+              const specOther = (specialtiesOtherInput && String(specialtiesOtherInput.value).trim()) || '';
+              const amt = (salaryAmount && salaryAmount.value.trim()) || '';
+              const cur = (salaryCurrency && salaryCurrency.value.trim()) || '';
+              const freq = (salaryFrequency && salaryFrequency.value.trim()) || '';
+              const travel = (document.getElementById('willing_to_travel') && document.getElementById('willing_to_travel').value.trim()) || '';
+              // read canonical services value from hidden
+              const servicesCanonical = (servicesHidden && String(servicesHidden.value).trim()) || '';
+              const servicesOtherVal = (servicesOtherInput && String(servicesOtherInput.value).trim()) || '';
+              const prefAge = (document.getElementById('preferred_age') && document.getElementById('preferred_age').value.trim()) || '';
+              const disability = (disabilitySelect && disabilitySelect.value.trim()) || '';
+              const disabilityDetails = (disabilityDetailsInput && String(disabilityDetailsInput.value).trim()) || '';
+              const languagesVal = (document.getElementById('languages') && document.getElementById('languages').value.trim()) || '';
+              const cty = (cityEl && cityEl.value.trim()) || '';
+              const cnt = (countryEl && countryEl.value.trim()) || '';
+
+              if(exp === '' || isNaN(Number(exp))){ showErr('Please provide valid Years of experience.'); }
+              if(spec === ''){ showErr('Please select a Specialty/Skill.'); }
+              if(spec === 'other' && specOther === ''){ showErr('Please specify your specialty in the Others field (max 21 characters).'); }
+              if(spec === 'other' && specOther.length > 21){ showErr('Specialty (Others) must be at most 21 characters.'); }
+              if((!amt || !cur || !freq) && (salaryFreeHidden && (salaryFreeHidden.value||"") === "")){
+                showErr('Please provide your salary using the structured fields (amount, currency, frequency).');
+              }
+              if(travel === ''){ showErr('Please select Yes or No for Willing to travel.'); }
+
+              if(!servicesCanonical){ showErr('Please select one service you offer.'); }
+              if(servicesCanonical.toLowerCase() === 'other' && servicesOtherVal === ''){ showErr('Please specify your Other service (max 21 characters).'); }
+              if(servicesOtherVal && servicesOtherVal.length > 21){ showErr('Service (Others) must be at most 21 characters.'); }
+
+              if(prefAge === ''){ showErr('Please select preferred care recipient age groups.'); }
+              if(disability === ''){ showErr('Please select a Disability option (Yes or No).'); }
+              if(disability === 'yes' && disabilityDetails === ''){ showErr('You selected Disability = Yes — please specify (max 21 characters).'); }
+              if(disabilityDetails && disabilityDetails.length > 21){ showErr('Disability details must be at most 21 characters.'); }
+
+              const daysChecked = Array.from(document.querySelectorAll('input[name="availability_days"]:checked')).map(n=>n.value);
+              const start = (document.getElementById('availability_start') && document.getElementById('availability_start').value) || '';
+              const end = (document.getElementById('availability_end') && document.getElementById('availability_end').value) || '';
+              if(daysChecked.length === 0){ showErr('Please select at least one availability day.'); }
+              if(!start || !end){ showErr('Please provide availability start and end times.'); }
+              if(languagesVal === ''){ showErr('Please list languages you speak.'); }
+              if(!cty || !cnt){ showErr('Please provide both city and country for Location.'); }
+
+            } else {
+              // FAMILY validations
+              const careSelectedEl = document.querySelector('input[name="care_needed"]:checked');
+              const careSelected = (careSelectedEl && careSelectedEl.value) || '';
+              const careOtherVal = (careOtherInput && String(careOtherInput.value).trim()) || '';
+              const numDep = (document.getElementById('number_of_dependents') && String(document.getElementById('number_of_dependents').value).trim()) || '';
+              const prefCareAge = (document.getElementById('preferred_caregiver_age') && String(document.getElementById('preferred_caregiver_age').value).trim()) || '';
+
+              // Preferred schedule validation (structured days + times)
+              const prefDaysChecked = Array.from(document.querySelectorAll('input[name="preferred_schedule_days"]:checked')).map(n=>n.value);
+              const prefStartVal = (prefStart && prefStart.value) || '';
+              const prefEndVal = (prefEnd && prefEnd.value) || '';
+
+              // salary budget (structured)
+              const famAmt = (familySalaryAmount && String(familySalaryAmount.value).trim()) || '';
+              const famCur = (familySalaryCurrency && String(familySalaryCurrency.value).trim()) || '';
+              const famFreq = (familySalaryFrequency && String(familySalaryFrequency.value).trim()) || '';
+
+              const gender = (document.getElementById('preferred_gender') && document.getElementById('preferred_gender').value.trim()) || '';
+              const household = (document.getElementById('household_info') && document.getElementById('household_info').value.trim()) || '';
+              const medical = (document.getElementById('medical_needs') && document.getElementById('medical_needs').value.trim()) || '';
+              const languagesVal = (document.getElementById('languages') && document.getElementById('languages').value.trim()) || '';
+              const cty = (cityEl && cityEl.value.trim()) || '';
+              const cnt = (countryEl && countryEl.value.trim()) || '';
+
+              if(!careSelected){ showErr('Please select one type of care needed.'); }
+              if(careSelected === 'other' && careOtherVal === ''){ showErr('Please specify your Other type of care needed (max 21 characters).'); }
+              if(careOtherVal && careOtherVal.length > 21){ showErr('Care needed (Others) must be at most 21 characters.'); }
+
+              if(numDep === '' || isNaN(Number(numDep))){ showErr('Please provide a valid number of dependents.'); }
+              if(prefCareAge === ''){ showErr('Please select a preferred caregiver age.'); }
+
+              if(prefDaysChecked.length === 0){ showErr('Please select at least one preferred schedule day.'); }
+              if(!prefStartVal || !prefEndVal){ showErr('Please provide preferred schedule start and end times.'); }
+
+              if(famAmt === '' || famCur === '' || famFreq === ''){ showErr('Please provide your salary budget using amount, currency and frequency.'); }
+
+              if(gender === ''){ showErr('Please select a preferred caregiver gender.'); }
+
+              // Household + medical length checks
+              if(household === ''){ showErr('Please provide household info.'); }
+              if(medical.length > MAX_FREE_TEXT){ showErr('Medical needs must be at most 17 characters.'); }
+
+
+              if(medical === ''){ showErr('Please provide medical needs (or state none).'); }
+              if(medical.length > MAX_FREE_TEXT){ showErr('Medical needs must be at most 40 characters.'); }
+
+              if(languagesVal === ''){ showErr('Please list preferred languages.'); }
+              if(!cty || !cnt){ showErr('Please provide both city and country for Location.'); }
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+            // Before submission, mirror final canonical values into localStorage so profile_setup can immediately show them after redirect
+            try{
+              if(specialtiesEl){
+                if(specialtiesEl.value === 'other'){
+                  lsSet('profile_specialties', (specialtiesOtherInput && specialtiesOtherInput.value.trim()) || 'Other');
+                } else {
+                  lsSet('profile_specialties', specialtiesEl.value || '');
+                }
+              }
+              if(servicesHidden){
+                lsSet('profile_services', servicesHidden.value || '');
+              }
+              if(availabilityHidden){
+                lsSet('profile_availability', availabilityHidden.value || '');
+              }
+            }catch(e){ console.warn('submit LS mirror failed', e); }
+
+             // All validations passed, now show loading
+nextBtn.disabled = true;
+nextBtnText.style.display = "none";
+nextBtnLoader.style.display = "inline";
+
+if (loadingOverlay) {
+    loadingOverlay.classList.add('show');
+}
+
+            const fd = new FormData(form);
+            fd.append('submitted_via','client');
+
+            fetch(form.action, { method: 'POST', body: fd, credentials: 'same-origin' })
+              .then(resp => {
+                // re-enable radios after posting so the form remains interactive if the request doesn't redirect
+                servicesRadios.forEach(r => { try{ r.disabled = false; }catch(e){} });
+
+                if(resp.redirected){
+                  window.location.href = resp.url;
+                } else {
+                  window.location.href = "{{ url_for('profile_setup') }}";
+                }
+              })
+               .catch(err => {
+
+
+    if (loadingOverlay) {
+    loadingOverlay.classList.remove('show');
+} 
+
+    nextBtn.disabled = false;
+    nextBtnText.style.display = "inline";
+    nextBtnLoader.style.display = "none";
+
+    console.error('Submission failed', err);
+
+    // re-enable radios if failure
+    servicesRadios.forEach(r => { try{ r.disabled = false; }catch(e){} });
+
+    alert('Submission failed: ' + (err.message || err));
+});
+
+          }catch(validationErr){
+
+    nextBtn.disabled = false;
+    nextBtnText.style.display = "inline";
+    nextBtnLoader.style.display = "none";
+
+    console.warn('Validation stopped submit:', validationErr.message);
+    return;
+} 
+        });
+
+        // enforce exclusivity on caregiver availability (existing) and family preferred schedule
+        enforceMonSunExclusivityFor('input[name="availability_days"]', monSunBox);
+        enforceMonSunExclusivityFor('input[name="preferred_schedule_days"]', prefMonSunBox);
+
+        // specialties other toggle
+        if(specialtiesEl){
+          specialtiesEl.addEventListener('change', function(){
+            if(this.value === 'other'){
+              if(specialtiesOtherWrap) specialtiesOtherWrap.style.display = 'block';
+              if(specialtiesOtherInput) specialtiesOtherInput.setAttribute('required','required');
+            } else {
+              if(specialtiesOtherWrap) specialtiesOtherWrap.style.display = 'none';
+              if(specialtiesOtherInput) specialtiesOtherInput.removeAttribute('required');
+            }
+            // mirror change immediately to localStorage so review updates live
+            try{
+              if(specialtiesEl.value === 'other'){
+                lsSet('profile_specialties', (specialtiesOtherInput && specialtiesOtherInput.value.trim()) || 'Other');
+              } else {
+                lsSet('profile_specialties', specialtiesEl.value || '');
+              }
+            }catch(e){ console.warn('specialties change LS mirror failed', e); }
+          });
+
+          // if user types into the 'other' field, update LS on input
+          if(specialtiesOtherInput){
+            specialtiesOtherInput.addEventListener('input', function(){
+              try{ if(specialtiesEl && specialtiesEl.value === 'other'){ lsSet('profile_specialties', this.value.trim() || 'Other'); } }catch(e){}
+            });
+          }
+        }
+
+        // disability toggle
+        if(disabilitySelect){
+          disabilitySelect.addEventListener('change', function(){
+            if(this.value === 'yes'){
+              if(disabilityDetailsWrap) disabilityDetailsWrap.style.display = 'block';
+              if(disabilityDetailsInput) disabilityDetailsInput.setAttribute('required','required');
+            } else {
+              if(disabilityDetailsWrap) disabilityDetailsWrap.style.display = 'none';
+              if(disabilityDetailsInput) disabilityDetailsInput.removeAttribute('required');
+            }
+          });
+        }
+
+        // services: hook change events to update canonical hidden field immediately
+        if(servicesRadios && servicesRadios.length){
+          servicesRadios.forEach(r => r.addEventListener('change', servicesChangeHandler));
+          // also sync typing in servicesOtherInput to localStorage and canonical hidden field
+          if(servicesOtherInput){
+            servicesOtherInput.addEventListener('input', function(){
+              try{
+                if(servicesOtherInput.value && document.querySelector('input[name="services_radio"]:checked') && document.querySelector('input[name="services_radio"]:checked').value === 'other'){
+                  servicesHidden.value = servicesOtherInput.value.trim();
+                  lsSet('profile_services', servicesHidden.value);
+                }
+              }catch(e){ console.warn('servicesOther input handler failed', e); }
+            });
+          }
+          // initialize canonical hidden field from current state (and LS hydration above)
+          servicesChangeHandler();
+        }
+
+        // care needed: radios -> show/hide other input
+        if(careInputs && careInputs.length){
+          careInputs.forEach(r => r.addEventListener('change', careRadioChangeHandler));
+          // initialize visibility state
+          careRadioChangeHandler();
+        }
+
+        // ------------------ Household & Medical char-limit UI -------------------
+        const householdEl = document.getElementById('household_info');
+        const medicalEl = document.getElementById('medical_needs');
+        const householdCounter = document.getElementById('household_counter');
+        const medicalCounter = document.getElementById('medical_counter');
+        const householdWarn = document.getElementById('household_warn');
+        const medicalWarn = document.getElementById('medical_warn');
+
+        function updateCounter(el, counterEl, warnEl){
+          if(!el || !counterEl) return;
+          const len = (el.value || '').length;
+          counterEl.textContent = `${len}/${MAX_FREE_TEXT}`;
+          if(len >= MAX_FREE_TEXT){
+            el.classList.add('warn');
+            if(warnEl) warnEl.classList.add('show');
+          } else {
+            el.classList.remove('warn');
+            if(warnEl) warnEl.classList.remove('show');
+          }
+        }
+
+        function truncateIfNeeded(el){
+          if(!el) return;
+          if(el.value.length > MAX_FREE_TEXT){
+            el.value = el.value.slice(0, MAX_FREE_TEXT);
+          }
+        }
+
+        if(householdEl){
+          householdEl.addEventListener('input', function(){ truncateIfNeeded(householdEl); updateCounter(householdEl, householdCounter, householdWarn); });
+          householdEl.addEventListener('paste', function(e){
+            setTimeout(function(){ truncateIfNeeded(householdEl); updateCounter(householdEl, householdCounter, householdWarn); }, 0);
+          });
+          updateCounter(householdEl, householdCounter, householdWarn);
+        }
+        if(medicalEl){
+          medicalEl.addEventListener('input', function(){ truncateIfNeeded(medicalEl); updateCounter(medicalEl, medicalCounter, medicalWarn); });
+          medicalEl.addEventListener('paste', function(e){
+            setTimeout(function(){ truncateIfNeeded(medicalEl); updateCounter(medicalEl, medicalCounter, medicalWarn); }, 0);
+          });
+          updateCounter(medicalEl, medicalCounter, medicalWarn);
+        }
+
+        // sync a few helpful fields into hidden inputs regularly in case user submits with native browser button
+        setInterval(function(){
+          try{
+            prepareForm();
+            // re-enable UI radios after interval prepare so user can still interact
+            servicesRadios.forEach(r => { try{ r.disabled = false; }catch(e){} });
+          }catch(e){}
+        }, 3000);
+
+        // Listen for storage events (if user edits in another tab, update UI accordingly)
+        window.addEventListener('storage', function(e){
+          try{
+            // keep track of which element (if any) is currently focused so we don't stomp the user's typing
+            const active = (document && document.activeElement) ? document.activeElement : null;
+
+            if(e.key === 'profile_specialties'){
+              const newVal = e.newValue;
+              if(specialtiesEl){
+                const opt = Array.from(specialtiesEl.options).find(o => o.value === newVal);
+                if(opt){
+                  specialtiesEl.value = newVal;
+                  if(specialtiesOtherWrap) specialtiesOtherWrap.style.display = 'none';
+                } else {
+                  specialtiesEl.value = 'other';
+                  if(specialtiesOtherWrap) specialtiesOtherWrap.style.display = 'block';
+                  // Only update the visible "other" text input if the user is NOT actively typing in it.
+                  if(specialtiesOtherInput && active !== specialtiesOtherInput){
+                    specialtiesOtherInput.value = newVal || '';
+                  }
+                }
+              }
+            } else if(e.key === 'profile_services'){
+              const newVal = e.newValue;
+              if(newVal !== null){
+                // find matching radio
+                let matched = false;
+                servicesRadios.forEach(r => {
+                  try{
+                    if(r.value === newVal){
+                      r.checked = true; matched = true;
+                    } else { r.checked = false; }
+                  }catch(e){}
+                });
+                if(!matched){
+                  const otherRadio = servicesRadios.find(r => r.value === 'other');
+                  if(otherRadio){
+                    otherRadio.checked = true;
+                    if(servicesOtherWrap) servicesOtherWrap.style.display = 'block';
+                    // Only update the visible "other" text input if the user is NOT actively typing in it.
+                    if(servicesOtherInput && active !== servicesOtherInput){
+                      servicesOtherInput.value = newVal || '';
+                    }
+                  }
+                } else {
+                  if(servicesOtherWrap) servicesOtherWrap.style.display = 'none';
+                }
+                if(servicesHidden) servicesHidden.value = newVal || '';
+              }
+            } else if(e.key === 'profile_availability'){
+              const newVal = e.newValue;
+              if(newVal !== null && availabilityHidden){
+                availabilityHidden.value = newVal || '';
+                // best-effort: try to parse into UI fields (reuse hydration logic)
+                // (this mirrors the hydrateFromLocalStorage behavior above)
+              }
+            }
+          }catch(e){}
+        });
+
+      }catch(e){
+        console.error('Unexpected error initializing form JS:', e);
+      }
+    })();
+  </script>
+
+<script>
+(function(){
+  'use strict';
+
+  function $id(id){ try { return document.getElementById(id); } catch(e) { return null; } }
+  function trimEdges(s){ return (s||'').replace(/^\s+|\s+$/g,''); }
+
+  // Elements
+  const specialtiesSel = $id('specialties');
+  const specialtiesOther = $id('specialties_other');
+  const specialtiesOtherWrap = $id('specialtiesOtherWrap');
+
+  const servicesRadios = Array.from(document.querySelectorAll('input[name="services_radio"]'));
+  const servicesOther = $id('services_other');
+  const servicesOtherWrap = $id('servicesOtherWrap');
+  const servicesHidden = $id('services_hidden');
+
+  // safe per-user localStorage helper (use __userLS if available)
+  function mirrorLS(key, value){
+    try {
+      if(window.__userLS && typeof window.__userLS.set === 'function'){
+        // prefer storing as raw string (preserve spaces)
+        window.__userLS.set(key, value);
+      } else {
+        localStorage.setItem(key, value);
+      }
+    } catch(e){}
+  }
+
+  // clear visible placeholder-like tokens (e.g. "Other") so input becomes empty
+  function clearPlaceholderToken(el){
+    if(!el) return;
+    const v = (el.value || '').trim();
+    if(!v || v.toLowerCase() === 'other' || /^other\s*/i.test(v) || /please specify/i.test(v)){
+      el.value = '';
+    }
+  }
+
+  // Show specialties-other as empty and focus ready
+  function showSpecialtiesOther(){
+    if(specialtiesOtherWrap) specialtiesOtherWrap.style.display = 'block';
+    if(specialtiesOther){
+      clearPlaceholderToken(specialtiesOther);
+      specialtiesOther.removeAttribute('disabled');
+      specialtiesOther.setAttribute('required','required');
+      try { specialtiesOther.focus(); } catch(e){}
+    }
+  }
+  function hideSpecialtiesOther(){
+    if(specialtiesOtherWrap) specialtiesOtherWrap.style.display = 'none';
+    if(specialtiesOther) specialtiesOther.removeAttribute('required');
+  }
+
+  // Show services-other wrapper empty and focus
+  function showServicesOther(){
+    if(servicesOtherWrap) servicesOtherWrap.style.display = 'block';
+    if(servicesOther){
+      clearPlaceholderToken(servicesOther);
+      servicesOther.removeAttribute('disabled');
+      servicesOther.setAttribute('required','required');
+      try { servicesOther.focus(); } catch(e){}
+    }
+  }
+  function hideServicesOther(){
+    if(servicesOtherWrap) servicesOtherWrap.style.display = 'none';
+    if(servicesOther) servicesOther.removeAttribute('required');
+  }
+
+  // Initialize: attach listeners
+  try{
+    if(specialtiesSel){
+      specialtiesSel.addEventListener('change', function(){
+        if(this.value === 'other'){
+          showSpecialtiesOther();
+          // mirror token to LS until user types (keeps preview consistent)
+          mirrorLS('profile_specialties', 'other');
+        } else {
+          hideSpecialtiesOther();
+          mirrorLS('profile_specialties', this.value || '');
+        }
+      }, true);
+
+      // if server preselected 'other' ensure the visible box is empty
+      if(specialtiesSel.value === 'other'){
+        showSpecialtiesOther();
+      }
+    }
+
+    // services radios: show/hide "other" input and ensure it's empty when shown
+    if(servicesRadios.length){
+      servicesRadios.forEach(r => {
+        r.addEventListener('change', function(){
+          if(this.checked && this.value === 'other'){
+            showServicesOther();
+            mirrorLS('profile_services', 'other');
+            // do not prefill visible field here
+          } else {
+            // if any other selected, hide other-wrapper
+            const otherChecked = servicesRadios.some(rr => rr.checked && rr.value === 'other');
+            if(!otherChecked) {
+              hideServicesOther();
+            }
+            if(this.checked){
+              // set canonical hidden immediately for non-other choice
+              if(servicesHidden) servicesHidden.value = this.value || '';
+              mirrorLS('profile_services', this.value || '');
+            }
+          }
+        }, true);
+      });
+
+      // hydrate: if services_hidden has a value that matches no radio, set other radio but keep visible other input empty
+      if(servicesHidden && servicesHidden.value){
+        const val = (servicesHidden.value || '').trim();
+        const match = servicesRadios.find(r => r.value === val);
+        if(!match){
+          const otherRadio = servicesRadios.find(r => r.value === 'other');
+          if(otherRadio) otherRadio.checked = true;
+          showServicesOther();
+          // leave servicesOther empty so user types their own value
+          if(servicesOther) servicesOther.value = '';
+        }
+      }
+    }
+
+    // Keep visible other inputs mirrored into localStorage and canonical hidden (so profile_setup sees typed text)
+    if(specialtiesOther){
+      specialtiesOther.addEventListener('input', function(){
+        const v = trimEdges(this.value);
+        mirrorLS('profile_specialties', v || 'other');
+      }, true);
+      specialtiesOther.addEventListener('paste', function(){
+        setTimeout(()=> {
+          const v = trimEdges(specialtiesOther.value);
+          mirrorLS('profile_specialties', v || 'other');
+        }, 10);
+      }, true);
+    }
+
+    if(servicesOther){
+      servicesOther.addEventListener('input', function(){
+        const v = trimEdges(this.value);
+        // keep canonical hidden in sync so server gets typed string
+        if(servicesHidden) servicesHidden.value = v;
+        mirrorLS('profile_services', v || '');
+      }, true);
+      servicesOther.addEventListener('paste', function(){
+        setTimeout(()=> {
+          const v = trimEdges(servicesOther.value);
+          if(servicesHidden) servicesHidden.value = v;
+          mirrorLS('profile_services', v || '');
+        }, 10);
+      }, true);
+    }
+
+    // Final guard: before Save draft / submit ensure values are the typed text (not "Other") and mirrored
+    const finalize = function(){
+      try{
+        if(specialtiesSel && specialtiesSel.value === 'other' && specialtiesOther){
+          specialtiesOther.value = trimEdges(specialtiesOther.value || '');
+          mirrorLS('profile_specialties', specialtiesOther.value || 'other');
+        }
+        const sel = document.querySelector('input[name="services_radio"]:checked');
+        if(sel && sel.value === 'other'){
+          if(servicesOther){
+            servicesOther.value = trimEdges(servicesOther.value || '');
+            if(servicesHidden) servicesHidden.value = servicesOther.value;
+            mirrorLS('profile_services', servicesOther.value || '');
+          }
+        } else if(sel && servicesHidden){
+          servicesHidden.value = sel.value || '';
+          mirrorLS('profile_services', sel.value || '');
+        }
+      }catch(e){ console.warn('finalize others', e); }
+    };
+
+    const saveBtn = $id('saveDraft');
+    if(saveBtn) saveBtn.addEventListener('click', function(){ setTimeout(finalize, 10); }, true);
+
+    const form = $id('step2Form');
+    if(form) form.addEventListener('submit', function(){ setTimeout(finalize, 10); }, true);
+
+    // ensure any server-rendered placeholder "Other" text is not left in visible boxes
+    if(specialtiesOther) clearPlaceholderToken(specialtiesOther);
+    if(servicesOther) clearPlaceholderToken(servicesOther);
+
+  }catch(e){
+    console.warn('profile-step2 others helper init failed', e);
+  }
+})();
+</script>
+
+
+<script>
+  // Ensure we start at the top when coming to this page (normal navigation, bfcache restore, etc.)
+  (function(){
+    function scrollTopNow(){
+      try {
+        // clear any scroll offsets
+        window.scrollTo(0,0);
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+      } catch(e){}
+    }
+
+    // pageshow covers bfcache (back/forward cache) restores
+    window.addEventListener('pageshow', function(evt){
+      scrollTopNow();
+      // small fallback in case some later focus call scrolls the page
+      setTimeout(scrollTopNow, 50);
+      setTimeout(scrollTopNow, 250);
+    });
+
+    // also guard normal loads
+    window.addEventListener('load', function(){
+      scrollTopNow();
+      setTimeout(scrollTopNow, 50);
+    });
+  })();
+</script>
+
+<script>
+  (function(){
+    try{
+      const certEl = document.getElementById('certifications');
+      if(certEl){
+        // enforce while typing (defensive)
+        certEl.addEventListener('input', function(){
+          if(this.value.length > 21) this.value = this.value.slice(0,21);
+        });
+        // handle pasted content
+        certEl.addEventListener('paste', function(){
+          setTimeout(()=> {
+            if(this.value.length > 21) this.value = this.value.slice(0,21);
+          }, 0);
+        });
+      }
+    }catch(e){}
+  })();
+
+
+
+
+window.addEventListener('pageshow', function () {
+
+    if (loadingOverlay) {
+        loadingOverlay.classList.remove('show');
+    }
+
+    nextBtn.disabled = false;
+    nextBtnText.style.display = "inline";
+    nextBtnLoader.style.display = "none";
+});
+</script>
+
+
+
+</body>
+</html>
+
+
+        

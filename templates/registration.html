@@ -1,0 +1,1853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register • Care Companion</title>
+
+  <!-- Fonts & icons (same as About page) -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
+  <style>
+    /* =========================
+       BLUE-HEAVY PALETTE (from About page) + registration styles
+       ========================= */
+    :root{
+      --berry:     #6A5CFA;
+      --admiral:   #062b5a;
+      --indigo:    #2b3d9a;
+      --cobalt:    #2153FF;
+      --airforce:  #3B6FF6;
+      --navy:      #041B3B;
+      --ice:       #e6f4ff;
+      --muted:     #a6bacf;
+      --card:      linear-gradient(180deg, rgba(8,30,66,0.9), rgba(11,51,120,0.95));
+      --accent:    #00d4ff;
+      --radius:    14px;
+      --maxw:      1180px;
+      --transition:220ms cubic-bezier(.2,.9,.3,1);
+    }
+
+    *{box-sizing:border-box}
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, Arial, "Noto Sans";
+      background:
+        radial-gradient(900px 500px at 10% 10%, rgba(11,30,66,0.55), transparent 30%),
+        radial-gradient(700px 420px at 95% 20%, rgba(17,36,70,0.45), transparent 30%),
+        linear-gradient(180deg, #07132a 0%, #041027 60%, #02101b 100%);
+      color: var(--ice);
+      min-height:100vh;
+      padding: 20px;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    .page { width:100%; max-width:var(--maxw); margin:10px auto; padding:12px; }
+
+    /* Top banner / nav copied from About page (identical) */
+    .top-banner {
+      width:100%;
+      background: linear-gradient(90deg, var(--berry), var(--cobalt));
+      color:#fff;
+      text-align:center;
+      padding:10px 14px;
+      font-weight:700;
+      border-radius:12px;
+      box-shadow: 0 8px 30px rgba(33,83,255,0.12);
+      margin-bottom:12px;
+    }
+
+    /* OFF-WHITE SECTION BASE (visual defaults preserved; specific mobile header rules appended later) */
+    .off-white-section{
+      display:flex; align-items:center; gap:18px; padding:12px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:12px;
+      border: 1px solid rgba(255,255,255,0.03);
+      color: #e6f4ff;
+      margin-bottom:18px;
+    }
+    .brand { display:flex; align-items:center; gap:12px; }
+    .brand img { width:88px; height:56px; object-fit:contain; filter: drop-shadow(0 6px 20px rgba(0,0,0,0.5)); }
+
+    .nav-menu { margin-left:20px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+    .nav-menu a {
+      color: rgba(255,255,255,0.9);
+      padding:8px 10px; border-radius:10px; font-weight:600; font-size:14px;
+      transition: all var(--transition);
+    }
+    .nav-menu a[aria-current="page"]{ background: linear-gradient(90deg,var(--cobalt),var(--airforce)); color:#fff; box-shadow:0 10px 30px rgba(33,83,255,0.12); }
+    .nav-menu a:hover{ transform:translateY(-3px); box-shadow:0 12px 36px rgba(33,83,255,0.08); }
+
+    /* ========== Registration card styles (kept from your original file) ========== */
+    .wrap{
+      width:100%;
+      max-width: 900px;
+      display:grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap:0;
+      border-radius:24px;
+      overflow:hidden;
+      background: var(--card);
+      box-shadow: 0 30px 80px rgba(6, 27, 60, 0.35);
+      border: 1px solid rgba(255,255,255,0.04);
+      margin: 0 auto;
+    }
+    .left{
+      padding:40px 36px 32px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-right:1px solid rgba(255,255,255,0.04);
+      color: var(--ice);
+    }
+    .right{
+      padding:40px 36px 32px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      color: var(--ice);
+    }
+    .brand-inline{
+      display:flex; align-items:center; gap:12px; margin-bottom:24px;
+      font-weight:700; letter-spacing:.3px; font-size:20px;
+    }
+    .brand-badge{
+      width:36px; height:36px; border-radius:12px;
+      background: linear-gradient(145deg, var(--berry), var(--indigo));
+      display:grid; place-items:center; font-weight:800; color:var(--ice);
+      box-shadow: inset 0 0 12px rgba(255,255,255,0.06);
+    }
+    h1{
+      margin:0 0 8px; font-size:28px; font-weight:800; letter-spacing:.2px;
+      color: var(--ice);
+    }
+    .subtitle{
+      opacity:.9; font-size:14px; margin-bottom:20px; color: var(--muted);
+    }
+    .role-switch{ display:flex; gap:8px; margin-bottom:20px; }
+    .chip{
+      flex:1; text-align:center; padding:10px 12px; border-radius:12px;
+      background: rgba(255,255,255,0.02); border:1px solid rgba(255,255,255,0.06);
+      cursor:pointer; user-select:none; font-weight:600; font-size:14px;
+      transition: transform .06s ease, background .2s ease, border .2s ease;
+      color: var(--ice);
+    }
+    .chip:hover{ transform: translateY(-1px); }
+    .chip.active{
+      background: linear-gradient(145deg, var(--navy), var(--berry));
+      border-color: rgba(255,255,255,0.12);
+      box-shadow: 0 6px 18px rgba(11,51,120,0.28);
+      color: var(--ice);
+    }
+    form{ display:grid; gap:14px; }
+    .row{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+    label{ font-size:12px; opacity:.95; margin-bottom:6px; display:block; color: var(--ice); }
+    .field{
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border:1px solid rgba(255,255,255,0.06);
+      border-radius:12px;
+      padding: 12px 12px;
+      color: var(--ice);
+      width:100%;
+      outline:none;
+      transition: border .2s ease, box-shadow .2s ease, background .2s ease;
+    }
+    .field::placeholder{ color: rgba(245,249,255,0.6); }
+    .field:focus{
+      border-color: rgba(255,255,255,0.12);
+      box-shadow: 0 2px 10px rgba(11,99,216,0.06);
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
+    }
+    .password-wrap{ position:relative; }
+    .toggle{
+      position:absolute; right:10px; top:50%; transform:translateY(-50%);
+      background:transparent; border:none; color:var(--ice);
+      cursor:pointer; font-size:12px; opacity:.95;
+    }
+    .hint{ font-size:12px; opacity:.85; margin-top:4px; color: var(--muted); }
+    .terms{ display:flex; gap:10px; align-items:flex-start; font-size:13px; line-height:1.3; color: var(--ice); }
+    .checkbox{ width:18px; height:18px; accent-color: var(--accent); }
+    .btn{ margin-top:6px; padding: 12px 16px; width:100%; border:none; border-radius:12px; font-weight:800; font-size:15px; color: var(--ice); background: linear-gradient(90deg, var(--berry), var(--indigo)); box-shadow: 0 12px 30px rgba(11,99,216,0.12); cursor:pointer; transition: transform .06s ease, filter .2s ease, box-shadow .2s ease; }
+    .btn:hover{ filter:brightness(1.03); } .btn:active{ transform: translateY(1px); }
+    .meta{ margin-top:14px; font-size:13px; opacity:.9; text-align:center; color: var(--muted); }
+    .link{ color: var(--accent); text-decoration:none; font-weight:700; }
+    .errors{ margin-bottom:14px; padding:10px 12px; border-radius:12px; background: rgba(244,67,54,0.12); border:1px solid rgba(244,67,54,0.28); color: #ffd6d0; }
+    .errors li{ margin-left:18px; }
+    .success { margin-bottom: 14px; padding: 12px 14px; border-radius: 12px; background: rgba(76, 175, 80, 0.12); border: 1px solid rgba(76, 175, 80, 0.35); display: flex; gap: 10px; align-items: center; font-weight: 700; color: #dff6de; box-shadow: 0 4px 12px rgba(76, 175, 80, 0.25); transform: translateY(-20px); opacity: 0; animation: slideIn 0.6s ease-out forwards; }
+    @keyframes slideIn { 0%{transform: translateY(-20px);opacity:0;} 60%{transform: translateY(4px);opacity:1;} 100%{transform: translateY(0);opacity:1;} }
+
+    .promo{ height:100%; display:flex; flex-direction:column; justify-content:space-between; color: var(--ice); }
+    .promo h2{ font-size:22px; margin:0 0 10px; color: var(--ice); }
+    .badge-stack{ display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; }
+    .pill{ padding:6px 10px; border-radius:999px; font-size:12px; font-weight:700; background: rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); color: var(--ice); }
+
+    @media (max-width:900px){ .wrap{ grid-template-columns: 1fr; } .right{ display:none; } .nav-menu { display:inline-flex; gap:8px; overflow:auto; padding-bottom:6px; } }
+
+    /* small utility: focus outlines */
+    a:focus, button:focus, input:focus, select:focus, textarea:focus { outline:3px solid rgba(33,83,255,0.14); outline-offset:3px; border-radius:8px; }
+
+    /* END of original registration CSS. Additional header/mobile rules appended next (do not touch form styles). */
+  </style>
+
+  <!-- ===== START: header/mobile CSS from login.html (appended so off-white header behaves exactly like login) ===== -->
+  <style>
+    /* LEFT: default desktop mobile-hamburger hidden */
+    .mobile-hamburger { display: none; }
+    .mobile-nav-panel { display: none; }
+
+    /* Mobile header changes */
+    @media (max-width: 760px) {
+
+      /* reduce header height and force pure white background */
+      .off-white-section {
+        height: 56px !important;
+        padding: 0 !important;
+        background-color: #ffffff !important;
+        align-items: stretch;
+        position: relative;
+      }
+
+      /* logo must touch left/top/bottom and not exceed header */
+      .off-white-section #siteLogo {
+        height: 100%;
+        width: auto;
+        display: block;
+        object-fit: contain;
+        margin: 0;
+        padding: 0;
+        vertical-align: middle;
+      }
+
+      /* show hamburger on mobile */
+      .mobile-hamburger {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        background: transparent;
+        border: 0;
+        padding: 8px;
+        margin-left: 6px;
+        cursor: pointer;
+        color: #062c55;
+        height: 56px;
+        box-sizing: border-box;
+      }
+      .mobile-hamburger svg { fill: #062c55; }
+
+      /* hide the desktop nav on mobile (desktop stays intact) */
+      .nav-menu { display: none !important; }
+
+      /* avatar on same horizontal line (right side) */
+      .top-right-controls {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 80;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        pointer-events: auto;
+      }
+      .top-right-controls .profile-btn .avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 999px;
+        object-fit: cover;
+      }
+
+      /* Mobile sliding panel; --mobile-panel-right is set by JS to stop before avatar */
+      .mobile-nav-panel {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        right: var(--mobile-panel-right, 88px);
+        background: linear-gradient(180deg, #ffffff, #f7fbff);
+        box-shadow: 0 18px 48px rgba(2,10,30,0.12);
+        padding: 12px 16px;
+        transform: translateX(calc(-100% - 8px));
+        transition: transform 320ms cubic-bezier(.22,.9,.3,1);
+        z-index: 70;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        overflow-y: auto;
+        border-radius: 0 12px 12px 0;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .mobile-nav-panel.open { transform: translateX(0); }
+
+      .mobile-nav-panel a {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 10px;
+        text-decoration: none;
+        color: #072049;
+        font-weight: 700;
+        border-radius: 10px;
+        background: transparent;
+        transition: background 160ms ease, transform 160ms ease;
+      }
+      .mobile-nav-panel a:hover,
+      .mobile-nav-panel a:focus {
+        background: rgba(33,83,255,0.06);
+        transform: translateY(-2px);
+        outline: none;
+      }
+
+      .mobile-nav-panel .drag-handle {
+        width: 44px;
+        height: 5px;
+        border-radius: 999px;
+        background: linear-gradient(90deg, rgba(33,83,255,0.12), rgba(127,196,255,0.12));
+        margin: 6px auto 8px;
+      }
+
+      .mobile-nav-panel .close-mobile-nav {
+        position: absolute;
+        right: 12px;
+        top: 10px;
+        border: none;
+        background: transparent;
+        cursor: pointer;
+        font-size: 18px;
+        color: #072049;
+      }
+
+      @media (max-width: 420px) {
+        .mobile-hamburger { padding: 6px; margin-left: 4px; height: 52px; }
+        .off-white-section { height: 52px; }
+        .mobile-nav-panel { padding: 10px 12px; }
+      }
+    } /* end mobile header media query */
+
+    /* FIX: hide accessible fallback text inside hamburger */
+    .mobile-hamburger .cc-aria-fallback,
+    .mobile-hamburger .cc-aria-fallback *,
+    .mobile-hamburger span:not(.hamburger-icon) {
+      display: none !important;
+      visibility: hidden !important;
+    }
+
+    /* Mobile off-canvas nav — modern, avatar-safe (bigger breakpoint rules) */
+    @media (max-width: 980px) {
+      .mobile-hamburger {
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        background: transparent !important;
+        border: 0 !important;
+        padding: 6px !important;
+        width: 44px;
+        height: 44px;
+        box-shadow: none !important;
+        z-index: 20050; /* raised so it sits above header/overlays and receives clicks */
+        cursor: pointer;
+        pointer-events: auto !important;
+      }
+
+      .top-right-controls {
+        position: absolute !important;
+        right: 12px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        z-index: 10200 !important;
+      }
+
+      .mobile-nav-panel,
+      #mobileNav {
+        --nav-width: 270px; /* fallback */
+        display: block !important;
+        position: fixed !important;
+        left: 0 !important;
+        top: 0 !important;
+        height: 100dvh !important;
+        width: var(--nav-width) !important;
+        max-width: 92vw !important;
+        background: #ffffff !important;
+        transform: translateX(calc(-1 * var(--nav-width))) !important;
+        transition: transform 420ms cubic-bezier(.22,.61,.36,1) !important;
+        will-change: transform;
+        z-index: 10100 !important;
+        box-shadow: 10px 0 36px rgba(6,20,50,0.12) !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch !important;
+      }
+
+      .mobile-nav-panel.open,
+      #mobileNav.open {
+        transform: translateX(0) !important;
+      }
+
+      .mobile-nav-panel .mobile-nav-inner,
+      #mobileNav .mobile-nav-inner {
+        padding: 20px 8px;
+      }
+
+      .mobile-nav-panel .mobile-nav-inner a,
+      #mobileNav .mobile-nav-inner a {
+        display: block;
+        padding: 16px 20px;
+        color: #072049;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 16px;
+        background: transparent;
+        position: relative;
+      }
+
+      .mobile-nav-panel .mobile-nav-inner a:not(:last-child)::after,
+      #mobileNav .mobile-nav-inner a:not(:last-child)::after {
+        content: "";
+        position: absolute;
+        left: 20px;
+        right: 20px;
+        bottom: 0;
+        height: 1px;
+        border-radius: 1px;
+        background: linear-gradient(90deg, rgba(6,20,50,0.06), rgba(6,20,50,0.03));
+        transform-origin: center;
+      }
+
+      .mobile-nav-panel .close-pill,
+      #mobileNav .close-pill {
+        display:flex;
+        align-items:center;
+        justify-content:flex-start;
+        gap:10px;
+        padding: 12px 16px;
+        font-weight:800;
+        color:#072049;
+        cursor:pointer;
+      }
+    } /* end 980px rules */
+
+    /* mobile-nav link separators + spacing */
+    .mobile-nav-panel .mobile-links a,
+    #mobileNav .mobile-links a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 18px 22px;
+      text-decoration: none;
+      color: #072049;
+      font-weight: 700;
+      font-size: 16px;
+      background: transparent;
+      position: relative;
+    }
+    .mobile-nav-panel .mobile-links a:not(:last-child)::after,
+    #mobileNav .mobile-links a:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      left: 20px;
+      right: 20px;
+      bottom: -1px;
+      height: 1.5px;
+      border-radius: 2px;
+      background: linear-gradient(90deg, rgba(6,20,50,0.06), rgba(6,20,50,0.02));
+      transform-origin: center;
+      pointer-events: none;
+      opacity: 0.95;
+    }
+    .mobile-nav-panel .mobile-links {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding-bottom: 20px;
+    }
+
+    .mobile-nav-panel .mobile-links a:focus,
+    .mobile-nav-panel .mobile-links a:hover,
+    #mobileNav .mobile-links a:focus,
+    #mobileNav .mobile-links a:hover {
+      background: rgba(33,83,255,0.06);
+      transform: translateY(-2px);
+      outline: none;
+    }
+
+    /* Final: call button — hidden on desktop by request, visible on mobile */
+    .top-right-controls .call-btn {
+      display: none !important; /* default hidden; mobile rules will show it where needed */
+      color: #062c55 !important;
+      background: linear-gradient(180deg,#ffffff,#f2f8ff);
+      border: 1px solid rgba(6,20,50,0.06);
+      box-shadow: 0 6px 18px rgba(6,20,50,0.06);
+      width: 40px;
+      height: 40px;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      padding: 6px;
+      box-sizing: border-box;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .top-right-controls .call-btn svg {
+      display: block;
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+
+    @media (max-width: 760px) {
+      .top-right-controls .call-btn {
+        display: inline-flex !important;
+      }
+      @media (max-width: 520px) {
+        .top-right-controls .call-btn { width: 44px; height: 44px; border-radius: 12px; }
+        .top-right-controls .profile-btn .avatar { width: 40px; height: 40px; }
+      }
+    }
+
+    .top-right-controls *::before,
+    .top-right-controls *::after {
+      content: none !important;
+    }
+
+    .top-right-controls .cc-aria-fallback {
+      display: none !important;
+    }
+
+    .top-right-controls [role="tooltip"],
+    .top-right-controls .tooltip,
+    .top-right-controls .tippy-box,
+    .top-right-controls .tippy-content {
+      display: none !important;
+      visibility: hidden !important;
+      pointer-events: none !important;
+    }
+
+    .top-right-controls .call-btn {
+      font-size: 0 !important;
+      line-height: 0 !important;
+      -webkit-tap-highlight-color: transparent;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      padding: 6px;
+      border-radius: 10px;
+      box-sizing: border-box;
+    }
+
+    .top-right-controls .call-btn svg {
+      width: 18px;
+      height: 18px;
+      display: block;
+      fill: currentColor;
+      font-size: revert !important;
+      line-height: revert !important;
+    }
+
+    /* Updated dropdown typography to match index page (font family & weight & padding) */
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      right: 0;
+      margin-top: 8px;
+      min-width: 180px;
+      background: #ffffff;
+      border: 1px solid rgba(6,20,50,0.06);
+      box-shadow: 0 8px 24px rgba(6,20,50,0.08);
+      border-radius: 8px;
+      padding: 8px 0;
+      z-index: 10300;
+      /* ensure same font as index */
+      font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+    }
+    /* Apply heavier, slightly larger menu items to match index look */
+    .dropdown-menu .menu-item {
+      display: block;
+      text-decoration: none;
+      color: #0b2a66;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-weight: 800;              /* heavier thickness */
+      font-size: 15px;               /* slightly larger for readability & match */
+      line-height: 1.1;
+      background: transparent;
+    }
+    .dropdown-menu .menu-item:hover,
+    .dropdown-menu .menu-item:focus {
+      background: rgba(142,130,254,0.06);
+      outline: none;
+    }
+
+    .profile-dropdown.open .dropdown-menu {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .profile-btn {
+      background: transparent;
+      border: 0;
+      padding: 0;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .profile-btn .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* mobile tap/active visual & stacking fixes */
+    .mobile-hamburger,
+    .mobile-hamburger:focus,
+    .mobile-hamburger:active,
+    .top-right-controls .call-btn,
+    .top-right-controls .call-btn:focus,
+    .top-right-controls .call-btn:active,
+    .profile-btn,
+    .profile-btn:focus,
+    .profile-btn:active {
+      -webkit-tap-highlight-color: transparent !important;
+      touch-action: manipulation !important;
+      -webkit-user-select: none !important;
+      user-select: none !important;
+      -webkit-appearance: none !important;
+      appearance: none !important;
+      background: transparent !important;
+      outline: none !important;
+      box-shadow: none !important;
+    }
+
+    .mobile-hamburger {
+      position: relative !important;
+      z-index: 20050 !important;
+      pointer-events: auto !important;
+    }
+
+    .top-right-controls .call-btn {
+      pointer-events: auto !important;
+      z-index: 10450 !important;
+    }
+
+    button.mobile-hamburger:focus,
+    button.mobile-hamburger:active,
+    button.call-btn:focus,
+    button.call-btn:active {
+      background: transparent !important;
+    }
+
+    @media (max-width: 980px) {
+      .top-right-controls {
+        pointer-events: auto;
+      }
+    }
+
+    @media (max-width: 980px) {
+      .mobile-nav-panel,
+      #mobileNav {
+        z-index: 10150 !important;
+        background: #fff !important;
+      }
+      .top-right-controls {
+        z-index: 10200 !important;
+        position: absolute !important;
+      }
+      .mobile-hamburger {
+        z-index: 10050 !important;
+        transition: opacity 180ms ease, transform 180ms ease;
+      }
+      body.mobile-nav-open .mobile-hamburger {
+        opacity: 0 !important;
+        pointer-events: none !important;
+        transform: translateX(-6px) !important;
+      }
+      #mobileNavOverlay {
+        z-index: 10090 !important;
+      }
+    }
+
+    /* hide login/register links inside mobile panel when logged in */
+    @media (max-width: 980px) {
+      body[data-logged-in="1"] .mobile-nav-panel a#loginLink,
+      body[data-logged-in="1"] .mobile-nav-panel a#registerLink,
+      body[data-logged-in="true"] .mobile-nav-panel a#loginLink,
+      body[data-logged-in="true"] .mobile-nav-panel a#registerLink,
+      body[data-logged-in="1"] #mobileNav a[href*="/login"],
+      body[data-logged-in="1"] #mobileNav a[href*="/register"],
+      body[data-logged-in="true"] #mobileNav a[href*="/login"],
+      body[data-logged-in="true"] #mobileNav a[href*="/register"] {
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+      }
+
+      /* make caregiver/family blocked modal fully visible on narrow screens */
+      #caregiverBlockedModal .cc-modal-card,
+      #familyBlockedModal .cc-modal-card {
+        box-sizing: border-box !important;
+        width: min(520px, calc(100% - 32px)) !important;
+        max-width: 92vw !important;
+        margin: 12px auto !important;
+        overflow: hidden !important;
+        padding: 12px !important;
+      }
+
+      #caregiverBlockedModal .cc-modal-content,
+      #familyBlockedModal .cc-modal-content {
+        width: 100% !important;
+        overflow-wrap: break-word !important;
+      }
+
+      #caregiverBlockedModal .cc-modal-actions,
+      #familyBlockedModal .cc-modal-actions {
+        gap: 8px !important;
+        justify-content: center !important;
+        flex-wrap: wrap !important;
+      }
+
+      @media (max-width: 520px) {
+        #caregiverBlockedModal .cc-modal-left,
+        #familyBlockedModal .cc-modal-left {
+          display: none !important;
+        }
+        #caregiverBlockedModal .cc-modal-card,
+        #familyBlockedModal .cc-modal-card {
+          padding: 10px 12px !important;
+          max-width: 96vw !important;
+        }
+      }
+    }
+
+    /* Global mobile defense */
+    html, body {
+      max-width: 100vw;
+      overflow-x: hidden !important;
+      touch-action: pan-y;
+      overscroll-behavior-x: none;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    /* prevent touch horizontal gestures on the carousel itself (if present) */
+    #arc-carousel,
+    #arc-carousel * {
+      touch-action: none;
+      -ms-touch-action: none;
+    }
+
+    /* subtle separator line under the off-white header */
+    .off-white-section {
+      border-bottom: 1px solid rgba(6,27,60,0.06);
+    }
+
+    /* DESKTOP-SPECIFIC ADJUSTMENTS */
+    @media (min-width: 761px) {
+      .nav-menu {
+        display: flex;
+        flex: 1 1 auto;
+        margin-left: 20px;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .top-right-controls {
+        position: static !important;
+        right: auto !important;
+        top: auto !important;
+        transform: none !important;
+        margin-left: 12px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        z-index: 10;
+      }
+
+      .top-right-controls .call-btn {
+        display: none !important;
+      }
+
+      .profile-dropdown { position: relative; }
+
+      .profile-btn .avatar { width: 40px; height: 40px; border-radius: 999px; }
+
+      .mobile-hamburger { display: none !important; }
+    }
+
+
+
+
+
+/* Paste this at the END of your existing <style> in register.html */
+/* Mobile-first fixes for the registration form area so it doesn't look like desktop on phones */
+
+@media (max-width: 720px) {
+  /* Make the whole card use the single-column layout and fit the viewport */
+  .wrap {
+    grid-template-columns: 1fr !important;    /* stack left/right */
+    max-width: 100% !important;
+    margin: 8px auto !important;
+    border-radius: 16px !important;
+  }
+
+  /* Hide the right promo column explicitly (if not already hidden) */
+  .right {
+    display: none !important;
+  }
+
+  /* Make the left column (the form) full width and more compact */
+  .left {
+    padding: 18px 16px !important;
+    border-right: none !important;
+  }
+
+  /* Collapse 2-column rows into 1 column */
+  .row {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  /* Ensure each input feels full-width and readable */
+  .field {
+    width: 100% !important;
+    padding: 12px 14px !important;
+    font-size: 15px !important;
+  }
+
+  /* Give password inputs extra right padding to avoid overlap with the "Show" toggle */
+  .password-wrap .field {
+    padding-right: 64px !important;
+  }
+  .toggle {
+    right: 12px !important;
+    font-size: 13px !important;
+  }
+
+  /* Slightly smaller headings & brand spacing for mobile */
+  .brand-inline { font-size: 16px !important; gap: 8px !important; }
+  h1 { font-size: 22px !important; margin-bottom: 8px !important; }
+  .subtitle { font-size: 13px !important; }
+
+  /* Chips/buttons - touch friendly sizing */
+  .chip { padding: 8px !important; font-size: 13px !important; border-radius: 10px !important; }
+  .btn { padding: 12px !important; font-size: 15px !important; border-radius: 10px !important; }
+
+  /* Compact helper text and messages */
+  .hint, .meta { font-size: 13px !important; }
+  .errors, .success { font-size: 14px !important; margin-left: 0 !important; margin-right: 0 !important; }
+
+  /* Prevent any horizontal overflow caused by the form */
+  html, body, .page { overflow-x: hidden !important; }
+}
+
+/* Extra polish for very small screens */
+@media (max-width: 420px) {
+  .left { padding: 14px 12px !important; }
+  .brand-inline { font-size: 15px !important; }
+  h1 { font-size: 20px !important; }
+  .field { font-size: 15px !important; padding: 10px 12px !important; }
+  .password-wrap .field { padding-right: 64px !important; }
+  .chip { font-size: 12px !important; padding: 8px 10px !important; }
+}  
+
+
+
+
+
+/* ==========================
+   Mobile: hide CC Care Companion writeup + fix password toggle
+   Paste at the END of your <style>
+   ========================== */
+
+/* 1) Remove the "CC Care Companion" writeup on small screens */
+@media (max-width: 720px) {
+  /* hide the inline brand (badge + text) on mobile */
+  .brand-inline {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+}
+
+/* 2) Fix the "Show" toggle inside password fields (center + contained) */
+.password-wrap { position: relative; }
+
+/* Give inputs enough right padding so the toggle sits inside the tile */
+.password-wrap .field {
+  padding-right: 80px !important; /* roomy space for the button */
+  box-sizing: border-box;
+}
+
+/* Style the toggle so it's vertically centered and visually inside the field */
+.password-wrap .toggle {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  min-width: 44px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: var(--ice);
+  cursor: pointer;
+  box-sizing: border-box;
+  z-index: 3; /* sit above the input */
+  line-height: 1;
+}
+
+/* Visible focus style for accessibility */
+.password-wrap .toggle:focus {
+  outline: 3px solid rgba(33,83,255,0.14);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* Extra tweaks for very small phones */
+@media (max-width: 420px) {
+  .password-wrap .field { padding-right: 72px !important; }
+  .password-wrap .toggle { height: 32px; min-width: 40px; right: 8px; font-size: 13px; }
+}
+
+@media (max-width: 760px) {
+  .top-banner{
+    display:none !important;
+  }
+
+  /* optional: tighten spacing after removing the banner */
+  .off-white-section{
+    margin-bottom:12px;
+  }
+}
+@media (max-width: 760px) {
+  .top-banner,
+  .off-white-section{
+    display:none !important;
+  }
+}
+
+/* Registration Loading Overlay */
+.loading-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.45);
+    display:none;
+    justify-content:center;
+    align-items:center;
+    z-index:99999;
+}
+
+.loading-overlay.show{
+    display:flex;
+}
+
+.loader{
+    width:55px;
+    height:55px;
+    border:6px solid rgba(255,255,255,.3);
+    border-top:6px solid #ffffff;
+    border-radius:50%;
+    animation:spin .8s linear infinite;
+}
+
+@keyframes spin{
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+
+  </style>
+  <!-- ===== END header/mobile CSS ===== -->
+</head>
+<body>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loader"></div>
+</div>
+
+
+  <main class="page" id="main">
+    <!-- TOP BANNER (identical to About page) -->
+    <header>
+      <div class="top-banner" role="banner">
+        Concerned about a senior loved one living alone? Care Companion connects families with trusted caregivers.
+      </div>
+
+      <!-- ***************** OFF-WHITE SECTION: replaced so it is identical to login.html's header ***************** -->
+      <section class="off-white-section" role="navigation" aria-label="Primary navigation">
+        <!-- logo -->
+        <div class="brand" style="align-items:center;">
+          <img id="siteLogo" src="{{ url_for('static', filename='images/caregiver_logo.png') }}" alt="Care Companion logo">
+        </div>
+
+        <!-- Mobile hamburger: visible only on small screens -->
+        <button id="mobileHamburger" class="mobile-hamburger" aria-controls="mobileNav" aria-expanded="false" aria-label="Open menu">
+          <svg width="22" height="16" viewBox="0 0 22 16" aria-hidden="true" focusable="false">
+            <rect width="22" height="2" rx="1"></rect>
+            <rect y="7" width="22" height="2" rx="1" opacity="0.95"></rect>
+            <rect y="14" width="22" height="2" rx="1" opacity="0.85"></rect>
+          </svg>
+        </button>
+
+        <!-- Desktop nav (kept as-is; hidden on mobile via CSS) -->
+        <nav class="nav-menu" aria-label="Primary links">
+          <a href="{{ url_for('home') }}">Home</a>
+          <a href="{{ url_for('find_caregiver') }}">Find Caregiver</a>
+          <a href="{{ url_for('find_family') }}">Find Family</a>
+          <a href="{{ url_for('how_it_works') }}">How It Works</a>
+          <a href="{{ url_for('about') }}">About Us</a>
+          <a id="loginLink" href="{{ url_for('login') }}">Login</a>
+          <a id="registerLink" href="{{ url_for('register') }}">Sign Up</a>
+        </nav>
+
+        <!-- Right side controls: profile dropdown (call hidden on desktop now) -->
+        <div class="top-right-controls" aria-hidden="false">
+          <!-- Call button (will show only on mobile via media query; hidden on desktop) -->
+          <button class="call-btn"
+                  type="button"
+                  aria-label="Call Care Companion +234 913 227 2022"
+                  onclick="window.location.href='tel:+2349132272022'">
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.02-.24c1.12.37 2.33.57 3.59.57a1 1 0 011 1V20a1 1 0 01-1 1C10.07 21 3 13.93 3 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.26.2 2.47.57 3.59a1 1 0 01-.24 1.02l-2.21 2.18z" />
+            </svg>
+          </button>
+
+          <div class="profile-dropdown" id="profileDropdown">
+            <button id="profileBtn" class="profile-btn" aria-haspopup="true" aria-expanded="false" title="Open profile menu">
+              <img
+                class="avatar"
+                src="{{ url_for('uploaded_file', filename=(user.profile.profile_photo|basename)) if (user and user.profile and user.profile.profile_photo) else ( url_for('uploaded_file', filename=(user.profile_photo|basename)) if (user and user.profile_photo) else url_for('static', filename='images/avatar cc.jfif') ) }}"
+                alt="Profile"
+              >
+              <span class="chev" aria-hidden="true">▾</span>
+            </button>
+
+            <div class="dropdown-menu" id="profileMenu" role="menu" aria-hidden="true">
+               <a class="menu-item" href="{{ url_for('profile_setup') }}?suppress_overlay=1" role="menuitem">My profile</a>
+              <a class="menu-item" href="{{ url_for('contact') }}" role="menuitem">Contact Us</a>
+              <a id="logoutLink" class="menu-item" href="{{ url_for('logout') }}" role="menuitem" data-method="get">Log out</a>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- ***************** END off-white section ***************** -->
+    </header>
+
+    <!-- Registration content (UNCHANGED from your original file) -->
+    <div class="wrap" role="main" aria-labelledby="create-account">
+      <div class="left">
+        <div class="brand-inline">
+          <div class="brand-badge">CC</div>
+          Care Companion
+        </div>
+
+        <h1 id="create-account">Create your account</h1>
+        <div class="subtitle">
+          <strong>Signing up as:</strong>
+          <span id="roleDisplay">{{ 'Caregiver' if role == 'caregiver' else 'Family' }}</span>
+        </div>
+
+        <!-- Success or error messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="errors">
+              <ul>
+                {% for category, msg in messages if category == 'error' %}
+                  <li>{{ msg }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        {% if success %}
+          <div class="success" role="status">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M20 7L9 18l-5-5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Registration received. We sent a verification email to the address you provided. Please check your inbox (and spam). 
+          </div>
+        {% endif %}
+
+        <!-- Role selector -->
+        <div class="role-switch">
+          <div class="chip {% if role == 'caregiver' %}active{% endif %}" data-role="caregiver">Caregiver</div>
+          <div class="chip {% if role == 'family' %}active{% endif %}" data-role="family">Family</div>
+        </div>
+
+        <form id="registerForm" method="POST" action="{{ url_for('register', role=role) }}" novalidate> 
+          <input type="hidden" name="role" id="roleInput" value="{{ role }}"/>
+
+          <div class="row">
+            <div>
+              <label for="first_name">First name</label>
+              <input class="field" id="first_name" name="first_name" type="text" placeholder="Ada"
+                     value="{{ form_data.first_name or '' }}" required>
+            </div>
+            <div>
+              <label for="last_name">Last name</label>
+              <input class="field" id="last_name" name="last_name" type="text" placeholder="Obi"
+                     value="{{ form_data.last_name or '' }}" required>
+            </div>
+          </div>
+
+          <div>
+            <label for="email">Email</label>
+            <input class="field" id="email" name="email" type="email" placeholder="you@example.com"
+                   value="{{ form_data.email or '' }}" required>
+          </div>
+
+          <div class="row">
+            <div class="password-wrap">
+              <label for="password">Password</label>
+              <input class="field" id="password" name="password" type="password" minlength="8"
+                     placeholder="At least 8 characters" required>
+              <button class="toggle" type="button" data-target="password">Show</button>
+              <div class="hint">Use 8+ characters with a mix of letters & numbers.</div>
+            </div>
+            <div class="password-wrap">
+              <label for="confirm_password">Confirm password</label>
+              <input class="field" id="confirm_password" name="confirm_password" type="password" minlength="8" required>
+              <button class="toggle" type="button" data-target="confirm_password">Show</button>
+            </div>
+          </div>
+
+          <div class="terms">
+            <input class="checkbox" id="terms" name="terms" type="checkbox" {% if form_data.terms %}checked{% endif %} required>
+            <label for="terms">I agree to the Terms of Service & Privacy Policy.</label>
+          </div>
+
+          <button class="btn" id="registerBtn" type="submit">Create account</button> 
+          <div class="meta">
+            Already have an account?
+            <a class="link" href="{{ url_for('login') }}">Log in</a>
+          </div>
+        </form>
+      </div>
+
+      <div class="right">
+        <div class="promo" aria-hidden="true">
+          <div>
+            <h2>Find the right match, faster.</h2>
+            <p>
+              Build a trusted profile and connect with families and caregivers nearby.
+              Smart filters and secure messaging make it easy to start the conversation.
+            </p>
+            <div class="badge-stack">
+              <span class="pill">Blue-check Verification</span>
+              <span class="pill">Location Filters</span>
+              <span class="pill">Secure Chat</span>
+              <span class="pill">Saved Matches</span>
+            </div>
+          </div>
+          <p class="hint">All you need is an email to get started. No fees to register.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Role chips (same as before)
+    const chips = document.querySelectorAll('.chip');
+    const roleInput = document.getElementById('roleInput');
+    const roleDisplay = document.getElementById('roleDisplay');
+    chips.forEach(chip=>{
+      chip.addEventListener('click', ()=>{
+        chips.forEach(c=>c.classList.remove('active'));
+        chip.classList.add('active');
+        const role = chip.dataset.role;
+        roleInput.value = role;
+        roleDisplay.textContent = role === 'caregiver' ? 'Caregiver' : 'Family';
+        const url = new URL(window.location);
+        url.searchParams.set('role', role);
+        window.history.replaceState({}, '', url);
+      });
+    });
+
+    // Password show/hide
+    document.querySelectorAll('.toggle').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const id = btn.getAttribute('data-target');
+        const input = document.getElementById(id);
+        const isPwd = input.type === 'password';
+        input.type = isPwd ? 'text' : 'password';
+        btn.textContent = isPwd ? 'Hide' : 'Show';
+      });
+    });
+  </script>
+
+  <!-- Defensive script to ensure nav links navigate normally -->
+  <script>
+    (function(){
+      const login = document.getElementById('loginLink');
+      const register = document.getElementById('registerLink');
+
+      function goDirect(e){
+        // allow Ctrl/Cmd / middle-click to open new tab normally
+        if (e.ctrlKey || e.metaKey || e.button === 1) return;
+        const href = this && this.getAttribute && this.getAttribute('href');
+        if (!href) return;
+        e.preventDefault();
+        window.location.href = href;
+      }
+
+      if (login) login.addEventListener('click', goDirect);
+      if (register) register.addEventListener('click', goDirect);
+    })();
+  </script>
+
+  <!-- ===== Modal blocks (kept from your original) ===== -->
+  <style>
+    .cc-modal-inline { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 20000; font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial; }
+    .cc-modal-inline.show { display:flex; }
+    .cc-modal-card { width:100%; max-width:520px; margin:16px; border-radius:12px; background: linear-gradient(180deg,#fff,#f6f8ff); box-shadow: 0 20px 60px rgba(8,18,60,0.18); padding:18px; color:#072049; display:flex; gap:12px; align-items:flex-start; }
+    .cc-modal-left{width:56px;height:56px;border-radius:12px;background:linear-gradient(180deg,#e6e9ff,#cfcfff); display:flex;align-items:center;justify-content:center;font-weight:700;color:#24307a}
+    .cc-modal-content h3{margin:0 0 6px;font-size:18px}
+    .cc-modal-content p{margin:0;font-size:14px;color:#0b2a4a;opacity:.95}
+    .cc-modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:12px}
+    .cc-btn-primary{background:linear-gradient(90deg,#3b6cff,#6aa8ff);color:#fff;padding:10px 14px;border-radius:10px;border:0;font-weight:700;cursor:pointer}
+    .cc-btn-ghost{background:transparent;border:1px solid rgba(11,42,90,0.06);padding:10px 12px;border-radius:10px;color:#0b2a4a;font-weight:700;cursor:pointer}
+    @media(max-width:520px){.cc-modal-left{display:none}.cc-modal-actions{flex-direction:column}.cc-btn-primary,.cc-btn-ghost{width:100%}}
+  </style>
+
+  <!-- Caregiver-block modal -->
+  <div id="caregiverBlockedModal" class="cc-modal-inline" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="cc-modal-card" role="document" aria-labelledby="cbTitle" aria-describedby="cbDesc">
+      <div class="cc-modal-left" aria-hidden="true">i</div>
+      <div class="cc-modal-content" style="flex:1">
+        <h3 id="cbTitle">Access restricted</h3>
+        <p id="cbDesc">Sorry — caregivers cannot view the <strong>Find Caregiver</strong> page. You can browse families instead.</p>
+        <div class="cc-modal-actions">
+          <button id="cbCloseBtn" class="cc-btn-ghost" type="button">Close</button>
+          <button id="cbViewFamiliesBtn" class="cc-btn-primary" type="button">View Families</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Family-block modal -->
+  <div id="familyBlockedModal" class="cc-modal-inline" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="cc-modal-card" role="document" aria-labelledby="fbTitle" aria-describedby="fbDesc">
+      <div class="cc-modal-left" aria-hidden="true">i</div>
+      <div class="cc-modal-content" style="flex:1">
+        <h3 id="fbTitle">Access restricted</h3>
+        <p id="fbDesc">Sorry — families cannot view the <strong>Find Family</strong> page. You can browse caregivers instead.</p>
+        <div class="cc-modal-actions">
+          <button id="fbCloseBtn" class="cc-btn-ghost" type="button">Close</button>
+          <button id="fbViewCaregiversBtn" class="cc-btn-primary" type="button">View Caregivers</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(function () {
+  // Read server flags from body data attributes (must exist)
+  function readFlags() {
+    const b = document.body;
+    const loggedAttr = String(b.getAttribute('data-logged-in') || '').toLowerCase();
+    const roleAttr = String(b.getAttribute('data-user-role') || '').toLowerCase();
+    const pubAttr = String(b.getAttribute('data-profile-published') || '').toLowerCase();
+    return {
+      isLogged: (loggedAttr === '1' || loggedAttr === 'true'),
+      role: roleAttr,
+      isPublished: (pubAttr === '1' || pubAttr === 'true')
+    };
+  }
+
+  function shouldBlockCaregiver() {
+    const f = readFlags();
+    return f.isLogged && f.role === 'caregiver' && f.isPublished;
+  }
+  function shouldBlockFamily() {
+    const f = readFlags();
+    return f.isLogged && f.role === 'family' && f.isPublished;
+  }
+
+  // Modal elements
+  const caregiverModal = document.getElementById('caregiverBlockedModal');
+  const caregiverClose = document.getElementById('cbCloseBtn');
+  const caregiverViewFamilies = document.getElementById('cbViewFamiliesBtn');
+
+  const familyModal = document.getElementById('familyBlockedModal');
+  const familyClose = document.getElementById('fbCloseBtn');
+  const familyViewCaregivers = document.getElementById('fbViewCaregiversBtn');
+
+  // Generic open/close helpers (works for either modal element)
+  function openModal(modalEl, primaryFocusEl) {
+    if (!modalEl) return;
+    modalEl.classList.add('show');
+    modalEl.setAttribute('aria-hidden', 'false');
+    // move focus to primary action
+    setTimeout(()=> { try { primaryFocusEl && primaryFocusEl.focus(); } catch(e){} }, 30);
+    document.addEventListener('keydown', onKeyDown);
+    modalEl._prevActive = document.activeElement;
+  }
+  function closeModal(modalEl) {
+    if (!modalEl) return;
+    modalEl.classList.remove('show');
+    modalEl.setAttribute('aria-hidden', 'true');
+    document.removeEventListener('keydown', onKeyDown);
+    try { if (modalEl._prevActive && typeof modalEl._prevActive.focus === 'function') modalEl._prevActive.focus(); } catch(e){}
+  }
+  function onKeyDown(e) {
+    if (e.key === 'Escape' || e.key === 'Esc') {
+      // close whichever modal is open
+      if (caregiverModal && caregiverModal.classList.contains('show')) closeModal(caregiverModal);
+      if (familyModal && familyModal.classList.contains('show')) closeModal(familyModal);
+    }
+    if (e.key === 'Tab') {
+      // trap focus inside whichever modal is open
+      const activeModal = caregiverModal.classList.contains('show') ? caregiverModal : (familyModal.classList.contains('show') ? familyModal : null);
+      if (!activeModal) return;
+      const focusables = Array.from(activeModal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')).filter(el=>el.offsetWidth || el.offsetHeight);
+      if (!focusables.length) return;
+      const first = focusables[0], last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  }
+
+  // Delegated click interception for both links/buttons
+  document.addEventListener('click', function (ev) {
+    // allow ctrl/cmd/new-tab and middle-click
+    if (ev.ctrlKey || ev.metaKey || ev.button === 1) return;
+    const el = ev.target;
+    if (!el) return;
+    const a = el.closest ? el.closest('a, button') : null;
+    if (!a) return;
+    const href = a.getAttribute && a.getAttribute('href') || '';
+    const id = a.id || '';
+    const classes = a.className || '';
+
+    const wantsCaregiver = (href.indexOf('/find-caregiver') !== -1 || id === 'navFindCaregiver' || (classes && classes.indexOf('find-care') !== -1));
+    const wantsFamily = (href.indexOf('/find-family') !== -1 || id === 'navFindFamily' || (classes && classes.indexOf('find-jobs') !== -1));
+
+    if (wantsCaregiver && shouldBlockCaregiver()) {
+      ev.preventDefault(); ev.stopPropagation();
+      openModal(caregiverModal, caregiverViewFamilies);
+      return;
+    }
+    if (wantsFamily && shouldBlockFamily()) {
+      ev.preventDefault(); ev.stopPropagation();
+      openModal(familyModal, familyViewCaregivers);
+      return;
+    }
+    // otherwise allow navigation
+  }, { capture: true });
+
+  // Wire modal buttons
+  if (caregiverClose) caregiverClose.addEventListener('click', ()=> closeModal(caregiverModal));
+  if (caregiverViewFamilies) caregiverViewFamilies.addEventListener('click', ()=> { window.location.href = '/find-family'; });
+
+  if (familyClose) familyClose.addEventListener('click', ()=> closeModal(familyModal));
+  if (familyViewCaregivers) familyViewCaregivers.addEventListener('click', ()=> { window.location.href = '/find-caregiver'; });
+
+})();
+</script>
+
+<!-- PROFILE DROPDOWN + MOBILE NAV HELPERS (same as login page; enables hamburger, panel and profile dropdown) -->
+<script>
+(function () {
+  // Toggle handler for every profile button (handles duplicated markup)
+  function toggleDropdownForButton(btn) {
+    var dropdown = btn.closest('.profile-dropdown');
+    if (!dropdown) return;
+    var menu = dropdown.querySelector('.dropdown-menu');
+    if (!menu) return;
+
+    var isOpen = dropdown.classList.contains('open');
+    if (isOpen) {
+      dropdown.classList.remove('open');
+      btn.setAttribute('aria-expanded', 'false');
+      menu.setAttribute('aria-hidden', 'true');
+    } else {
+      // close any other open dropdowns on the page first
+      document.querySelectorAll('.profile-dropdown.open').forEach(function (d) {
+        if (d === dropdown) return;
+        d.classList.remove('open');
+        var b = d.querySelector('.profile-btn');
+        var m = d.querySelector('.dropdown-menu');
+        if (b) b.setAttribute('aria-expanded', 'false');
+        if (m) m.setAttribute('aria-hidden', 'true');
+      });
+
+      dropdown.classList.add('open');
+      btn.setAttribute('aria-expanded', 'true');
+      menu.setAttribute('aria-hidden', 'false');
+    }
+  }
+
+  // Attach click to all profile buttons
+  document.querySelectorAll('.profile-btn').forEach(function (btn) {
+    btn.addEventListener('click', function (ev) {
+      ev.stopPropagation();
+      toggleDropdownForButton(btn);
+    });
+  });
+
+  // Close dropdowns when clicking outside
+  document.addEventListener('click', function (ev) {
+    document.querySelectorAll('.profile-dropdown.open').forEach(function (d) {
+      var btn = d.querySelector('.profile-btn');
+      var menu = d.querySelector('.dropdown-menu');
+      if (!d.contains(ev.target)) {
+        d.classList.remove('open');
+        if (btn) btn.setAttribute('aria-expanded', 'false');
+        if (menu) menu.setAttribute('aria-hidden', 'true');
+      }
+    });
+  });
+
+  // Close on Escape
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Escape' || ev.key === 'Esc') {
+      document.querySelectorAll('.profile-dropdown.open').forEach(function (d) {
+        var btn = d.querySelector('.profile-btn');
+        var menu = d.querySelector('.dropdown-menu');
+        d.classList.remove('open');
+        if (btn) btn.setAttribute('aria-expanded', 'false');
+        if (menu) menu.setAttribute('aria-hidden', 'true');
+      });
+    }
+  });
+})();
+
+// Mobile hamburger slide-panel helper — only active on small screens
+(function () {
+  try {
+    var ham = document.getElementById('mobileHamburger');
+    if (!ham) return;
+
+    // Helper to detect mobile breakpoint (match your CSS breakpoint)
+    function isMobileView() {
+      return window.matchMedia && window.matchMedia('(max-width: 980px)').matches;
+    }
+
+    // Defensive: ensure hamburger has a hit area when in mobile view
+    function ensureHamburgerVisibleIfMobile() {
+      if (!isMobileView()) return;
+      try {
+        var cs = window.getComputedStyle(ham);
+        var rect = ham.getBoundingClientRect();
+        if (cs.display === 'none' || rect.width === 0 || rect.height === 0) {
+          ham.style.setProperty('display', 'inline-flex', 'important');
+          ham.style.setProperty('width', '44px', 'important');
+          ham.style.setProperty('height', '44px', 'important');
+          ham.style.setProperty('padding', '6px', 'important');
+          ham.style.setProperty('alignItems', 'center', 'important');
+          ham.style.setProperty('justifyContent', 'center', 'important');
+          ham.style.setProperty('position', 'relative', 'important');
+          ham.style.setProperty('zIndex', '20050', 'important');
+          ham.style.setProperty('pointerEvents', 'auto', 'important');
+        }
+      } catch (e) { /* ignore */ }
+    }
+
+    // Find existing panel or create a fallback mobile panel
+    var nav = document.getElementById('mobileNav') || document.querySelector('.mobile-nav-panel');
+    var createdPanel = false;
+    if (!nav) {
+      createdPanel = true;
+      nav = document.createElement('nav');
+      nav.id = 'mobileNav';
+      nav.className = 'mobile-nav-panel';
+      nav.setAttribute('aria-hidden', 'true');
+      // set a CSS variable fallback so transforms work
+      nav.style.setProperty('--nav-width', '270px');
+
+      var inner = document.createElement('div');
+      inner.className = 'mobile-nav-inner mobile-links';
+      var src = document.querySelector('.nav-menu');
+      if (src) inner.innerHTML = src.innerHTML;
+      else inner.innerHTML = '<a href="/">Home</a><a href="/how-it-works">How It Works</a>';
+      nav.appendChild(inner);
+
+      // Insert panel at end of body so z-index ordering is predictable
+      document.body.appendChild(nav);
+
+      // guard styles if needed
+      if (!nav.style.position) nav.style.position = 'fixed';
+      if (!nav.style.top) nav.style.top = '0';
+      if (!nav.style.left) nav.style.left = '0';
+      if (!nav.style.height) nav.style.height = '100dvh';
+    }
+
+    // Create overlay if not present
+    var overlay = document.getElementById('mobileNavOverlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'mobileNavOverlay';
+      overlay.setAttribute('aria-hidden', 'true');
+      overlay.style.cssText = [
+        'position:fixed',
+        'inset:0',
+        'background:rgba(0,0,0,0.32)',
+        'opacity:0',
+        'pointer-events:none',
+        'transition:opacity .28s ease',
+        'z-index:10090'
+      ].join(';');
+      document.body.appendChild(overlay);
+    }
+
+    // Open / Close helpers — only actually open on mobile view
+    function openNav() {
+      if (!isMobileView()) return;
+      nav.classList.add('open');
+      nav.setAttribute('aria-hidden', 'false');
+      overlay.style.opacity = '1';
+      overlay.style.pointerEvents = 'auto';
+      ham.setAttribute('aria-expanded', 'true');
+      // prevent page scroll behind the nav on mobile
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none';
+    }
+    function closeNav() {
+      nav.classList.remove('open');
+      nav.setAttribute('aria-hidden', 'true');
+      overlay.style.opacity = '0';
+      overlay.style.pointerEvents = 'none';
+      ham.setAttribute('aria-expanded', 'false');
+      document.documentElement.style.overflow = '';
+      document.body.style.touchAction = '';
+    }
+
+    // Attach click handler — toggles only when in mobile breakpoint
+    if (!ham.__mobileNavHandlerAttached) {
+      function onHamClick(ev) {
+        ev.stopPropagation();
+        ensureHamburgerVisibleIfMobile();
+        if (!isMobileView()) return; // do nothing on desktop
+        if (nav.classList.contains('open')) closeNav(); else openNav();
+      }
+      ham.addEventListener('click', onHamClick);
+      ham.__mobileNavHandlerAttached = true;
+    }
+
+    // Close when overlay clicked
+    overlay.addEventListener('click', function (ev) { ev.stopPropagation(); closeNav(); });
+
+    // Clicks outside close nav (only matters if nav is open)
+    document.addEventListener('click', function (ev) {
+      if (!nav.contains(ev.target) && !ham.contains(ev.target)) {
+        if (nav.classList.contains('open')) closeNav();
+      }
+    }, { passive: true });
+
+    // If nav created by us, close on link click
+    if (createdPanel) {
+      nav.addEventListener('click', function (ev) {
+        var a = ev.target.closest('a');
+        if (a) closeNav();
+      });
+    }
+
+    // Ensure nav is scrollable on mobile
+    if (!nav.style.overflowY) nav.style.overflowY = 'auto';
+    nav.style.webkitOverflowScrolling = 'touch';
+
+    // Sync initial aria states
+    ham.setAttribute('aria-expanded', String(nav.classList.contains('open')));
+    nav.setAttribute('aria-hidden', String(!nav.classList.contains('open')));
+
+    // Re-run ensureHamburgerVisibleIfMobile on viewport changes (useful if CSS toggles)
+    window.addEventListener('resize', function () {
+      ensureHamburgerVisibleIfMobile();
+    });
+  } catch (e) {
+    console && console.warn && console.warn('mobileNav helper error', e);
+  }
+})();
+</script>
+
+<script>
+(function(){
+  // find the panel, hamburger and the avatar area
+  const nav = document.getElementById('mobileNav') || document.querySelector('.mobile-nav-panel');
+  const ham = document.getElementById('mobileHamburger') || document.querySelector('.mobile-hamburger');
+  const topRight = document.querySelector('.top-right-controls');
+
+  if (!nav || !ham || !topRight) return;
+
+  // compute and set --nav-width so the panel stops before the avatar/phone area
+  function computeNavWidthRespectingAvatar() {
+    try {
+      const tr = topRight.getBoundingClientRect();
+      // left edge of avatar area (px from left of viewport)
+      const avatarLeft = Math.max(0, Math.floor(tr.left));
+      // keep a small gap between panel and avatar
+      const gap = 12; // px
+      // desired width is the space from left edge to avatarLeft minus gap
+      let desired = Math.max(160, avatarLeft - gap); // minimum reasonable width
+      // keep some maximum so nav isn't too wide on tablets
+      const maxAllowed = Math.round(window.innerWidth * 0.92);
+      desired = Math.min(desired, maxAllowed);
+
+      // Write CSS var used by your CSS transform rules (--nav-width)
+      nav.style.setProperty('--nav-width', desired + 'px');
+      // also directly set explicit width for CSS rules that use width: var(--nav-width)
+      nav.style.width = desired + 'px';
+    } catch (e) {
+      // fail silently — keep fallback widths already in CSS
+      console && console.warn && console.warn('computeNavWidth error', e);
+    }
+  }
+
+  // run now and on resize/orientation
+  computeNavWidthRespectingAvatar();
+  window.addEventListener('resize', computeNavWidthRespectingAvatar, { passive: true });
+  window.addEventListener('orientationchange', computeNavWidthRespectingAvatar, { passive: true });
+
+  // Observe open/close (class list changes) and toggle body class so CSS can hide the hamburger
+  const mo = new MutationObserver(() => {
+    if (nav.classList && nav.classList.contains('open')) {
+      document.body.classList.add('mobile-nav-open');
+      // ensure hamburger is visually hidden and not interactive (extra safety)
+      ham.style.pointerEvents = 'none';
+      ham.setAttribute('aria-hidden','true');
+    } else {
+      document.body.classList.remove('mobile-nav-open');
+      ham.style.pointerEvents = '';
+      ham.removeAttribute('aria-hidden');
+    }
+  });
+  mo.observe(nav, { attributes: true, attributeFilter: ['class'] });
+
+  // Also sync on page load if nav already open
+  if (nav.classList.contains('open')) {
+    document.body.classList.add('mobile-nav-open');
+    ham.style.pointerEvents = 'none';
+    ham.setAttribute('aria-hidden','true');
+  }
+
+  // small fix: ensure the computed variable is used immediately
+  setTimeout(computeNavWidthRespectingAvatar, 40);
+})();
+</script>
+
+<script>
+(function(){
+  // Safe small helper: if user is logged in, remove/hide login/register links inside mobileNav
+  try {
+    const logged = (String(document.body.getAttribute('data-logged-in') || '').toLowerCase() === '1')
+                || (String(document.body.getAttribute('data-logged-in') || '').toLowerCase() === 'true');
+
+    if (!logged) return; // nothing to do if not logged in
+
+    // Helper to remove/hide matching anchors inside a panel element
+    function hideLoginInPanel(panel) {
+      if (!panel) return;
+      // Prefer IDs if present
+      const byIdLogin = panel.querySelector('#loginLink');
+      const byIdReg = panel.querySelector('#registerLink');
+      if (byIdLogin) byIdLogin.style.display = 'none';
+      if (byIdReg) byIdReg.style.display = 'none';
+
+      // Fallback: remove anchors whose href contains '/login' or '/register'
+      const anchors = panel.querySelectorAll('a[href]');
+      anchors.forEach(a => {
+        try {
+          const href = (a.getAttribute('href') || '').toLowerCase();
+          if (href.indexOf('/login') !== -1 || href.indexOf('/register') !== -1 || href.indexOf('login') !== -1 && a.textContent.trim().toLowerCase() === 'login' || a.textContent.trim().toLowerCase() === 'sign up' || a.textContent.trim().toLowerCase() === 'signup') {
+            a.style.display = 'none';
+            a.style.pointerEvents = 'none';
+          }
+        } catch(e){}
+      });
+    }
+
+    // Panels to check (your created or server-side)
+    const panels = [];
+    const p1 = document.getElementById('mobileNav');
+    if (p1) panels.push(p1);
+    const p2 = document.querySelector('.mobile-nav-panel');
+    if (p2 && !panels.includes(p2)) panels.push(p2);
+    const p3 = document.querySelector('.mobile-nav-inner');
+    if (p3 && !panels.includes(p3)) panels.push(p3);
+
+    panels.forEach(hideLoginInPanel);
+
+    // If the panel is created dynamically later, observe the body for new #mobileNav and run again
+    const bodyObserver = new MutationObserver((mutations) => {
+      for (const m of mutations) {
+        if (m.addedNodes && m.addedNodes.length) {
+          m.addedNodes.forEach(node => {
+            try {
+              if (!(node instanceof HTMLElement)) return;
+              if (node.id === 'mobileNav' || node.classList && node.classList.contains('mobile-nav-panel')) {
+                hideLoginInPanel(node);
+              } else {
+                const found = node.querySelector && (node.querySelector('#mobileNav') || node.querySelector('.mobile-nav-panel') || node.querySelector('.mobile-nav-inner'));
+                if (found) hideLoginInPanel(found);
+              }
+            } catch(e){}
+          });
+        }
+      }
+    });
+    bodyObserver.observe(document.body, { childList: true, subtree: true });
+
+    // Extra: also hide any desktop nav aging in the cloned mobile panel on 'open' event
+    document.addEventListener('click', function (ev) {
+      const panel = document.getElementById('mobileNav') || document.querySelector('.mobile-nav-panel');
+      if (panel && panel.classList.contains('open')) hideLoginInPanel(panel);
+    }, { passive: true, capture: true });
+
+  } catch (err) {
+    console && console.warn && console.warn('hideLoginInPanel helper error', err);
+  }
+})();
+</script>
+
+
+
+
+
+
+<!-- Fix: precisely vertically center "Show" toggles for password & confirm password -->
+<style>
+/* safety CSS (keeps toggle inside the tile and readable if JS not available) */
+.password-wrap { position: relative; }
+.password-wrap .field { box-sizing: border-box; padding-right: 88px; min-height:44px; }
+.password-wrap .toggle {
+  position: absolute;
+  right: 10px;
+  top: 50%;                /* fallback */
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 28px;
+  min-width: 44px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ice);
+  font-weight:700;
+  border: none;
+  cursor: pointer;
+  z-index: 3;
+  line-height: 1;
+  box-sizing: border-box;
+}
+.password-wrap .toggle::-moz-focus-inner { border: 0; padding: 0; }
+</style>
+
+<script>
+(function () {
+  // Debounce helper
+  function debounce(fn, wait) {
+    let t;
+    return function () {
+      clearTimeout(t);
+      const args = arguments, ctx = this;
+      t = setTimeout(() => fn.apply(ctx, args), wait);
+    };
+  }
+
+  // Position a toggle vertically centered to its input
+  function positionToggles() {
+    document.querySelectorAll('.password-wrap .toggle').forEach(btn => {
+      try {
+        const targetId = btn.getAttribute('data-target');
+        if (!targetId) { btn.style.top = '50%'; return; }
+
+        const input = document.getElementById(targetId);
+        if (!input) { btn.style.top = '50%'; return; }
+
+        const wrap = btn.closest('.password-wrap') || input.parentElement;
+        if (!wrap) { btn.style.top = '50%'; return; }
+
+        // get bounding rects to compute position relative to wrap
+        const wrapRect = wrap.getBoundingClientRect();
+        const inputRect = input.getBoundingClientRect();
+
+        // vertical center of input relative to wrap's top
+        const centerY = (inputRect.top - wrapRect.top) + (inputRect.height / 2);
+
+        // set button top in pixels, keep translateY(-50%) so it's perfectly centered
+        btn.style.top = Math.round(centerY) + 'px';
+
+        // ensure the button is on top and clickable
+        btn.style.zIndex = 3;
+      } catch (e) {
+        // fallback to CSS center if anything goes wrong
+        btn.style.top = '50%';
+      }
+    });
+  }
+
+  // Run after fonts/images load (so heights are stable), and on DOM ready
+  function init() {
+    positionToggles();
+
+    // reposition after a small delay to handle late layout shifts (webfonts, images)
+    setTimeout(positionToggles, 120);
+  }
+
+  // debounce the resize/orientation handler
+  const onResize = debounce(positionToggles, 120);
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+  window.addEventListener('resize', onResize, { passive: true });
+  window.addEventListener('orientationchange', onResize, { passive: true });
+
+  // If your UI dynamically changes the form (e.g., shows/hides hints), observe size changes
+  // Use a ResizeObserver to keep toggles aligned when the input's size changes.
+  try {
+    const ro = new ResizeObserver(debounce(entries => {
+      // small safety: run the full layout update
+      positionToggles();
+    }, 60));
+
+    document.querySelectorAll('.password-wrap .field').forEach(inp => ro.observe(inp));
+  } catch (e) {
+    // ResizeObserver not available -> rely on resize/orientation handlers
+  }
+})();
+</script>
+
+
+<script>
+(function(){
+
+    const registerForm = document.getElementById('registerForm');
+    const registerBtn = document.getElementById('registerBtn');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+
+    if(!registerForm) return;
+
+    registerForm.addEventListener('submit', function(){
+
+        if(registerBtn){
+            registerBtn.disabled = true;
+            registerBtn.textContent = "Please wait...";
+        }
+
+        if(loadingOverlay){
+            loadingOverlay.classList.add("show");
+        }
+
+    });
+
+})();
+</script>
+
+</body>
+</html>

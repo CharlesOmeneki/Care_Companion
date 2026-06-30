@@ -1,0 +1,1687 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Connections — Care Companion</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    :root{
+      --admiral: #062b5a;
+      --muted:  #7f8fa6;
+      --accent-start: #1e5fbf;
+      --accent-end:   #2b3d9a;
+      --card-bg: #ffffff;
+      --card-border: rgba(6,43,90,0.06);
+      --shadow: 0 12px 30px rgba(6,43,90,0.06);
+      --radius: 12px;
+    }
+
+    *{box-sizing:border-box;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial; -webkit-font-smoothing:antialiased;}
+    html,body{height:100%;margin:0;color:var(--admiral);}    
+    body{background: linear-gradient(180deg, #062b5a 0%, #0a2a66 18%, rgba(15,59,93,0.8) 28%, rgba(232,245,255,0.75) 52%, #e9f4ff 100%); padding:44px 20px; -webkit-font-smoothing:antialiased;}
+
+    .page-wrap{max-width:1120px;margin:0 auto;background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.95));border-radius:calc(var(--radius) + 6px);padding:26px;box-shadow: 0 20px 60px rgba(2,10,30,0.18);border: 1px solid rgba(255,255,255,0.06);}
+    .page-accent {height:8px;width:100%;border-radius:8px;margin-bottom:18px;background: linear-gradient(90deg, var(--accent-start), var(--accent-end));box-shadow: 0 6px 20px rgba(30,95,191,0.12);}    
+
+    header.hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;gap:12px;}    
+    header.hdr h1{margin:0;font-size:22px;color:var(--admiral);}    
+    header.hdr p{margin:0;color:var(--muted);font-size:13px;}    
+
+    .list{display:flex;flex-direction:column;gap:14px;}
+
+    .card{display:flex;align-items:center;gap:16px;background:var(--card-bg);border-radius:12px;padding:14px 16px;border:1px solid var(--card-border);box-shadow:var(--shadow);transition: transform .14s ease, box-shadow .14s ease;}
+    .card:hover{ transform: translateY(-4px); box-shadow: 0 18px 40px rgba(6,43,90,0.12); }
+
+    .avatar{width:84px;height:84px;flex:0 0 84px;border-radius:10px;overflow:hidden;background:linear-gradient(180deg,#eef6ff,#ffffff);border:1px solid rgba(6,43,90,0.04);display:flex;align-items:center;justify-content:center;}
+    .avatar img{width:100%;height:100%;object-fit:cover;display:block;}
+
+    .content{display:flex;flex-direction:column;gap:6px;flex:1 1 auto;min-width:0;}
+    .content h3{margin:0;font-size:16px;color:var(--admiral);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .content .meta-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+    .content .muted{color:var(--muted);font-size:13px;}
+    .tags{font-size:13px;color:var(--muted);margin-top:6px;}
+    .tags span{display:inline-block;margin-right:12px;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis;}
+
+    .country-flag-inline{display:inline-flex;align-items:center;gap:6px;margin-left:8px;}
+    .country-flag-inline img{width:22px;height:14px;object-fit:cover;border-radius:2px;border:1px solid #fff;box-shadow:0 1px 2px rgba(0,0,0,0.08);}
+    .country-flag-inline .flag-emoji{font-size:12px;line-height:1}
+
+    .actions{display:flex;gap:10px;align-items:center;justify-self:end;flex:0 0 auto;}
+    .btn{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(90deg,var(--accent-start),var(--accent-end));color:#fff;padding:8px 12px;border-radius:10px;text-decoration:none;font-weight:700;border:0;cursor:pointer;white-space:nowrap;}
+    .btn.secondary{background:transparent;color:var(--admiral);border:1px solid var(--card-border);font-weight:700;}
+    .btn.chat{background:transparent;color:var(--accent-start);border:1px solid rgba(30,95,191,0.12);padding:8px 10px;border-radius:10px;}
+
+    .right-meta{color:var(--muted);font-size:13px;min-width:80px;text-align:right;}
+
+    @media (max-width:980px){.avatar{width:72px;height:72px;flex:0 0 72px;} .card{padding:12px;} .right-meta{display:none;}}    
+    @media (max-width:640px){.page-wrap{padding:16px;} .card{flex-direction:column;align-items:flex-start;} .actions{width:100%;justify-content:space-between;margin-top:8px;} .right-meta{display:block;width:100%;text-align:left;margin-top:6px;color:var(--muted);}}
+
+    .empty{padding:24px;text-align:center;color:var(--muted);background:#fff;border-radius:10px;border:1px dashed rgba(6,43,90,0.04);}  
+
+    /* ========================= HEADER-RELATED CSS (from about.html) ========================= */
+    :root{
+      --berry:     #6A5CFA;
+      --cobalt:    #2153FF;
+      --airforce:  #3B6FF6;
+      --sky:       #79BFFF;
+      --ice:       #e6f4ff;
+      --navy:      #041B3B;
+      --transition:220ms cubic-bezier(.2,.9,.3,1);
+    }
+
+    header { margin-bottom:12px; }
+    .top-banner {
+      width:100%;
+      background: linear-gradient(90deg, var(--berry), var(--cobalt));
+      color:#fff;
+      text-align:center;
+      padding:10px 14px;
+      font-weight:700;
+      border-radius:12px;
+      box-shadow: 0 8px 30px rgba(33,83,255,0.12);
+      margin-bottom:12px;
+    }
+
+    .off-white-section{
+      display:flex; align-items:center; gap:18px; padding:12px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:12px;
+      border: 1px solid rgba(255,255,255,0.03);
+      color: #e6f4ff;
+      position: relative;
+    }
+    .brand { display:flex; align-items:center; gap:12px; }
+    .brand img { width:88px; height:56px; object-fit:contain; filter: drop-shadow(0 6px 20px rgba(0,0,0,0.5)); }
+
+    .nav-menu { margin-left:20px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+    .nav-menu a {
+      color: rgba(255,255,255,0.9);
+      padding:8px 10px; border-radius:10px; font-weight:600; font-size:14px;
+      transition: all var(--transition);
+    }
+    .nav-menu a[aria-current="page"]{ background: linear-gradient(90deg,var(--cobalt),var(--airforce)); color:#fff; box-shadow:0 10px 30px rgba(33,83,255,0.12); }
+    .nav-menu a:hover{ transform:translateY(-3px); box-shadow:0 12px 36px rgba(33,83,255,0.08); }
+
+    /* Top-right profile dropdown */
+    .top-right-controls { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); z-index: 40; }
+    .profile-dropdown { position: relative; display: inline-block; }
+    .profile-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: transparent;
+      border: none;
+      padding: 6px;
+      cursor: pointer;
+      color: #151b54;
+    }
+    .profile-btn .avatar {
+      width: 38px;
+      height: 38px;
+      border-radius: 999px;
+      object-fit: cover;
+      border: 2px solid rgba(0,0,0,0.06);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+      background: #fff;
+      display:block;
+    }
+    .profile-btn .chev { font-size: 12px; color: rgba(21,27,84,0.9); }
+
+    .dropdown-menu {
+      position: absolute;
+      right: 0;
+      top: calc(100% + 8px);
+      min-width: 160px;
+      background: #fff;
+      color: #0b2a66;
+      border-radius: 10px;
+      box-shadow: 0 14px 34px rgba(6,27,60,0.12);
+      padding: 6px;
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      overflow: hidden;
+    }
+    .dropdown-menu.show { display: flex; }
+    .menu-item {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      padding: 8px 10px;
+      border-radius: 8px;
+      font-weight: 600;
+      background: transparent;
+      text-align: left;
+      border: 0;
+      cursor: pointer;
+    }
+    .menu-item:hover, .menu-item:focus { background: rgba(142,130,254,0.08); outline: none; }
+
+    .cc-modal { position: fixed; inset: 0; z-index: 16000; display:flex; align-items:center; justify-content:center; pointer-events:none; }
+    .cc-modal[aria-hidden="true"] { opacity:0; transition: opacity 180ms ease; pointer-events:none; }
+    .cc-modal[aria-hidden="false"] { opacity:1; pointer-events:auto; }
+    .cc-modal-backdrop { position: absolute; inset: 0; background: rgba(2,10,30,0.56); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); opacity:0; transition: opacity 180ms ease; }
+    .cc-modal[aria-hidden="false"] .cc-modal-backdrop { opacity:1; }
+    .cc-modal-panel { position: relative; width: 100%; max-width: 420px; margin: 18px; border-radius: 12px; box-shadow: 0 30px 80px rgba(2,10,30,0.45); transform: translateY(12px) scale(0.995); transition: transform 220ms cubic-bezier(.2,.9,.3,1), opacity 180ms ease; z-index: 16010; pointer-events:auto; }
+    .cc-modal[aria-hidden="false"] .cc-modal-panel { transform: translateY(0) scale(1); }
+    .cc-modal-body { background: linear-gradient(180deg,#fff,#f7fbff); padding: 20px; border-radius: 12px; color: #08243f; text-align: center; }
+    .cc-modal-close { position: absolute; right: 10px; top: 8px; border: none; background: transparent; font-size: 22px; color: #0b2a4a; cursor:pointer; }
+    .cc-modal-avatar { width:64px; height:64px; margin: 6px auto 12px; border-radius:999px; overflow:hidden; border:2px solid rgba(13,58,108,0.06); }
+    .cc-modal-avatar img { width:100%; height:100%; object-fit:cover; display:block; }
+    .cc-modal-body h2 { margin:6px 0 8px; font-size:18px; color:#0b2a4a; }
+    .cc-modal-body p { margin:0 0 16px; color:#2a4c7a; font-size:14px; }
+    .cc-modal-actions { display:flex; gap:10px; justify-content:center; align-items:center; margin-top:6px; flex-wrap:wrap; }
+    .cc-btn-ghost { background: transparent; color:#0b2a4a; border: 1px solid rgba(13,58,108,0.06); padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:700; }
+    .cc-btn-danger { background: linear-gradient(90deg,#e24b4b,#d33b3b); color:#fff; padding:10px 14px; border-radius:10px; border:0; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:8px; }
+
+    .cc-modal-inline { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 20000; font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial; }
+    .cc-modal-inline.show { display:flex; }
+    .cc-modal-card { width:100%; max-width:520px; margin:16px; border-radius:12px; background: linear-gradient(180deg,#fff,#f6f8ff); box-shadow: 0 20px 60px rgba(8,18,60,0.18); padding:18px; color:#072049; display:flex; gap:12px; align-items:flex-start; }
+    .cc-modal-left{width:56px;height:56px;border-radius:12px;background:linear-gradient(180deg,#e6e9ff,#cfcfff); display:flex;align-items:center;justify-content:center;font-weight:700;color:#24307a}
+    .cc-modal-content h3{margin:0 0 6px;font-size:18px}
+    .cc-modal-content p{margin:0;font-size:14px;color:#0b2a4a;opacity:.95}
+    .cc-modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:12px}
+    .cc-btn-primary{background:linear-gradient(90deg,#3b6cff,#6aa8ff);Color:#fff;padding:10px 14px;border-radius:10px;border:0;font-weight:700;cursor:pointer}
+    @media (max-width:520px) {
+      .top-right-controls { right: 10px; top: 10px; }
+      .dropdown-menu { right: 6px; left: auto; min-width: 140px; }
+      .cc-modal-left{display:none}.cc-modal-actions{flex-direction:column}.cc-btn-primary,.cc-btn-ghost{width:100%}
+    }
+    a:focus, button:focus, input:focus, select:focus, textarea:focus { outline:3px solid rgba(33,83,255,0.14); outline-offset:3px; border-radius:8px; }
+
+    /* =========================
+       PAGE-WRAP OVERRIDES (fix readability when header is placed on light page)
+       These keep header structure & behavior identical but switch text to dark
+       so the brand/title and nav links are readable on your light .page-wrap.
+       ========================= */
+    .page-wrap .off-white-section {
+      /* make header visually sit on the white band so it matches your page */
+      background: linear-gradient(180deg, #ffffff, #f7fbff);
+      color: var(--admiral) !important;
+      border: 1px solid var(--card-border);
+    }
+
+    /* brand text (title and subtitle) readable */
+    .page-wrap .brand div > div:first-child { color: var(--admiral) !important; font-weight:800; }
+    .page-wrap .brand div > div:last-child { color: var(--muted) !important; font-size:12px; }
+
+    /* nav links dark so they show on white */
+    .page-wrap .nav-menu a { color: rgba(6,43,90,0.92) !important; }
+    .page-wrap .nav-menu a[aria-current="page"] { color: #fff !important; background: linear-gradient(90deg,var(--cobalt),var(--airforce)); box-shadow:0 10px 30px rgba(33,83,255,0.12); }
+
+    /* ensure login/register visible and match look */
+    .page-wrap #loginLink, .page-wrap #registerLink { color: rgba(6,43,90,0.92) !important; }
+
+    /* adjust profile button chevron color on light header */
+    .page-wrap .profile-btn .chev { color: rgba(6,43,90,0.85) !important; }
+
+    /* small tweak: make dropdown menu match page colors */
+    .page-wrap .dropdown-menu { color: #0b2a66; }
+
+    /* end overrides */
+  </style>
+
+ <!-- Image zoom (updated: prevents whole-page zoom) -->
+<style>
+  /* overlay */
+  .cc-zoom-overlay{
+    position:fixed;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:rgba(0,0,0,0.78);
+    z-index:9999;
+    opacity:0;
+    transition:opacity .18s ease;
+    cursor:zoom-out;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .cc-zoom-overlay.cc-open{ opacity:1; }
+
+  .cc-zoom-container{
+    max-width:92vw;
+    max-height:92vh;
+    overflow:auto;
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .cc-zoom-img{
+    display:block;
+    max-width:100%;
+    max-height:100%;
+    width:auto;
+    height:auto;
+    object-fit:contain;
+    transform:scale(.96);
+    transition:transform .28s cubic-bezier(.2,.9,.2,1);
+    user-select:none;
+    -webkit-user-drag:none;
+    touch-action:manipulation;
+    cursor:zoom-out;
+  }
+  .cc-zoom-overlay.cc-open .cc-zoom-img{ transform:scale(1); }
+
+  .cc-zoom-caption{
+    margin-top:10px;
+    color: #fff;
+    font-size:13px;
+    text-align:center;
+    opacity:.92;
+    max-width:92vw;
+    padding:0 12px;
+    pointer-events:none;
+  }
+
+  html.cc-zoom-open .card {
+    transform: none !important;
+    transition: none !important;
+    will-change: auto !important;
+  }
+  html.cc-zoom-open .page-wrap { pointer-events: none; }
+
+  
+/* ===== Fix: make header profile image perfectly round ===== */
+.off-white-section .profile-btn .avatar,
+.page-wrap .profile-btn .avatar,
+.profile-btn .avatar {
+  /* force a square shape and make it impossible to become an ellipse */
+  width: 34px !important;
+  aspect-ratio: 1 / 1 !important;
+  height: auto !important;
+
+  /* perfect circle */
+  border-radius: 50% !important;
+  overflow: hidden !important;
+  display: block !important;
+
+  /* ensure image fills container without distortion and is centered */
+  object-fit: cover !important;
+  object-position: center center !important;
+}
+
+/* In case some pages use an <img> inside a wrapper named .avatar (defensive) */
+.profile-btn .avatar img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+  display: block !important;
+}
+
+/* ===== header avatar: force exact square size and perfect circle ===== */
+.off-white-section .profile-btn > img.avatar,
+.page-wrap .profile-btn > img.avatar,
+.profile-btn > img.avatar {
+  width: 36px !important;          /* visible circle size: change this value */
+  height: 36px !important;         /* keep equal to width to avoid ellipse */
+  max-width: 36px !important;
+  max-height: 36px !important;
+  display: block !important;
+  box-sizing: border-box !important; /* include border in the size */
+  border-radius: 50% !important;     /* perfect circle */
+  object-fit: cover !important;      /* crop nicely */
+  object-position: center center !important;
+  line-height: 1 !important;
+  vertical-align: middle !important;
+  background: transparent !important;
+  border: 2px solid rgba(0,0,0,0.06) !important; /* optional — included inside the 24px */
+}
+
+/* Keep the profile button hit area accessible while avatar stays small */
+.profile-btn {
+  padding: 6px 6px !important; /* increase/decrease to change click target (does not change visible avatar) */
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+
+
+
+
+
+
+
+
+
+
+@media (max-width: 767px) {
+  body{
+    padding:0;
+    background:#e9f4ff;
+  }
+
+  .page-wrap{
+    max-width:100%;
+    margin:0;
+    padding:0;
+    border-radius:0;
+    box-shadow:none;
+    border:none;
+  }
+
+  /* remove the entire top header/banner area on mobile */
+  .page-wrap > .page-accent,
+  .page-wrap > header,
+  .page-wrap .top-banner,
+  .page-wrap .off-white-section,
+  .page-wrap .container > header.hdr{
+    display:none !important;
+  }
+
+  /* show only the mobile connections section */
+  #mobile-connections{
+    display:block !important;
+    padding:12px;
+  }
+
+  .page-wrap .list,
+  .page-wrap .empty{
+    display:none !important;
+  }
+
+  #mobileConnectionsInner{
+    max-width:100%;
+    margin:0 auto;
+  }
+
+  #mobileConnectionsHeader{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:10px;
+    margin-bottom:12px;
+  }
+
+  #mobileConnectionsHeader h2{
+    margin:0;
+    font-size:18px;
+    color:#062b5a;
+    font-weight:800;
+  }
+
+  #mobileConnectionsHeader p{
+    margin:4px 0 0;
+    font-size:13px;
+    color:#7f8fa6;
+  }
+
+  #mobileConnectionsHeader .btn.secondary{
+    white-space:nowrap;
+    font-size:12px !important;
+    padding:8px 10px !important;
+  }
+
+  .mc-card{
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+    background:#fff;
+    padding:10px;
+    border-radius:12px;
+    border:1px solid rgba(6,43,90,0.05);
+    box-shadow:0 10px 28px rgba(6,43,90,0.06);
+  }
+
+  .mc-avatar{
+    width:60px;
+    height:60px;
+    flex:0 0 60px;
+    border-radius:10px;
+    overflow:hidden;
+  }
+
+  .mc-body{
+    min-width:0;
+  }
+
+  .mc-name{
+    font-size:14px;
+  }
+
+  .mc-meta,
+  .mc-tags{
+    font-size:12px;
+  }
+
+  .mc-actions{
+    width:100%;
+    margin-left:0;
+    margin-top:8px;
+    flex-direction:row;
+  }
+
+  .mc-actions .mc-view,
+  .mc-actions .mc-msg{
+    flex:1 1 50%;
+    padding:9px 10px;
+    font-size:12px;
+  }
+}
+
+@media (max-width: 420px) {
+  #mobileConnectionsHeader{
+    flex-direction:column;
+  }
+
+  #mobileConnectionsHeader .btn.secondary{
+    width:100%;
+    text-align:center;
+  }
+
+  .mc-card{
+    flex-direction:column;
+  }
+
+  .mc-actions{
+    flex-direction:column;
+  }
+
+  .mc-actions .mc-view,
+  .mc-actions .mc-msg{
+    width:100%;
+  }
+}
+
+
+.mc-head-left{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:0;
+}
+
+.mc-head-logo{
+  width:54px;
+  height:54px;
+  object-fit:contain;
+  flex:0 0 34px;
+}
+
+.mc-head-right{
+  margin-left:auto;
+}
+
+.mc-back-btn{
+  transform: translateX(-6px);
+  display:inline-flex;
+  align-items:left;
+  gap:6px;
+}
+
+
+
+</style>
+
+</head>
+<body
+  data-logged-in="{{ 1 if session.get('user_id') else 0 }}"
+  data-user-role="{{ user.role if user else '' }}"
+  data-profile-published="{{ 1 if (user and user.profile and user.profile.published) else 0 }}"
+>
+  <div class="page-wrap" role="main" aria-labelledby="pageTitle">
+    <div class="page-accent" aria-hidden="true"></div>
+
+    <div class="container">
+      {% set _ = get_flashed_messages() %}
+
+      <!-- ===== START: REPLACED HEADER (from about.html) ===== -->
+      <header>
+        <div class="top-banner" role="banner">
+          Concerned about a senior loved one living alone? Care Companion connects families with trusted caregivers.
+        </div>
+
+        <div class="off-white-section" role="navigation" aria-label="Primary navigation">
+          <div class="brand">
+            <img src="{{ url_for('static', filename='images/caregiver_logo.png') }}" alt="Care Companion logo">
+            <div>
+              <div style="font-weight:800; color:var(--ice); font-size:18px;">Care Companion</div>
+              <div style="font-size:12px; color:rgba(230,245,255,0.75)">Find trusted caregivers near you</div>
+            </div>
+          </div>
+
+          <nav class="nav-menu" aria-label="Primary links">
+            <a href="{{ url_for('home') }}">Home</a>
+            <a id="navFindCaregiver" href="/find-caregiver">Find Caregiver</a>
+            <a id="navFindFamily" href="/find-family">Find Family</a>
+
+            <a href="{{ url_for('how_it_works') }}">How It Works</a>
+            <a href="{{ url_for('about') }}">About Us</a>
+            <a id="loginLink" href="{{ url_for('login') }}">Login</a>
+            <a id="registerLink" href="{{ url_for('register') }}">Sign Up</a>
+          </nav>
+
+          <!-- PROFILE DROPDOWN: paste this inside .off-white-section right after </nav> -->
+          <div class="top-right-controls">
+            <div class="profile-dropdown" id="profileDropdown">
+              <button id="profileBtn" class="profile-btn" aria-haspopup="true" aria-expanded="false" title="Open profile menu">
+                <img
+                  class="avatar"
+                  src="{{ url_for('uploaded_file', filename=(user.profile.profile_photo|basename)) if (user and user.profile and user.profile.profile_photo) else ( url_for('uploaded_file', filename=(user.profile_photo|basename)) if (user and user.profile_photo) else url_for('static', filename='images/avatar cc.jfif') ) }}"
+                  alt="Profile"
+                >
+                <span class="chev" aria-hidden="true">▾</span>
+              </button>
+
+              <div class="dropdown-menu" id="profileMenu" role="menu" aria-hidden="true">
+                <a class="menu-item" href="{{ url_for('profile_setup') }}?suppress_overlay=1" role="menuitem">My profile</a>
+                <a class="menu-item" href="{{ url_for('contact') }}" role="menuitem">Contact Us</a>
+                <a id="logoutLink" class="menu-item" href="{{ url_for('logout') }}" role="menuitem" data-method="get">Log out</a>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </header>
+      <!-- ===== END: REPLACED HEADER ===== -->
+
+
+
+          
+          
+
+
+
+
+            <!-- ===== Mobile-only Connections section (updated: includes Language inside each card) =====
+     Replace the existing #mobile-connections block with this one.
+     Paste immediately AFTER your replaced header block and BEFORE <header class="hdr" ...>
+============================================================================== -->
+<section id="mobile-connections" aria-hidden="true" style="display:none;">
+  <style>
+    #mobile-connections { display:none; box-sizing:border-box; }
+
+    @media (max-width: 767px) {
+      #mobile-connections { display:block; padding:12px; }
+      .page-wrap .list,
+      .page-wrap .empty { display:none !important; }
+
+      #mobileConnectionsInner{
+        max-width:100%;
+        margin:0 auto;
+        display:flex;
+        flex-direction:column;
+        gap:12px;
+      }
+
+      #mobileConnectionsHeader{
+        display:flex;
+        justify-content:space-between;
+        align-items:flex-start;
+        gap:10px;
+        margin-bottom:8px;
+      }
+
+      .mc-head-left{
+        display:flex;
+        align-items:center;
+        gap:10px;
+        min-width:0;
+      }
+
+      .mc-head-logo{
+        width:46px;
+        height:46px;
+        object-fit:contain;
+        flex:0 0 auto;
+      }
+
+      #mobileConnectionsTitle{
+        margin:0;
+        font-size:18px;
+        color:#062b5a;
+        font-weight:800;
+      }
+
+      #mobileConnectionsSub{
+        margin:4px 0 0;
+        font-size:13px;
+        color:#7f8fa6;
+      }
+
+      .mc-back-btn{
+        display:inline-flex;
+        align-items:center;
+        gap:6px;
+        white-space:nowrap;
+        font-size:12px !important;
+        padding:8px 10px !important;
+        transform: translateX(-4px);
+      }
+
+      .mc-card{
+        display:flex;
+        gap:12px;
+        align-items:flex-start;
+        background:#fff;
+        padding:10px;
+        border-radius:12px;
+        border:1px solid rgba(6,43,90,0.05);
+        box-shadow:0 10px 28px rgba(6,43,90,0.06);
+      }
+
+      .mc-avatar{
+        width:64px;
+        min-width:64px;
+        display:flex;
+        align-items:center;
+        gap:6px;
+      }
+
+      .mc-photo{
+        width:64px;
+        height:64px;
+        border-radius:10px;
+        overflow:hidden;
+        background:linear-gradient(180deg,#eef6ff,#ffffff);
+        box-shadow:0 6px 18px rgba(6,43,90,0.04);
+        flex:0 0 64px;
+      }
+
+      .mc-photo img{
+        width:100%;
+        height:100%;
+        object-fit:cover;
+        display:block;
+      }
+
+      .mc-flag-badge{
+        width:24px;
+        height:16px;
+        flex:0 0 24px;
+        border-radius:2px;
+        overflow:hidden;
+        border:1px solid rgba(0,0,0,0.08);
+        box-shadow:0 1px 2px rgba(0,0,0,0.12);
+        background:#fff;
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+      }
+
+      .mc-flag-badge img{
+        width:100%;
+        height:100%;
+        object-fit:cover;
+        display:block;
+      }
+
+      .mc-flag-emoji{
+        font-size:12px;
+        line-height:1;
+      }
+
+      .mc-body{
+        flex:1 1 auto;
+        min-width:0;
+        display:flex;
+        flex-direction:column;
+        gap:6px;
+      }
+
+      .mc-name{
+        font-size:15px;
+        font-weight:800;
+        color:#062b5a;
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
+      }
+
+      .mc-meta{
+        font-size:13px;
+        color:#7f8fa6;
+        display:flex;
+        gap:8px;
+        align-items:center;
+        flex-wrap:wrap;
+      }
+
+      .mc-tags{
+        font-size:13px;
+        color:#7f8fa6;
+        margin-top:4px;
+        display:flex;
+        flex-direction:column;
+        gap:4px;
+      }
+
+      .mc-actions{
+        display:flex;
+        flex-direction:column;
+        gap:8px;
+        margin-left:8px;
+        flex:0 0 auto;
+        width:116px;
+      }
+
+      .mc-actions a,
+      .mc-actions button{
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        gap:8px;
+        padding:8px 10px;
+        border-radius:10px;
+        font-weight:700;
+        font-size:13px;
+        text-decoration:none;
+        cursor:pointer;
+        border:0;
+      }
+
+      .mc-actions .mc-view{
+        background:linear-gradient(90deg,#1e5fbf,#2b3d9a);
+        color:#fff;
+      }
+
+      .mc-actions .mc-msg{
+        background:transparent;
+        color:#1e5fbf;
+        border:1px solid rgba(30,95,191,0.12);
+      }
+
+      .mc-actions .mc-msg:disabled{
+        opacity:.6;
+        cursor:not-allowed;
+      }
+
+      #mobileConnectionsEmpty{
+        padding:14px;
+        text-align:center;
+        color:#7f8fa6;
+        background:#fff;
+        border-radius:10px;
+        border:1px dashed rgba(6,43,90,0.04);
+      }
+
+      @media (max-width:420px) {
+        #mobileConnectionsHeader{
+          flex-direction:column;
+        }
+
+        .mc-back-btn{
+          width:100%;
+          justify-content:center;
+          transform:none;
+        }
+
+        .mc-card{
+          flex-direction:column;
+          align-items:stretch;
+        }
+
+        .mc-actions{
+          width:100%;
+          margin-left:0;
+          flex-direction:row;
+        }
+
+        .mc-actions .mc-view,
+        .mc-actions .mc-msg{
+          flex:1 1 48%;
+        }
+
+        .mc-avatar{
+          width:auto;
+        }
+      }
+    }
+
+    @media (min-width:768px){
+      #mobile-connections{ display:none !important; }
+    }
+  </style>
+
+  <div id="mobileConnectionsInner" role="region" aria-label="Mobile connections list">
+    <div id="mobileConnectionsHeader">
+      <div class="mc-head-left">
+        <img class="mc-head-logo" src="{{ url_for('static', filename='images/caregiver_logo.png') }}" alt="Care Companion logo">
+        <div>
+          <h2 id="mobileConnectionsTitle">Connections</h2>
+          <p id="mobileConnectionsSub">Showing profiles — scroll to explore</p>
+        </div>
+      </div>
+
+      <div class="mc-head-right">
+        <a href="{{ url_for('profile_setup', enable_actions='1', suppress_overlay='1') }}"
+           class="btn secondary mc-back-btn"
+           style="text-decoration:none;">
+          <i class="fa-solid fa-arrow-left" aria-hidden="true"></i>
+          Back to preview
+        </a>
+      </div>
+    </div>
+
+    <div id="mobileConnectionsList" aria-live="polite" style="display:flex; flex-direction:column; gap:12px;"></div>
+    <div id="mobileConnectionsEmpty" style="display:none;">No profiles found.</div>
+  </div>
+
+  <script>
+  (function(){
+    'use strict';
+
+    function enabled() { return window.innerWidth <= 767; }
+    function qsa(sel, root=document) { return Array.from((root || document).querySelectorAll(sel)); }
+
+    function normalize(v){
+      if(!v) return '';
+      v = String(v).trim().toLowerCase();
+      v = v.replace(/\([^)]*\)/g,'');
+      v = v.replace(/[\.]+$/,'');
+      v = v.replace(/[_]/g,' ');
+      v = v.replace(/\s{2,}/g,' ');
+      return v;
+    }
+
+    function countryCodeToEmoji(cc){
+      if(!cc || cc.length !== 2) return '';
+      const A = 0x41;
+      const first = 0x1F1E6 + (cc.toUpperCase().charCodeAt(0) - A);
+      const second = 0x1F1E6 + (cc.toUpperCase().charCodeAt(1) - A);
+      return String.fromCodePoint(first, second);
+    }
+
+    function isoFromLocationString(raw){
+      if(!raw) return null;
+
+      const NAME_TO_ISO = {
+        "afghanistan":"af","albania":"al","algeria":"dz","angola":"ao","argentina":"ar","armenia":"am","australia":"au","austria":"at",
+        "bahamas":"bs","bahrain":"bh","bangladesh":"bd","belgium":"be","benin":"bj","botswana":"bw","brazil":"br","bulgaria":"bg",
+        "cameroon":"cm","canada":"ca","china":"cn","croatia":"hr","cyprus":"cy","czech republic":"cz","czechia":"cz",
+        "denmark":"dk","egypt":"eg","ethiopia":"et","finland":"fi","france":"fr","germany":"de","ghana":"gh","greece":"gr",
+        "hungary":"hu","india":"in","indonesia":"id","ireland":"ie","israel":"il","italy":"it","japan":"jp","kenya":"ke",
+        "malaysia":"my","mexico":"mx","morocco":"ma","netherlands":"nl","new zealand":"nz","nigeria":"ng","norway":"no",
+        "pakistan":"pk","philippines":"ph","poland":"pl","portugal":"pt","qatar":"qa","romania":"ro","russia":"ru","singapore":"sg",
+        "south africa":"za","spain":"es","sweden":"se","switzerland":"ch","tanzania":"tz","thailand":"th","turkey":"tr",
+        "uganda":"ug","ukraine":"ua","united arab emirates":"ae","united kingdom":"gb","united states":"us","usa":"us",
+        "vietnam":"vn","zambia":"zm","zimbabwe":"zw","uk":"gb","u.k.":"gb","u.s.":"us","u.s.a.":"us","england":"gb","britain":"gb"
+      };
+
+      const parts = String(raw).split(/[\/|,]/).map(p => normalize(p)).filter(Boolean);
+      for(let i = parts.length - 1; i >= 0; i--){
+        const p = parts[i];
+        if(/^[a-z]{2}$/.test(p)) return p;
+        if(NAME_TO_ISO[p]) return NAME_TO_ISO[p];
+        const words = p.split(/\s+/);
+        if(words.length > 1){
+          const lastTwo = words.slice(-2).join(' ');
+          if(NAME_TO_ISO[lastTwo]) return NAME_TO_ISO[lastTwo];
+          const last = words[words.length - 1];
+          if(NAME_TO_ISO[last]) return NAME_TO_ISO[last];
+        }
+      }
+
+      const whole = normalize(raw);
+      if(NAME_TO_ISO[whole]) return NAME_TO_ISO[whole];
+      if(/united states|usa|u s a|u s$/i.test(raw)) return 'us';
+      if(/united kingdom|uk|great britain|england|scotland/i.test(raw)) return 'gb';
+      return null;
+    }
+
+    function makeFlagBadge(iso){
+      const badge = document.createElement('span');
+      badge.className = 'mc-flag-badge';
+
+      if (iso === 'ng') {
+        badge.innerHTML = '<span style="display:block;width:100%;height:100%;background:linear-gradient(90deg,#008753 0 33.33%, #ffffff 33.33% 66.66%, #008753 66.66% 100%);"></span>';
+        return badge;
+      }
+
+      const img = document.createElement('img');
+      img.src = 'https://flagcdn.com/w80/' + iso + '.png';
+      img.alt = iso.toUpperCase();
+      img.loading = 'eager';
+      img.decoding = 'async';
+      img.onerror = function(){
+        badge.innerHTML = '';
+        const em = document.createElement('span');
+        em.className = 'mc-flag-emoji';
+        em.textContent = countryCodeToEmoji(iso);
+        badge.appendChild(em);
+      };
+      badge.appendChild(img);
+      return badge;
+    }
+
+    function cloneCardToMobile(card) {
+      try {
+        const nameEl = card.querySelector('h3') || card.querySelector('h2');
+        const name = nameEl ? nameEl.textContent.trim() : 'Unnamed';
+
+        const avatarImg = card.querySelector('.avatar img');
+        const avatarSrc = avatarImg ? avatarImg.src : '{{ url_for("static", filename="default-avatar.png") }}';
+        const avatarAlt = avatarImg ? avatarImg.alt : ('Avatar for ' + name);
+
+        const locationNode = card.querySelector('.location-text') || card.querySelector('.muted');
+        const locationText = locationNode ? locationNode.textContent.trim() : '';
+        const iso = isoFromLocationString(locationText || '');
+
+        const servicesSpan = card.querySelector('.tags [title="Services"]');
+        const specialtiesSpan = card.querySelector('.tags [title="Specialties"]');
+        const servicesText = servicesSpan ? servicesSpan.textContent.trim() : '';
+        const specialtiesText = specialtiesSpan ? specialtiesSpan.textContent.trim() : '';
+
+        const langNode = card.querySelector('.right-meta');
+        const langText = langNode ? langNode.textContent.trim() : '';
+
+        const wrapper = document.createElement('article');
+        wrapper.className = 'mc-card';
+
+        const avWrap = document.createElement('div');
+        avWrap.className = 'mc-avatar';
+
+        const photo = document.createElement('div');
+        photo.className = 'mc-photo';
+
+        const img = document.createElement('img');
+        img.src = avatarSrc;
+        img.alt = avatarAlt;
+        photo.appendChild(img);
+
+        avWrap.appendChild(photo);
+
+        if (iso) {
+          avWrap.appendChild(makeFlagBadge(iso));
+        }
+
+        const body = document.createElement('div');
+        body.className = 'mc-body';
+
+        const nm = document.createElement('div');
+        nm.className = 'mc-name';
+        nm.textContent = name;
+
+        const meta = document.createElement('div');
+        meta.className = 'mc-meta';
+        if (locationText) {
+          const loc = document.createElement('span');
+          loc.className = 'mc-location';
+          loc.textContent = locationText;
+          meta.appendChild(loc);
+        }
+
+        body.appendChild(nm);
+        body.appendChild(meta);
+
+        const tagsWrap = document.createElement('div');
+        tagsWrap.className = 'mc-tags';
+
+        if (specialtiesText) {
+          const s = document.createElement('span');
+          s.textContent = specialtiesText;
+          tagsWrap.appendChild(s);
+        }
+        if (servicesText) {
+          const s2 = document.createElement('span');
+          s2.textContent = servicesText;
+          tagsWrap.appendChild(s2);
+        }
+        if (langText) {
+          const langSpan = document.createElement('span');
+          langSpan.textContent = /language/i.test(langText) ? langText : 'Language: ' + langText;
+          tagsWrap.appendChild(langSpan);
+        }
+
+        if (tagsWrap.children.length) body.appendChild(tagsWrap);
+
+        const actions = document.createElement('div');
+        actions.className = 'mc-actions';
+
+        const viewLink = card.querySelector('.btn[href]') || card.querySelector('a.btn');
+        if (viewLink && viewLink.getAttribute('href')) {
+          const a = document.createElement('a');
+          a.className = 'mc-view';
+          a.href = viewLink.getAttribute('href');
+          a.innerHTML = '<span aria-hidden="true">👁</span> View';
+          actions.appendChild(a);
+        }
+
+        const chatLink = card.querySelector('a.btn.chat[href]') || card.querySelector('a.btn.chat');
+        if (chatLink && chatLink.getAttribute('href')) {
+          const m = document.createElement('a');
+          m.className = 'mc-msg';
+          m.href = chatLink.getAttribute('href');
+          m.innerHTML = '<span aria-hidden="true">💬</span> Message';
+          actions.appendChild(m);
+        }
+
+        wrapper.appendChild(avWrap);
+        wrapper.appendChild(body);
+        wrapper.appendChild(actions);
+
+        return wrapper;
+      } catch (err) {
+        console.error('cloneCardToMobile error', err);
+        return null;
+      }
+    }
+
+    function populateMobileList() {
+      const listRoot = document.getElementById('mobileConnectionsList');
+      const emptyEl = document.getElementById('mobileConnectionsEmpty');
+      if (!listRoot) return;
+
+      const desktopCards = qsa('.page-wrap .list .card');
+      if (!desktopCards.length) {
+        listRoot.innerHTML = '';
+        if (emptyEl) emptyEl.style.display = 'block';
+        return;
+      }
+
+      listRoot.innerHTML = '';
+      if (emptyEl) emptyEl.style.display = 'none';
+
+      desktopCards.forEach(card => {
+        const node = cloneCardToMobile(card);
+        if (node) listRoot.appendChild(node);
+      });
+    }
+
+    function onReady() {
+      if (!enabled()) return;
+      populateMobileList();
+    }
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', onReady);
+    } else {
+      setTimeout(onReady, 60);
+    }
+
+    window.addEventListener('resize', function () {
+      const el = document.getElementById('mobile-connections');
+      if (el) el.style.display = enabled() ? 'block' : 'none';
+    }, { passive: true });
+  })();
+  </script>
+</section>
+<!-- ===== End mobile-only Connections section ===== -->
+ 
+
+
+
+
+
+
+
+      <!-- Page content header (kept your original header area, moved below replaced header) -->
+      <header class="hdr" style="margin-top:8px;">
+        <div>
+          <h1 id="pageTitle">Connections</h1>
+          <p>Showing <strong>{{ target|capitalize }}</strong> profiles for you.</p>
+        </div>
+        <div class="header-actions">
+           <a href="{{ url_for('profile_setup', enable_actions='1', suppress_overlay='1') }}" class="btn secondary" style="text-decoration:none;" onclick="(function(){try{localStorage.setItem('profile_published_hidden','1');localStorage.setItem('profile_published_overlay_seen','1');}catch(e){}window.location.replace('{{ url_for('profile_setup', enable_actions='1', suppress_overlay='1') }}');})(); return false;">Back to preview</a>
+        </div>
+      </header>
+
+      {% if not profiles %}
+        <div class="empty">No {{ target }} profiles found yet.</div>
+      {% else %}
+        <section class="list" aria-live="polite">
+          {% for p in profiles %}
+            <article class="card" role="article" aria-labelledby="p-{{ p.id }}">
+              <div class="avatar" aria-hidden="false">
+                {% if p.profile_photo %}
+                  <img src="{{ url_for('uploaded_file', filename=p.profile_photo) }}" alt="avatar for {{ p.user.first_name if p.user else 'user' }}">
+                {% else %}
+                  <img src="{{ url_for('static', filename='default-avatar.png') }}" alt="default avatar">
+                {% endif %}
+              </div>
+
+              <div class="content">
+                <h3 id="p-{{ p.id }}">{{ (p.user.first_name ~ ' ' ~ p.user.last_name) if p.user else 'Unnamed' }}</h3>
+                <div class="meta-row">
+                  <div class="muted location-text">{{ p.location or 'Location not provided' }}</div>
+                  {% if p.care_needed and target == 'family' %}
+                    <div class="muted">• Care needed: {{ p.care_needed }}</div>
+                  {% endif %}
+                </div>
+
+                <div class="tags" title="Profiles tags">
+                  {% if p.services %}<span title="Services">Services: {{ p.services }}</span>{% endif %}
+                  {% if p.specialties and target == 'caregiver' %}<span title="Specialties">Specialties: {{ p.specialties }}</span>{% endif %}
+                </div>
+              </div>
+
+              <div class="actions" aria-hidden="false">
+                <a class="btn" href="{% if p.user %}{{ url_for('view_public_profile', user_id=p.user.id) }}{% else %}#{% endif %}" title="View profile of {{ p.user.first_name if p.user else '' }}"><i class="fa-solid fa-eye" aria-hidden="true"></i> View profile</a>
+
+                {% if p.user %}
+                  <a class="btn chat"
+                     href="{{ url_for('chat_page', other_id=p.user.id) }}"
+                     title="Message {{ p.user.first_name }}"
+                     data-user-id="{{ p.user.id }}">
+                    <i class="fa-solid fa-comment-dots" aria-hidden="true"></i> Message
+                  </a>
+                {% else %}
+                  <a class="btn chat" href="#" aria-disabled="true" title="No user available">
+                    <i class="fa-solid fa-comment-dots" aria-hidden="true"></i> Message
+                  </a>
+                {% endif %}
+
+                <div class="right-meta" aria-hidden="false">{{ p.languages or '' }}</div>
+              </div>
+            </article>
+          {% endfor %}
+        </section>
+      {% endif %}
+    </div>
+  </div>
+
+  <script>
+    window.addEventListener('pageshow', function (e) {
+      try { localStorage.setItem('profile_published_hidden','1'); localStorage.setItem('profile_published_overlay_seen','1'); } catch (err) {}
+    });
+  </script>
+
+  <!-- FLAG: client-only, small flags placed next to/under the location text. Full country list included. -->
+  <script>
+  (function(){
+    // Full (extensive) mapping of normalized country names -> ISO2
+    const NAME_TO_ISO = {
+      "afghanistan":"af","aland islands":"ax","albania":"al","algeria":"dz","american samoa":"as","andorra":"ad","angola":"ao","anguilla":"ai","antarctica":"aq","antigua and barbuda":"ag","argentina":"ar","armenia":"am","aruba":"aw","australia":"au","austria":"at","azerbaijan":"az",
+      "bahamas":"bs","bahrain":"bh","bangladesh":"bd","barbados":"bb","belarus":"by","belgium":"be","belize":"bz","benin":"bj","bermuda":"bm","bhutan":"bt","bolivia":"bo","bonaire":"bq","bosnia and herzegovina":"ba","botswana":"bw","bouvet island":"bv","brazil":"br","british indian ocean territory":"io","british virgin islands":"vg","brunei":"bn","bulgaria":"bg","burkina faso":"bf","burundi":"bi",
+      "cabo verde":"cv","cambodia":"kh","cameroon":"cm","canada":"ca","cayman islands":"ky","central african republic":"cf","chad":"td","chile":"cl","china":"cn","christmas island":"cx","cocos islands":"cc","colombia":"co","comoros":"km","congo":"cg","congo (democratic republic)":"cd","costa rica":"cr","cote d'ivoire":"ci","ivory coast":"ci","croatia":"hr","cuba":"cu","curacao":"cw","cyprus":"cy","czech republic":"cz","czechia":"cz",
+      "denmark":"dk","djibouti":"dj","dominica":"dm","dominican republic":"do","ecuador":"ec","egypt":"eg","el salvador":"sv","equatorial guinea":"gq","eritrea":"er","estonia":"ee","eswatini":"sz","ethiopia":"et","falkland islands":"fk","faroe islands":"fo","fiji":"fj","finland":"fi","france":"fr","french guiana":"gf","french polynesia":"pf","french southern territories":"tf",
+      "gabon":"ga","gambia":"gm","georgia":"ge","germany":"de","ghana":"gh","gibraltar":"gi","greece":"gr","greenland":"gl","grenada":"gd","guadeloupe":"gp","guam":"gu","guatemala":"gt","guernsey":"gg","guinea":"gn","guinea-bissau":"gw","guyana":"gy",
+      "haiti":"ht","heard island and mcdonald islands":"hm","holy see":"va","honduras":"hn","hong kong":"hk","hungary":"hu","iceland":"is","india":"in","indonesia":"id","iran":"ir","iraq":"iq","ireland":"ie","isle of man":"im","israel":"il","italy":"it",
+      "jamaica":"jm","japan":"jp","jersey":"je","jordan":"jo","kazakhstan":"kz","kenya":"ke","kiribati":"ki","kosovo":"xk","kuwait":"kw","kyrgyzstan":"kg","laos":"la","latvia":"lv","lebanon":"lb","lesotho":"ls","liberia":"lr","libya":"ly","liechtenstein":"li","lithuania":"lt","luxembourg":"lu",
+      "macao":"mo","macedonia":"mk","north macedonia":"mk","madagascar":"mg","malawi":"mw","malaysia":"my","maldives":"mv","mali":"ml","malta":"mt","marshall islands":"mh","martinique":"mq","mauritania":"mr","mauritius":"mu","mayotte":"yt","mexico":"mx","micronesia":"fm","moldova":"md","monaco":"mc","mongolia":"mn","montenegro":"me","montserrat":"ms","morocco":"ma","mozambique":"mz","myanmar":"mm",
+      "namibia":"na","nauru":"nr","nepal":"np","netherlands":"nl","new caledonia":"nc","new zealand":"nz","nicaragua":"ni","niger":"ne","nigeria":"ng","niue":"nu","norfolk island":"nf","north korea":"kp","northern mariana islands":"mp","norway":"no","oman":"om","pakistan":"pk","palau":"pw","palestine":"ps","panama":"pa","papua new guinea":"pg","paraguay":"py","peru":"pe","philippines":"ph","pitcairn":"pn","poland":"pl","portugal":"pt","puerto rico":"pr",
+      "qatar":"qa","reunion":"re","romania":"ro","russia":"ru","russian federation":"ru","rwanda":"rw",
+      "saint barthelemy":"bl","saint helena":"sh","saint kitts and nevis":"kn","saint lucia":"lc","saint martin":"mf","saint pierre and miquelon":"pm","saint vincent and the grenadines":"vc","samoa":"ws","san marino":"sm","sao tome and principe":"st","saudi arabia":"sa","senegal":"sn","serbia":"rs","seychelles":"sc","sierra leone":"sl","singapore":"sg","sint maarten":"sx","slovakia":"sk","slovenia":"si","solomon islands":"sb","somalia":"so","south africa":"za","south korea":"kr","south sudan":"ss","spain":"es","sri lanka":"lk","sudan":"sd","suriname":"sr","svalbard and jan mayen":"sj","sweden":"se","switzerland":"ch","syria":"sy",
+      "taiwan":"tw","tajikistan":"tj","tanzania":"tz","thailand":"th","timor-leste":"tl","togo":"tg","tokelau":"tk","tonga":"to","trinidad and tobago":"tt","tunisia":"tn","turkey":"tr","turkmenistan":"tm","turks and caicos islands":"tc","tuvalu":"tv","uganda":"ug","ukraine":"ua","united arab emirates":"ae","united kingdom":"gb","united states":"us","united states of america":"us","usa":"us","us":"us","uruguay":"uy","uzbekistan":"uz","vanuatu":"vu","venezuela":"ve","vietnam":"vn","virgin islands":"vi","wallis and futuna":"wf","western sahara":"eh","yemen":"ye","zambia":"zm","zimbabwe":"zw",
+
+      // Common short-forms
+      "england":"gb","scotland":"gb","wales":"gb","britain":"gb","uk":"gb","u.k.":"gb","u.s.":"us","u.s.a.":"us","america":"us"
+    };
+
+    function normalize(v){ if(!v) return ''; v = String(v).trim().toLowerCase(); v = v.replace(/\([^)]*\)/g,''); v = v.replace(/[\.]+$/,''); v = v.replace(/\s{2,}/g,' '); v = v.replace(/[_]/g,' '); return v; }
+
+    function tryMapNameToIso(name){ if(!name) return null; name = normalize(name); if(!name) return null; if(/^[a-z]{2}$/.test(name)) return name; if(NAME_TO_ISO[name]) return NAME_TO_ISO[name]; const words = name.split(/\s+/); if(words.length>1){ const lastTwo = (words.slice(-2).join(' ')).trim(); if(NAME_TO_ISO[lastTwo]) return NAME_TO_ISO[lastTwo]; const last = words[words.length-1]; if(NAME_TO_ISO[last]) return NAME_TO_ISO[last]; } return null; }
+
+    function countryCodeToEmoji(cc){ if(!cc || cc.length!==2) return ''; const A = 0x41; const first = 0x1F1E6 + (cc.toUpperCase().charCodeAt(0)-A); const second = 0x1F1E6 + (cc.toUpperCase().charCodeAt(1)-A); return String.fromCodePoint(first, second); }
+
+    function appendSmallFlagToLocation(locationNode, iso){
+      if(!locationNode || !iso) return;
+      if(locationNode.querySelector('.country-flag-inline')) return;
+      const container = document.createElement('span');
+      container.className = 'country-flag-inline';
+      const img = document.createElement('img');
+      img.src = 'https://flagcdn.com/w20/' + iso + '.png';
+      img.alt = iso.toUpperCase();
+      img.onerror = function(){ container.removeChild(img); const em = document.createElement('span'); em.className = 'flag-emoji'; em.textContent = countryCodeToEmoji(iso); container.appendChild(em); };
+      container.appendChild(img);
+      locationNode.appendChild(container);
+    }
+
+    function isoFromLocationString(raw){ if(!raw) return null;
+      const parts = raw.split(/[\/|,]/).map(p=>normalize(p)).filter(Boolean);
+      for(let i=parts.length-1;i>=0;i--){ const iso = tryMapNameToIso(parts[i]); if(iso) return iso; }
+      const whole = normalize(raw); const isoWhole = tryMapNameToIso(whole); if(isoWhole) return isoWhole;
+      if(/united states|usa|u s a|u s$/i.test(raw)) return 'us';
+      if(/united kingdom|uk|great britain|england|scotland/i.test(raw)) return 'gb';
+      const words = whole.split(/\s+/);
+      if(words.length>=2){ const lastTwo = (words.slice(-2).join(' ')).trim(); const iso2 = tryMapNameToIso(lastTwo); if(iso2) return iso2; }
+      return null; }
+
+    function renderFlags(){ document.querySelectorAll('.card').forEach(function(card){ try{
+        let locationNode = card.querySelector('.location-text');
+        if(!locationNode) locationNode = card.querySelector('.muted');
+        let candidate = '';
+        if(card.dataset && card.dataset.countryCode) candidate = card.dataset.countryCode;
+        if(!candidate && locationNode) candidate = locationNode.textContent || locationNode.innerText || '';
+        if(!candidate){ const tags = card.querySelector('.tags'); if(tags && tags.textContent) candidate = tags.textContent.trim(); }
+        if(!candidate){ const altimg = card.querySelector('.avatar img'); if(altimg && altimg.alt) candidate = altimg.alt; }
+        if(!candidate) return;
+        const iso = isoFromLocationString(candidate);
+        if(!iso) return;
+        appendSmallFlagToLocation(locationNode || card.querySelector('.content'), iso);
+      }catch(e){ console.error('flag render error', e); } }); }
+
+    if(document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', renderFlags); } else { renderFlags(); }
+    const observer = new MutationObserver((mut)=>{ let added=false; for(const m of mut){ if(m.addedNodes && m.addedNodes.length){ added=true; break; } } if(added) renderFlags(); });
+    observer.observe(document.body, { childList: true, subtree: true });
+
+  })();
+  </script>
+
+<script>
+(function(){
+  let _prevBodyOverflow = null;
+
+  function lockBodyScroll(){
+    _prevBodyOverflow = document.body.style.overflow || '';
+    document.body.style.overflow = 'hidden';
+  }
+  function unlockBodyScroll(){
+    if(_prevBodyOverflow !== null) document.body.style.overflow = _prevBodyOverflow;
+    _prevBodyOverflow = null;
+  }
+
+  function openZoom(src, alt){
+    if (window.__imageViewerVisible) { ev && ev.stopImmediatePropagation && ev.stopImmediatePropagation(); ev && ev.preventDefault && ev.preventDefault(); return; }
+    if(!src) return;
+    if(document.querySelector('.cc-zoom-overlay')) return;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'cc-zoom-overlay';
+    overlay.setAttribute('role','dialog');
+    overlay.setAttribute('aria-modal','true');
+    overlay.tabIndex = -1;
+
+    const container = document.createElement('div');
+    container.className = 'cc-zoom-container';
+
+    const img = document.createElement('img');
+    img.className = 'cc-zoom-img';
+    img.src = src;
+    img.alt = alt || '';
+    img.loading = 'eager';
+    img.draggable = false;
+
+    container.appendChild(img);
+    overlay.appendChild(container);
+
+    if(alt && String(alt).trim()){
+      const cap = document.createElement('div');
+      cap.className = 'cc-zoom-caption';
+      cap.textContent = alt;
+      overlay.appendChild(cap);
+    }
+
+    function close(){
+      overlay.classList.remove('cc-open');
+      document.documentElement.classList.remove('cc-zoom-open');
+      overlay.addEventListener('transitionend', function onEnd(){
+        overlay.removeEventListener('transitionend', onEnd);
+        if(overlay.parentNode) overlay.parentNode.removeChild(overlay);
+      }, { once: true });
+      document.removeEventListener('keydown', keyHandler);
+      unlockBodyScroll();
+    }
+
+    function keyHandler(e){
+      if(e.key === 'Escape') close();
+    }
+
+    overlay.addEventListener('click', function(e){
+      e.stopPropagation();
+      e.preventDefault();
+      close();
+    });
+
+    img.addEventListener('click', function(ev){
+      ev.stopPropagation();
+      ev.preventDefault();
+      close();
+    });
+
+    document.body.appendChild(overlay);
+    document.documentElement.classList.add('cc-zoom-open');
+    lockBodyScroll();
+    requestAnimationFrame(function(){
+      overlay.classList.add('cc-open');
+      overlay.focus();
+      document.addEventListener('keydown', keyHandler);
+    });
+  }
+
+  document.addEventListener('click', function(e){
+    const el = e.target;
+    const avatarImg = el.closest ? el.closest('.avatar img') : null;
+    if(!avatarImg) return;
+    e.preventDefault();
+    e.stopPropagation();
+    openZoom(avatarImg.src, avatarImg.alt || '');
+  }, false);
+})();
+</script>
+
+  <!-- ======= LOGOUT CONFIRMATION MODAL (inserted at end of body) ======= -->
+  <div id="logoutConfirmModal" class="cc-modal" role="dialog" aria-modal="true" aria-labelledby="logoutConfirmTitle" aria-hidden="true" style="display:none;">
+    <div class="cc-modal-backdrop" data-close="backdrop"></div>
+    <div class="cc-modal-panel" role="document">
+      <button class="cc-modal-close" type="button" aria-label="Close confirmation">&times;</button>
+
+      <div class="cc-modal-body">
+        <div class="cc-modal-avatar" id="logoutConfirmAvatarWrap" aria-hidden="true">
+          <img id="logoutConfirmAvatar" src="{{ url_for('static', filename='images/avatar cc.jfif') }}" alt="Avatar">
+        </div>
+
+        <h2 id="logoutConfirmTitle">Are you sure you want to sign out?</h2>
+        <p id="logoutConfirmText">Signing out will end your session on this device. You can sign in again anytime.</p>
+
+        <div class="cc-modal-actions">
+          <button id="logoutCancelBtn" class="btn cc-btn-ghost" type="button">Cancel</button>
+          <button id="logoutConfirmBtn" class="btn cc-btn-danger" type="button">
+            <span class="btn-spinner" style="display:none;"></span>
+            Sign out
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Caregiver-block modal -->
+  <div id="caregiverBlockedModal" class="cc-modal-inline" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="cc-modal-card" role="document" aria-labelledby="cbTitle" aria-describedby="cbDesc">
+      <div class="cc-modal-left" aria-hidden="true">i</div>
+      <div class="cc-modal-content" style="flex:1">
+        <h3 id="cbTitle">Access restricted</h3>
+        <p id="cbDesc">Sorry — caregivers cannot view the <strong>Find Caregiver</strong> page. You can browse families instead.</p>
+        <div class="cc-modal-actions">
+          <button id="cbCloseBtn" class="cc-btn-ghost" type="button">Close</button>
+          <button id="cbViewFamiliesBtn" class="cc-btn-primary" type="button">View Families</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Family-block modal -->
+  <div id="familyBlockedModal" class="cc-modal-inline" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="cc-modal-card" role="document" aria-labelledby="fbTitle" aria-describedby="fbDesc">
+      <div class="cc-modal-left" aria-hidden="true">i</div>
+      <div class="cc-modal-content" style="flex:1">
+        <h3 id="fbTitle">Access restricted</h3>
+        <p id="fbDesc">Sorry — families cannot view the <strong>Find Family</strong> page. You can browse caregivers instead.</p>
+        <div class="cc-modal-actions">
+          <button id="fbCloseBtn" class="cc-btn-ghost" type="button">Close</button>
+          <button id="fbViewCaregiversBtn" class="cc-btn-primary" type="button">View Caregivers</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ======= Header-related scripts (profile dropdown, logout confirm, hide-login, caregiver/family block) ======= -->
+  <script>
+  (function(){
+    const login = document.getElementById('loginLink');
+    const register = document.getElementById('registerLink');
+
+    function goDirect(e){
+      if (e.ctrlKey || e.metaKey || e.button === 1) return;
+      const href = this && this.getAttribute && this.getAttribute('href');
+      if (!href) return;
+      e.preventDefault();
+      window.location.href = href;
+    }
+
+    if (login) login.addEventListener('click', goDirect);
+    if (register) register.addEventListener('click', goDirect);
+  })();
+  </script>
+
+  <script>
+  (function(){
+    const btn = document.getElementById('profileBtn');
+    const menu = document.getElementById('profileMenu');
+
+    if(!btn || !menu) return;
+
+    function openMenu() {
+      menu.classList.add('show');
+      menu.setAttribute('aria-hidden','false');
+      btn.setAttribute('aria-expanded','true');
+      const first = menu.querySelector('.menu-item');
+      if(first && typeof first.focus === 'function') first.focus();
+    }
+    function closeMenu() {
+      menu.classList.remove('show');
+      menu.setAttribute('aria-hidden','true');
+      btn.setAttribute('aria-expanded','false');
+    }
+
+    btn.addEventListener('click', function(e){
+      e.stopPropagation();
+      if(menu.classList.contains('show')) closeMenu(); else openMenu();
+    });
+
+    document.addEventListener('click', function(){ closeMenu(); });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape' || e.key === 'Esc') closeMenu();
+    });
+
+    menu.addEventListener('click', function(e){ e.stopPropagation(); });
+  })();
+  </script>
+
+  <script>
+  (function(){
+    const logoutLink = document.getElementById('logoutLink');
+    const modal = document.getElementById('logoutConfirmModal');
+    const backdrop = modal && modal.querySelector('.cc-modal-backdrop');
+    const closeBtn = modal && modal.querySelector('.cc-modal-close');
+    const cancelBtn = document.getElementById('logoutCancelBtn');
+    const confirmBtn = document.getElementById('logoutConfirmBtn');
+    const avatarImg = document.getElementById('logoutConfirmAvatar');
+
+    if(!logoutLink || !modal || !confirmBtn || !cancelBtn) return;
+
+    try {
+      const pageAvatar = document.querySelector('.profile-btn .avatar') || document.querySelector('.avatar-link .avatar') || document.querySelector('#heroAvatar');
+      if(pageAvatar && pageAvatar.src) avatarImg.src = pageAvatar.src;
+    } catch(e){}
+
+    function openModal() {
+      modal.style.display = 'flex';
+      modal.setAttribute('aria-hidden', 'false');
+      modal._previousActive = document.activeElement;
+      setTimeout(()=> cancelBtn.focus(), 50);
+      trapFocus(modal);
+    }
+    function closeModal() {
+      modal.setAttribute('aria-hidden','true');
+      setTimeout(()=> { try { modal.style.display='none'; } catch(e){} }, 220);
+      if(modal._previousActive && typeof modal._previousActive.focus === 'function') modal._previousActive.focus();
+      releaseFocusTrap();
+    }
+
+    logoutLink.addEventListener('click', function(ev){
+      if(ev.ctrlKey || ev.metaKey || logoutLink.target === '_blank') return;
+      ev.preventDefault();
+      openModal();
+    });
+
+    backdrop && backdrop.addEventListener('click', closeModal);
+    closeBtn && closeBtn.addEventListener('click', closeModal);
+    cancelBtn && cancelBtn.addEventListener('click', closeModal);
+    document.addEventListener('keydown', function(ev){
+      if(ev.key === 'Escape' || ev.key === 'Esc') {
+        if(modal.getAttribute('aria-hidden') === 'false') closeModal();
+      }
+    });
+
+    let _trap = null;
+    function trapFocus(el) {
+      const focusable = Array.from(el.querySelectorAll('a[href], button:not([disabled]), input, textarea, select, [tabindex]:not([tabindex="-1"])'))
+        .filter(i => i.offsetWidth || i.offsetHeight || i === document.activeElement);
+      if (focusable.length === 0) return;
+      let iFirst = focusable[0], iLast = focusable[focusable.length-1];
+      _trap = function(e){
+        if(e.key !== 'Tab') return;
+        if(e.shiftKey && document.activeElement === iFirst) { e.preventDefault(); iLast.focus(); }
+        else if(!e.shiftKey && document.activeElement === iLast) { e.preventDefault(); iFirst.focus(); }
+      };
+      document.addEventListener('keydown', _trap);
+    }
+    function releaseFocusTrap() { if(_trap) { document.removeEventListener('keydown', _trap); _trap = null; } }
+
+    confirmBtn.addEventListener('click', async function(ev){
+      ev.preventDefault();
+      const method = (logoutLink.dataset.method || 'get').toLowerCase();
+      const href = logoutLink.getAttribute('href') || '';
+      const spinner = confirmBtn.querySelector('.btn-spinner');
+      if(spinner) spinner.style.display = 'inline-block';
+      confirmBtn.disabled = true;
+      cancelBtn.disabled = true;
+      logoutLink.disabled = true;
+
+      try {
+        if(method === 'post') {
+          const res = await fetch(href, { method: 'POST', credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } }).catch(()=>null);
+          if(res && res.redirected && res.url) { window.location.href = res.url; return; }
+          if(res && (res.ok || res.status === 200 || res.status === 204)) { window.location.href = href; return; }
+          window.location.href = href;
+        } else {
+          window.location.href = href;
+        }
+      } catch (err) {
+        console.error('Logout failed', err);
+        window.location.href = href;
+      } finally {
+        if(confirmBtn) { confirmBtn.disabled = false; if(spinner) spinner.style.display = 'none'; }
+        if(cancelBtn) cancelBtn.disabled = false;
+        logoutLink.disabled = false;
+      }
+    });
+  })();
+  </script>
+
+  <script>
+  (function(){
+    const login = document.getElementById('loginLink');
+    if (!login) return;
+
+    function detectLoggedIn() {
+      try {
+        const bodyFlag = document.body.getAttribute('data-logged-in');
+        if (bodyFlag !== null && bodyFlag !== undefined) {
+          return String(bodyFlag) === '1' || String(bodyFlag).toLowerCase() === 'true';
+        }
+      } catch (e) {}
+
+      try {
+        const avatar = document.querySelector('.profile-btn .avatar');
+        if (avatar && avatar.src && avatar.src.indexOf('/static/images/avatar cc.jfif') === -1) return true;
+      } catch (e) {}
+
+      return false;
+    }
+
+    function refreshLoginVisibility() {
+      const logged = detectLoggedIn();
+      if (logged) {
+        login.style.display = 'none';
+        login.setAttribute('aria-hidden','true');
+        login.tabIndex = -1;
+      } else {
+        login.style.display = '';
+        login.removeAttribute('aria-hidden');
+        login.tabIndex = 0;
+      }
+    }
+
+    refreshLoginVisibility();
+    setTimeout(refreshLoginVisibility, 300);
+    setTimeout(refreshLoginVisibility, 1200);
+  })();
+  </script>
+
+  <script>
+  (function () {
+    function readFlags() {
+      const b = document.body;
+      const loggedAttr = String(b.getAttribute('data-logged-in') || '').toLowerCase();
+      const roleAttr = String(b.getAttribute('data-user-role') || '').toLowerCase();
+      const pubAttr = String(b.getAttribute('data-profile-published') || '').toLowerCase();
+      return {
+        isLogged: (loggedAttr === '1' || loggedAttr === 'true'),
+        role: roleAttr,
+        isPublished: (pubAttr === '1' || pubAttr === 'true')
+      };
+    }
+
+    function shouldBlockCaregiver() {
+      const f = readFlags();
+      return f.isLogged && f.role === 'caregiver' && f.isPublished;
+    }
+    function shouldBlockFamily() {
+      const f = readFlags();
+      return f.isLogged && f.role === 'family' && f.isPublished;
+    }
+
+    const caregiverModal = document.getElementById('caregiverBlockedModal');
+    const caregiverClose = document.getElementById('cbCloseBtn');
+    const caregiverViewFamilies = document.getElementById('cbViewFamiliesBtn');
+
+    const familyModal = document.getElementById('familyBlockedModal');
+    const familyClose = document.getElementById('fbCloseBtn');
+    const familyViewCaregivers = document.getElementById('fbViewCaregiversBtn');
+
+    function openModal(modalEl, primaryFocusEl) {
+      if (!modalEl) return;
+      modalEl.classList.add('show');
+      modalEl.setAttribute('aria-hidden', 'false');
+      setTimeout(()=> { try { primaryFocusEl && primaryFocusEl.focus(); } catch(e){} }, 30);
+      document.addEventListener('keydown', onKeyDown);
+      modalEl._prevActive = document.activeElement;
+    }
+    function closeModal(modalEl) {
+      if (!modalEl) return;
+      modalEl.classList.remove('show');
+      modalEl.setAttribute('aria-hidden', 'true');
+      document.removeEventListener('keydown', onKeyDown);
+      try { if (modalEl._prevActive && typeof modalEl._prevActive.focus === 'function') modalEl._prevActive.focus(); } catch(e){}
+    }
+    function onKeyDown(e) {
+      if (e.key === 'Escape' || e.key === 'Esc') {
+        if (caregiverModal && caregiverModal.classList.contains('show')) closeModal(caregiverModal);
+        if (familyModal && familyModal.classList.contains('show')) closeModal(familyModal);
+      }
+      if (e.key === 'Tab') {
+        const activeModal = caregiverModal.classList.contains('show') ? caregiverModal : (familyModal.classList.contains('show') ? familyModal : null);
+        if (!activeModal) return;
+        const focusables = Array.from(activeModal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')).filter(el=>el.offsetWidth || el.offsetHeight);
+        if (!focusables.length) return;
+        const first = focusables[0], last = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    }
+
+    document.addEventListener('click', function (ev) {
+      if (ev.ctrlKey || ev.metaKey || ev.button === 1) return;
+      const el = ev.target;
+      if (!el) return;
+      const a = el.closest ? el.closest('a, button') : null;
+      if (!a) return;
+      const href = a.getAttribute && a.getAttribute('href') || '';
+      const id = a.id || '';
+      const classes = a.className || '';
+
+      const wantsCaregiver = (href.indexOf('/find-caregiver') !== -1 || id === 'navFindCaregiver' || (classes && classes.indexOf('find-care') !== -1));
+      const wantsFamily = (href.indexOf('/find-family') !== -1 || id === 'navFindFamily' || (classes && classes.indexOf('find-jobs') !== -1));
+
+      if (wantsCaregiver && shouldBlockCaregiver()) {
+        ev.preventDefault(); ev.stopPropagation();
+        openModal(caregiverModal, caregiverViewFamilies);
+        return;
+      }
+      if (wantsFamily && shouldBlockFamily()) {
+        ev.preventDefault(); ev.stopPropagation();
+        openModal(familyModal, familyViewCaregivers);
+        return;
+      }
+    }, { capture: true });
+
+    if (caregiverClose) caregiverClose.addEventListener('click', ()=> closeModal(caregiverModal));
+    if (caregiverViewFamilies) caregiverViewFamilies.addEventListener('click', ()=> { window.location.href = '/find-family'; });
+
+    if (familyClose) familyClose.addEventListener('click', ()=> closeModal(familyModal));
+    if (familyViewCaregivers) familyViewCaregivers.addEventListener('click', ()=> { window.location.href = '/find-caregiver'; });
+
+  })();
+  </script>
+  <!-- ======= end header-related scripts ======= -->
+
+</body>
+</html>

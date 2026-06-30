@@ -1,0 +1,308 @@
+<!-- templates/invite_share.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Share Invite — Care Companion</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    /* reset / layout base */
+    *, *::before, *::after { box-sizing: border-box; }
+    html,body{height:100%;margin:0}
+    :root {
+      --bg1: linear-gradient(180deg,#071027,#082a3e);
+      --card: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      --accent: #6C63FF;
+      --muted: #9fb0c8;
+      --glass: rgba(255,255,255,0.02);
+    }
+
+    body{
+      margin:0;
+      min-height:100vh;
+      background:var(--bg1); /* desktop/default background preserved */
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto;
+      color:#eaf3ff;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:28px;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    .wrap{
+      max-width:980px;
+      width:100%;
+      border-radius:14px;
+      padding:22px;
+      background:var(--card);
+      box-shadow:0 24px 70px rgba(2,8,20,0.6);
+      transform: translateZ(0); /* helps some mobile rendering glitches */
+    }
+
+    .head{display:flex;justify-content:space-between;align-items:center;gap:12px}
+    .head .title{font-size:20px;font-weight:800}
+    .head .sub{color:var(--muted);font-size:13px}
+    .share-area{display:flex;gap:18px;margin-top:18px;align-items:flex-start}
+    .left{flex:1; min-width:0;}
+    .right{width:320px}
+    .link-box{display:flex;gap:8px; align-items:center;}
+    input.link{flex:1 1 auto; min-width:0; padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:#ecf7ff}
+    button.primary{flex:0 0 auto;padding:10px 12px;border-radius:10px;border:none;background:linear-gradient(90deg,var(--accent),#4fb0ff);color:#022; font-weight:800;cursor:pointer}
+    .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:14px}
+    .app{background:var(--glass);padding:12px;border-radius:10px;text-align:center;cursor:pointer;border:1px solid rgba(255,255,255,0.02);user-select:none}
+    .app i{font-size:20px}
+    .app .label{display:block;margin-top:8px;font-weight:700;color:#e9f6ff;font-size:13px}
+    .small-muted{color:var(--muted);font-size:13px;margin-top:8px}
+    .qr-panel{border-radius:10px;padding:12px;background:rgba(255,255,255,0.02);text-align:center}
+    .profile-pic { width:64px;height:64px;border-radius:12px;overflow:hidden;background:#1a324f;display:flex;align-items:center;justify-content:center;flex-shrink:0 }
+    .profile-pic img{ width:100%;height:100%;object-fit:cover;display:block }
+    .app:focus, .app:hover { outline: none; box-shadow: 0 6px 20px rgba(108,99,255,0.12); transform: translateY(-2px); transition: transform .12s ease, box-shadow .12s ease; }
+    .qr-image { width:100%; max-width:220px; height:auto; border-radius:8px; display:block; margin:10px auto 0; background:#fff; }
+
+    /* Keep existing mobile behaviour for grid and layout */
+    @media(max-width:860px){
+      .grid{grid-template-columns:repeat(3,1fr)}
+      .right{width:100%}
+      .share-area{flex-direction:column}
+    }
+
+    /* MOBILE ONLY: hide header, set mobile background, prevent horizontal overflow */
+    @media(max-width:860px){
+      .head { display: none !important; }
+
+      /* Prevent horizontal overflow and visual cutting */
+      html, body { overflow-x: hidden; -webkit-overflow-scrolling: touch; }
+
+      body {
+        background: #151b54 !important;
+        padding: 18px 12px 18px 12px;
+        align-items: flex-start !important;   /* align to top so nothing is vertically centered/cut */
+        justify-content: flex-start !important;
+      }
+
+      /* make wrap use full width (no calc/100vw) and allow vertical scrolling inside when needed */
+      .wrap {
+        background: transparent !important;
+        box-shadow: none !important;
+        padding: 12px;
+        margin: 0;
+        width: 100%;
+        max-height: calc(100vh - env(safe-area-inset-top, 24px) - 48px);
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+        transform: translateZ(0);
+      }
+
+      /* inviter row */
+      .inviter-row { display:flex; align-items:center; gap:12px; }
+      .inviter-info { min-width:0; }
+      .inviter-name { font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:block; }
+
+      /* make sure the link+button line doesn't overflow */
+      .link-box { width:100%; }
+      input.link { max-width: 100%; }
+      button.primary { margin-left: 8px; }
+
+      /* avoid any element causing horizontal scroll */
+      .share-area, .grid, .qr-panel { box-sizing: border-box; width:100%; max-width:100%; }
+
+      /* fix for tiny screens */
+      @media(max-width:420px){
+        .profile-pic { width:56px; height:56px; }
+        .inviter-name { white-space:normal; } /* allow wrapping on very narrow screens */
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap" role="main" aria-labelledby="h1">
+    <div class="head">
+      <div>
+        <div id="h1" class="title">Share invite</div>
+        <div class="sub">Pick an app to send the invite link to friends, family or caregivers.</div>
+      </div>
+      <div></div>
+    </div>
+
+    {# Compute a reliable public invite URL server-side; fallback to homepage if invite_url missing #}
+    {% set public_invite = (invite_url if (invite_url is defined and invite_url) else url_for('home', _external=True)) %}
+
+    <div class="share-area">
+      <!-- LEFT: inviter + link + sharing grid -->
+      <div class="left">
+        <div class="inviter-row">
+          {# Robustly detect available inviter photo field #}
+          {% set inviter_photo = None %}
+          {% if inviter %}
+            {% if inviter.profile and inviter.profile.profile_photo %}
+              {% set inviter_photo = inviter.profile.profile_photo %}
+            {% elif inviter.profile_photo %}
+              {% set inviter_photo = inviter.profile_photo %}
+            {% elif inviter.photo %}
+              {% set inviter_photo = inviter.photo %}
+            {% elif inviter.avatar %}
+              {% set inviter_photo = inviter.avatar %}
+            {% endif %}
+          {% endif %}
+
+          <div class="profile-pic" aria-hidden="true">
+            {% set fallback_static = url_for('static', filename='images/avatar cc.jfif', _external=True) %}
+            {% if inviter and inviter.avatar_url %}
+              <img src="{{ inviter.avatar_url }}" alt="{{ inviter.name or 'Inviter' }}" onerror="this.onerror=null; this.src='{{ fallback_static }}';" />
+            {% else %}
+              <img src="{{ fallback_static }}" alt="Inviter" />
+            {% endif %}
+          </div>
+
+          <div class="inviter-info">
+            <div class="inviter-name">{{ inviter.first_name ~ ' ' ~ inviter.last_name if inviter else 'A friend' }}</div>
+            <div class="small-muted" aria-hidden="true">Share this invite with people you trust.</div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px" class="link-box" aria-live="polite">
+          <input id="inviteUrl" class="link" readonly value="{{ public_invite|e }}" aria-label="Invite link (hidden preview)">
+          <button id="copyBtn" class="primary" aria-label="Copy invite link">Copy</button>
+        </div>
+
+        <div class="grid" id="shareGrid" role="list" aria-label="Share options" style="margin-top:14px">
+          <div class="app" data-channel="whatsapp" role="listitem" tabindex="0"><i class="fa-brands fa-whatsapp" aria-hidden="true"></i><span class="label">WhatsApp</span></div>
+          <div class="app" data-channel="facebook" role="listitem" tabindex="0"><i class="fa-brands fa-facebook" aria-hidden="true"></i><span class="label">Facebook</span></div>
+          <div class="app" data-channel="messenger" role="listitem" tabindex="0"><i class="fa-brands fa-facebook-messenger" aria-hidden="true"></i><span class="label">Messenger</span></div>
+          <div class="app" data-channel="twitter" role="listitem" tabindex="0"><i class="fa-brands fa-twitter" aria-hidden="true"></i><span class="label">Twitter</span></div>
+
+          <div class="app" data-channel="telegram" role="listitem" tabindex="0"><i class="fa-brands fa-telegram" aria-hidden="true"></i><span class="label">Telegram</span></div>
+          <div class="app" data-channel="linkedin" role="listitem" tabindex="0"><i class="fa-brands fa-linkedin" aria-hidden="true"></i><span class="label">LinkedIn</span></div>
+          <div class="app" data-channel="sms" role="listitem" tabindex="0"><i class="fa-solid fa-message" aria-hidden="true"></i><span class="label">SMS</span></div>
+          <div class="app" data-channel="email" role="listitem" tabindex="0"><i class="fa-solid fa-envelope" aria-hidden="true"></i><span class="label">Email</span></div>
+
+          <div class="app" data-channel="reddit" role="listitem" tabindex="0"><i class="fa-brands fa-reddit" aria-hidden="true"></i><span class="label">Reddit</span></div>
+          <div class="app" data-channel="pinterest" role="listitem" tabindex="0"><i class="fa-brands fa-pinterest" aria-hidden="true"></i><span class="label">Pinterest</span></div>
+          <div class="app" data-channel="skype" role="listitem" tabindex="0"><i class="fa-brands fa-skype" aria-hidden="true"></i><span class="label">Skype</span></div>
+          <div class="app" data-channel="instagram" role="listitem" tabindex="0"><i class="fa-brands fa-instagram" aria-hidden="true"></i><span class="label">Instagram</span></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: QR visible by default + toggle button -->
+      <div class="right" aria-live="polite">
+        <div class="qr-panel" id="qrPanel" aria-hidden="false">
+          <div style="font-weight:800">Invite QR</div>
+          <div style="margin-top:10px;color:var(--muted);font-size:13px">Scan to open the invite link</div>
+
+          <img id="qrImg" class="qr-image" alt="Invite QR" data-invite="{{ public_invite|e }}" src="https://quickchart.io/qr?size=300&text={{ public_invite|e }}" />
+
+          <div style="margin-top:12px">
+            <button id="toggleQrBtn" class="primary" aria-pressed="false" aria-controls="qrImg">Hide QR</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  const inviteInput = document.getElementById('inviteUrl');
+  const inviteUrl = inviteInput ? inviteInput.value : '';
+  const copyBtn = document.getElementById('copyBtn');
+  const shareGrid = document.getElementById('shareGrid');
+  const qrImg = document.getElementById('qrImg');
+  const toggleQrBtn = document.getElementById('toggleQrBtn');
+
+  if (qrImg && (!qrImg.src || qrImg.src.trim() === '')) {
+    const dataInvite = qrImg.dataset && qrImg.dataset.invite ? qrImg.dataset.invite : inviteUrl;
+    qrImg.src = "https://quickchart.io/qr?size=300&text=" + encodeURIComponent(dataInvite || window.location.origin + '/');
+  }
+
+  function showQrImage() {
+    qrImg.style.display = 'block';
+    toggleQrBtn.textContent = 'Hide QR';
+    toggleQrBtn.setAttribute('aria-pressed', 'false');
+    toggleQrBtn.setAttribute('aria-label', 'Hide QR');
+  }
+  function hideQrImage() {
+    qrImg.style.display = 'none';
+    toggleQrBtn.textContent = 'Show QR';
+    toggleQrBtn.setAttribute('aria-pressed', 'true');
+    toggleQrBtn.setAttribute('aria-label', 'Show QR');
+  }
+
+  showQrImage();
+
+  toggleQrBtn.addEventListener('click', function(){
+    if (!qrImg) return;
+    if (qrImg.style.display === 'none') {
+      if (!qrImg.src || qrImg.src.trim() === '') {
+        const dataInvite = qrImg.dataset && qrImg.dataset.invite ? qrImg.dataset.invite : inviteUrl;
+        qrImg.src = "https://quickchart.io/qr?size=300&text=" + encodeURIComponent(dataInvite || window.location.origin + '/');
+      }
+      showQrImage();
+    } else {
+      hideQrImage();
+    }
+  });
+
+  const templates = {
+    whatsapp: (u, t) => `https://wa.me/?text=${encodeURIComponent(t + ' ' + u)}`,
+    facebook: (u,t) => `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(u)}`,
+    messenger: (u,t) => `https://www.facebook.com/dialog/send?link=${encodeURIComponent(u)}&app_id=280000000000000&redirect_uri=${encodeURIComponent(u)}`,
+    twitter: (u,t) => `https://twitter.com/intent/tweet?text=${encodeURIComponent(t)}&url=${encodeURIComponent(u)}`,
+    telegram: (u,t) => `https://t.me/share/url?url=${encodeURIComponent(u)}&text=${encodeURIComponent(t)}`,
+    linkedin: (u,t) => `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(u)}`,
+    sms: (u,t) => `sms:?body=${encodeURIComponent(t + ' ' + u)}`,
+    email: (u,t) => `mailto:?subject=${encodeURIComponent(t)}&body=${encodeURIComponent(t + ' ' + u)}`,
+    reddit: (u,t) => `https://www.reddit.com/submit?url=${encodeURIComponent(u)}&title=${encodeURIComponent(t)}`,
+    pinterest: (u,t) => `https://pinterest.com/pin/create/button/?url=${encodeURIComponent(u)}&description=${encodeURIComponent(t)}`,
+    skype: (u,t) => `https://web.skype.com/share?url=${encodeURIComponent(u)}`,
+    instagram: (u,t) => `https://www.instagram.com/`
+  };
+
+  shareGrid.addEventListener('keydown', function(e){
+    if(e.key === 'Enter' || e.key === ' '){
+      const el = e.target.closest('.app');
+      if(el) el.click();
+      e.preventDefault();
+    }
+  });
+
+  shareGrid.addEventListener('click', function(e){
+    const el = e.target.closest('.app');
+    if(!el) return;
+    const ch = el.dataset.channel;
+    const title = "Join me on Care Companion";
+    const url = inviteUrl || (qrImg && qrImg.dataset && qrImg.dataset.invite ? qrImg.dataset.invite : window.location.origin + '/');
+    const tpl = templates[ch];
+    if(!tpl) return;
+    const shareUrl = tpl(url, title);
+    window.open(shareUrl, '_blank', 'noopener,noreferrer');
+  });
+
+  copyBtn.addEventListener('click', function(){
+    const textToCopy = inviteUrl || (qrImg && qrImg.dataset && qrImg.dataset.invite ? qrImg.dataset.invite : window.location.origin + '/');
+    if(!textToCopy) return alert('Invite link is missing.');
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(textToCopy).then(function(){
+        copyBtn.textContent = 'Copied';
+        setTimeout(()=> copyBtn.textContent = 'Copy', 1400);
+      });
+    } else {
+      const tmp = document.createElement('textarea'); tmp.value = textToCopy; document.body.appendChild(tmp);
+      tmp.select();
+      try{
+        document.execCommand('copy');
+        copyBtn.textContent='Copied';
+        setTimeout(()=>copyBtn.textContent='Copy',1400);
+      }catch(e){
+        alert('Copy failed — select and copy the link manually.');
+      }
+      tmp.remove();
+    }
+  });
+
+})();
+</script>
+</body>
+</html>

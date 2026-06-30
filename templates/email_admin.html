@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{ title or "Notification from Care Companion" }}</title>
+  <style>
+    body { margin:0; padding:0; background:#f5f8fc; font-family: Arial, Helvetica, sans-serif; color:#0f172a;}
+    table{border-collapse:collapse;}
+    .button{display:inline-block;padding:10px 14px;border-radius:9px;text-decoration:none;font-weight:700;}
+  </style>
+</head>
+<body>
+  <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
+    <tr>
+      <td align="center" style="padding:28px 12px;">
+        <table width="600" cellpadding="0" cellspacing="0" role="presentation" style="max-width:600px;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 10px 22px rgba(6,43,76,0.06);">
+          <tr>
+            <td style="padding:18px 20px;background:linear-gradient(90deg,#2a86d4,#1e6fb8);color:#fff;">
+              <!-- logo_url must be provided by the caller (render_template) -->
+              <img src="{{ logo_url }}" alt="Care Companion" width="96" style="display:block;border-radius:6px;">
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:20px;">
+              <h2 style="margin:0 0 8px;color:#062b5a;">{{ title }}</h2>
+              <div style="color:#334155;font-size:14px;line-height:1.45;">
+                {{ message | safe }}
+              </div>
+
+              <div style="margin-top:18px;">
+                <!-- profile_url must be provided by the caller (render_template) -->
+                <a href="{{ profile_url or '#' }}" class="button" style="background:linear-gradient(90deg,#2a86d4,#1e6fb8);color:#fff;">Open Care Companion</a>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:12px 18px;background:#f1f7ff;color:#616f7f;font-size:12px;text-align:center;">
+              © Care Companion
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

@@ -1,0 +1,278 @@
+{% extends "base_admin.html" %}
+{% block title %}User — {{ user.first_name }} {{ user.last_name }}{% endblock %}
+{% block header %}User details{% endblock %}
+
+{% block content %}
+  <style>
+    .user-detail-card{
+      background:var(--card);
+      padding:18px;
+      border-radius:12px;
+      color:var(--muted);
+    }
+
+    .user-detail-top{
+      display:flex;
+      gap:18px;
+      align-items:center;
+    }
+
+    .user-avatar-box{
+      width:120px;
+      height:120px;
+      border-radius:12px;
+      background:var(--glass);
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex:0 0 120px;
+    }
+
+    .user-actions{
+      margin-top:12px;
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    .user-actions .btn,
+    .user-actions form,
+    .user-actions button{
+      margin:0;
+    }
+
+    .user-profile-block{
+      margin-top:0;
+    }
+
+    @media (max-width: 900px){
+      .user-detail-card{
+        padding:14px;
+      }
+
+      .user-detail-top{
+        gap:14px;
+        align-items:flex-start;
+      }
+
+      .user-avatar-box{
+        width:96px;
+        height:96px;
+        flex:0 0 96px;
+      }
+
+      .user-actions{
+        gap:10px;
+      }
+
+      .user-actions .btn,
+      .user-actions button,
+      .user-actions form{
+        flex:1 1 45%;
+      }
+
+      .user-actions .btn,
+      .user-actions button{
+        width:100%;
+      }
+    }
+
+    @media (max-width: 600px){
+      .user-detail-top{
+        flex-direction:column;
+        align-items:stretch;
+      }
+
+      .user-avatar-box{
+        width:88px;
+        height:88px;
+        flex:0 0 88px;
+      }
+
+      .user-detail-card h2{
+        font-size:20px;
+        line-height:1.25;
+      }
+
+      .user-actions{
+        width:100%;
+      }
+
+      .user-actions .btn,
+      .user-actions button,
+      .user-actions form{
+        flex:1 1 100%;
+        width:100%;
+      }
+
+      .user-actions .btn,
+      .user-actions button{
+        display:block;
+        text-align:center;
+      }
+
+      .user-profile-block div{
+        font-size:14px;
+        line-height:1.55;
+        word-break:break-word;
+      }
+    }
+  </style>
+
+  <div class="user-detail-card">
+    <div class="user-detail-top">
+      <div class="user-avatar-box">
+        {% if user.profile and user.profile.profile_photo %}
+          <img src="{{ url_for('admin_serve_uploads', filename=user.profile.profile_photo) }}" style="width:100%;height:100%;object-fit:cover">
+        {% else %}
+          <img src="{{ url_for('static', filename='default-avatar.png') }}" style="width:100%;height:100%;object-fit:cover">
+        {% endif %}
+      </div>
+
+      <div style="flex:1;min-width:0">
+        <h2 style="margin:0;color:white">{{ user.first_name }} {{ user.last_name }}</h2>
+        <p style="margin:6px 0 0;word-break:break-word">{{ user.email }}</p>
+        <p style="margin:6px 0 0">Role: {{ user.role }} • Verified: {{ 'Yes' if user.verified else 'No' }}</p>
+        <p style="margin:6px 0 0">Status:
+          {% if (user.is_deleted is defined and user.is_deleted) %}
+            Deleted
+          {% else %}
+            {% if user.is_active is defined and not user.is_active %}
+              Inactive
+            {% else %}
+              Active
+            {% endif %}
+          {% endif %}
+        </p>
+
+        <div class="user-actions">
+          {% if (user.is_deleted is defined and user.is_deleted) %}
+            <button class="btn" id="restoreBtn" type="button"
+                    data-url="{{ url_for('admin_restore_user', user_id=user.id) }}"
+                    onclick="restoreUser(this.dataset.url)">
+              Restore user
+            </button>
+          {% else %}
+            <button class="btn" id="softDeleteBtn" type="button"
+                    data-url="{{ url_for('admin_delete_user', user_id=user.id) }}"
+                    data-name="{{ (user.first_name or '') }}"
+                    onclick="softDeleteUser(this.dataset.url, this.dataset.name)"
+                    style="background:var(--danger)">
+              Delete
+            </button>
+          {% endif %}
+
+          <a class="btn ghost" href="{{ url_for('admin_dashboard') }}" style="text-decoration:none">Back</a>
+
+          <a class="btn ghost" href="{{ url_for('admin_deleted_users') }}" style="text-decoration:none">Show deleted users</a>
+
+          <button class="btn ghost" id="permaDeleteBtn" type="button"
+                  data-url="{{ url_for('admin_permanent_delete_user', user_id=user.id) }}"
+                  data-name="{{ (user.first_name or '') }}"
+                  onclick="permanentDeleteUser(this.dataset.url, this.dataset.name)">
+            Permanent delete
+          </button>
+
+          <form method="get" action="{{ url_for('admin_logout') }}" style="margin:0">
+            <button class="btn ghost" type="submit">Logout</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <hr style="margin:18px 0;border:none;border-top:1px solid rgba(255,255,255,0.03)">
+
+    <div class="user-profile-block">
+      <h3 style="margin:0 0 8px;color:white">Profile</h3>
+      {% if user.profile %}
+        <div style="color:var(--muted)"><strong>Location:</strong> {{ user.profile.location or '—' }}</div>
+        <div style="color:var(--muted)"><strong>Languages:</strong> {{ user.profile.languages or '—' }}</div>
+        <div style="color:var(--muted)"><strong>Specialties:</strong> {{ user.profile.specialties or '—' }}</div>
+        <div style="color:var(--muted)"><strong>Experience:</strong> {{ user.profile.experience_years or 0 }} years</div>
+        <div style="color:var(--muted)"><strong>Published:</strong> {{ 'Yes' if user.profile.published else 'No' }}</div>
+      {% else %}
+        <div style="color:var(--muted)">No profile</div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function getCsrfToken() {
+    return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+  }
+  async function jsonOrText(res) {
+    const txt = await res.text();
+    try { return JSON.parse(txt); } catch(e) { return txt; }
+  }
+
+  async function softDeleteUser(url, name) {
+    if (!url) { alert('No delete URL'); return; }
+    if (!confirm(`Delete ${name || 'this user'}? This will mark the user deleted (soft-delete if supported).`)) return;
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCsrfToken(),
+          'X-CSRF-Token': getCsrfToken()
+        },
+        body: JSON.stringify({ confirm: true })
+      });
+      if (res.redirected) { alert('Not authorized — you were redirected to login.'); return; }
+      if (!res.ok) { const parsed = await jsonOrText(res); alert('Delete failed: ' + (parsed && parsed.message ? parsed.message : res.statusText)); return; }
+      const data = await res.json();
+      if (data && data.status === 'ok') { alert('Deleted.'); location.href = "{{ url_for('admin_dashboard') }}"; }
+      else alert('Delete failed: ' + (data && data.message ? data.message : 'unknown'));
+    } catch (err) { console.error(err); alert('Request failed: ' + err); }
+  }
+
+  async function restoreUser(url) {
+    if (!url) { alert('No restore URL'); return; }
+    if (!confirm('Restore this user?')) return;
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCsrfToken(),
+          'X-CSRF-Token': getCsrfToken()
+        },
+        body: JSON.stringify({ confirm: true })
+      });
+      if (res.redirected) { alert('Not authorized — you were redirected to login.'); return; }
+      if (!res.ok) { const parsed = await jsonOrText(res); alert('Restore failed: ' + (parsed && parsed.message ? parsed.message : res.statusText)); return; }
+      const data = await res.json();
+      if (data && data.status === 'ok') { alert('Restored.'); location.href = "{{ url_for('admin_dashboard') }}"; }
+      else alert('Restore failed: ' + (data && data.message ? data.message : 'unknown'));
+    } catch (err) { console.error(err); alert('Request failed: ' + err); }
+  }
+
+  async function permanentDeleteUser(url, name) {
+    if (!url) { alert('No permanent-delete URL'); return; }
+    if (!confirm(`Permanently delete ${name || 'this user'}? This cannot be undone.`)) return;
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCsrfToken(),
+          'X-CSRF-Token': getCsrfToken()
+        },
+        body: JSON.stringify({ confirm: true })
+      });
+      if (res.redirected) { alert('Not authorized — you were redirected to login.'); return; }
+      if (!res.ok) { const parsed = await jsonOrText(res); alert('Permanent delete failed: ' + (parsed && parsed.message ? parsed.message : res.statusText)); return; }
+      const data = await res.json();
+      if (data && data.status === 'ok') { alert('User permanently deleted.'); location.href = "{{ url_for('admin_dashboard') }}"; }
+      else alert('Permanent delete failed: ' + (data && data.message ? data.message : 'unknown'));
+    } catch (err) { console.error(err); alert('Request failed: ' + err); }
+  }
+</script>
+{% endblock %}

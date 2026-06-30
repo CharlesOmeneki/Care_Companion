@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>{% block title %}Admin — Care Companion{% endblock %}</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root{
+      --bg:#06142b;      /* page background */
+      --panel:#082245;   /* panels */
+      --card:#0b2f56;    /* cards */
+      --accent:#106fb3;  /* primary accent */
+      --accent-2:#2a88d9;/* accent gradient */
+      --muted:#9fb6d9;   /* muted text */
+      --glass: rgba(255,255,255,0.03);
+      --danger:#d65b5b;
+    }
+
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter,system-ui,Roboto,Arial;background:linear-gradient(180deg,var(--bg),#041127);color:var(--muted);min-height:100vh}
+    .app-shell{max-width:1200px;margin:28px auto;padding:18px}
+    header.app-header{display:flex;align-items:center;justify-content:space-between;padding:18px;border-radius:12px;background:linear-gradient(180deg,var(--panel),#05203a);box-shadow:0 8px 30px rgba(2,6,23,0.6)}
+    header .title{display:flex;gap:12px;align-items:center}
+    header h1{margin:0;color:white;font-size:18px}
+    header .controls{display:flex;gap:10px;align-items:center}
+    .btn{padding:8px 12px;border-radius:8px;background:var(--accent);color:#fff;border:0;cursor:pointer;font-weight:600}
+    .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
+    .flash-wrap{margin-top:14px}
+    .flash{padding:10px;border-radius:8px;background:rgba(255,255,255,0.03);color:var(--muted);margin-bottom:8px}
+    main{margin-top:18px}
+    footer{margin-top:26px;text-align:center;color:rgba(255,255,255,0.35);font-size:13px}
+    /* utility */
+    .row{display:flex;gap:12px;align-items:center}
+  </style>
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="title">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" style="flex:0 0 36px">
+          <rect width="24" height="24" rx="6" fill="#0f57a3"/>
+          <path d="M6 8h12M6 12h12M6 16h12" stroke="white" stroke-opacity="0.95" stroke-width="1.1" stroke-linecap="round"/>
+        </svg>
+        <h1>{% block header %}Care Companion — Admin{% endblock %}</h1>
+      </div>
+
+      <div class="controls">
+        {% if session.get('is_admin') %}
+        <form method="get" action="{{ url_for('admin_logout') }}" style="margin:0">
+          <button class="btn" type="submit">Logout</button>
+        </form>
+        {% endif %}
+      </div>
+    </header>
+
+    <div class="flash-wrap">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for cat,msg in messages %}
+            <div class="flash">{{ msg }}</div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+    </div>
+
+    <main>
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+      <small>Care Companion admin panel</small>
+    </footer>
+  </div>
+
+  {% block scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,421 @@
+{% extends "base_admin.html" %}
+
+{% block title %}Published profiles — Admin{% endblock %}
+{% block header %}Published Profiles{% endblock %}
+
+{% block content %}
+  <style>
+    .admin-toolbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      margin-bottom:12px;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .admin-search-wrap{
+      flex:1;
+      min-width:220px;
+      max-width:520px;
+    }
+
+    .admin-search-wrap input{
+      width:100%;
+      padding:10px 12px;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,0.08);
+      background:rgba(255,255,255,0.03);
+      color:inherit;
+      outline:none;
+      box-sizing:border-box;
+    }
+
+    .admin-users-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+      gap:16px;
+    }
+
+    .admin-user-card{
+      background:var(--card);
+      padding:14px;
+      border-radius:12px;
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      box-shadow:0 6px 20px rgba(2,6,23,0.6);
+    }
+
+    .admin-user-actions{
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+      align-items:flex-end;
+      flex-shrink:0;
+    }
+
+    .admin-tags{
+      margin-top:10px;
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      text-align:center;
+    }
+
+    @media (max-width: 900px){
+      .admin-users-grid{
+        grid-template-columns:1fr;
+        gap:12px;
+      }
+
+      .admin-user-card{
+        padding:12px;
+      }
+
+      .admin-user-card > div:first-child{
+        width:72px !important;
+        height:72px !important;
+        flex:0 0 72px !important;
+      }
+
+      .admin-user-actions{
+        width:100%;
+        align-items:stretch;
+        flex-direction:row;
+        flex-wrap:wrap;
+      }
+
+      .admin-user-actions .btn,
+      .admin-user-actions button{
+        flex:1 1 30%;
+        min-width:88px;
+        text-align:center;
+        justify-content:center;
+      }
+
+      .admin-user-card .user-top{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:10px;
+      }
+
+      .admin-user-card .user-name{
+        font-size:14px !important;
+      }
+
+      .admin-user-card .user-email{
+        font-size:12px !important;
+        word-break:break-word;
+      }
+
+      .admin-toolbar{
+        justify-content:stretch;
+      }
+
+      .admin-search-wrap{
+        max-width:none;
+      }
+
+      .admin-toolbar .btn{
+        width:100%;
+      }
+    }
+
+    @media (max-width: 600px){
+      .admin-user-card{
+        flex-direction:column;
+        align-items:stretch;
+      }
+
+      .admin-user-card > div:first-child{
+        width:78px !important;
+        height:78px !important;
+        flex:0 0 78px !important;
+        margin-bottom:4px;
+      }
+
+      .admin-user-actions{
+        width:100%;
+      }
+
+      .admin-user-actions .btn,
+      .admin-user-actions button{
+        flex:1 1 100%;
+        width:100%;
+      }
+
+      .admin-tags span{
+        font-size:11px !important;
+        padding:5px 7px !important;
+      }
+    }
+  </style>
+
+  {% if not users %}
+    <div style="padding:28px;border-radius:12px;background:linear-gradient(180deg,var(--panel),#042033);text-align:center">
+      <h3 style="margin:0 0 6px;color:white">No published profiles</h3>
+      <p style="margin:0;color:var(--muted)">There are currently no published user profiles to display.</p>
+    </div>
+  {% else %}
+    <div class="admin-toolbar">
+      <div class="admin-search-wrap">
+        <input id="adminSearch"
+               type="search"
+               placeholder="Search by name or email..."
+               autocomplete="off">
+      </div>
+
+      <a class="btn ghost" href="{{ url_for('admin_deleted_users') }}">Show deleted users</a>
+    </div>
+
+    <div id="noSearchResults" style="display:none;padding:20px;border-radius:12px;background:linear-gradient(180deg,var(--panel),#042033);text-align:center;margin-bottom:16px">
+      <h3 style="margin:0 0 6px;color:white">No matching users</h3>
+      <p style="margin:0;color:var(--muted)">Try a different name or email.</p>
+    </div>
+
+    <div class="admin-users-grid" id="adminUsersGrid">
+      {% for u in users %}
+        {% set p = u.profile %}
+        <article id="card-{{ u.id }}"
+                 class="admin-user-card"
+                 data-search="{{ (u.first_name ~ ' ' ~ u.last_name ~ ' ' ~ u.email)|lower }}">
+          <div style="width:86px;height:86px;border-radius:10px;background:var(--glass);overflow:hidden;flex:0 0 86px;display:flex;align-items:center;justify-content:center">
+            {% if p and p.profile_photo %}
+              <img src="{{ url_for('admin_serve_uploads', filename=p.profile_photo) }}" alt="{{ u.first_name }}" style="width:100%;height:100%;object-fit:cover">
+            {% else %}
+              <img src="{{ url_for('static', filename='default-avatar.png') }}" alt="avatar" style="width:100%;height:100%;object-fit:cover">
+            {% endif %}
+          </div>
+
+          <div style="flex:1;min-width:0">
+            <div class="user-top" style="display:flex;justify-content:space-between;align-items:start;gap:12px">
+              <div style="min-width:0">
+                <div class="user-name" style="font-weight:700;color:white;font-size:15px">{{ u.first_name }} {{ u.last_name }}</div>
+                <div class="user-email" style="margin-top:6px;color:var(--muted);font-size:13px">{{ u.email }}</div>
+              </div>
+
+              <div class="admin-user-actions">
+                <a class="btn view"
+                   href="{{ url_for('admin_view_user', user_id=u.id) }}"
+                   target="_blank"
+                   style="text-decoration:none;padding:8px 10px;border-radius:8px;background:rgba(255,255,255,0.03);color:var(--muted)">
+                  View
+                </a>
+
+                <a class="btn chat"
+                   href="{{ url_for('admin_view_user_chat', user_id=u.id) }}"
+                   target="_blank"
+                   style="text-decoration:none;padding:8px 10px;border-radius:8px;background:#1d4ed8;color:white">
+                  Chat
+                </a>
+
+                <button class="btn suspend-btn"
+                        data-user-id="{{ u.id }}"
+                        data-active="{{ '1' if u.is_active else '0' }}"
+                        style="background:{{ 'var(--danger)' if u.is_active else '#16a34a' }};border-radius:8px;padding:8px 10px;color:white;border:0;cursor:pointer"
+                        onclick="toggleSuspend(this)">
+                  {{ 'Suspend' if u.is_active else 'Unsuspend' }}
+                </button>
+
+                <button class="btn delete-btn"
+                        data-url="{{ url_for('admin_delete_user', user_id=u.id) }}"
+                        data-name="{{ (u.first_name or '') }}"
+                        style="background:var(--danger);border-radius:8px;padding:8px 10px;color:white;border:0;cursor:pointer"
+                        onclick="deleteUserFromButton(this)">
+                  Delete
+                </button>
+              </div>
+            </div>
+
+            <div style="margin-top:10px;color:var(--muted);font-size:13px">
+              Role: {{ u.role }} &nbsp;•&nbsp; Verified: {{ 'Yes' if u.verified else 'No' }} &nbsp;•&nbsp; Published: {{ 'Yes' if p and p.published else 'No' }}
+            </div>
+
+            <div style="margin-top:6px;color:var(--muted);font-size:13px">
+              Status: {{ 'Active' if u.is_active else 'Suspended' }}
+            </div>
+
+            <div class="admin-tags">
+              {% if p and p.location %}<span style="background:rgba(255,255,255,0.03);padding:6px 8px;border-radius:8px;font-size:12px;color:var(--muted)">{{ p.location }}</span>{% endif %}
+              {% if p and p.languages %}<span style="background:rgba(255,255,255,0.03);padding:6px 8px;border-radius:8px;font-size:12px;color:var(--muted)">{{ p.languages }}</span>{% endif %}
+              {% if p and p.specialties %}<span style="background:rgba(255,255,255,0.03);padding:6px 8px;border-radius:8px;font-size:12px;color:var(--muted)">{{ p.specialties }}</span>{% endif %}
+              {% if p and p.experience_years %}<span style="background:rgba(255,255,255,0.03);padding:6px 8px;border-radius:8px;font-size:12px;color:var(--muted)">{{ p.experience_years }} yrs</span>{% endif %}
+            </div>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function getCsrfToken() {
+    return document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '';
+  }
+
+  async function jsonOrText(res) {
+    const txt = await res.text();
+    try {
+      return JSON.parse(txt);
+    } catch (e) {
+      return txt;
+    }
+  }
+
+  async function deleteUserFromButton(btn) {
+    const url = btn.dataset.url;
+    const name = btn.dataset.name || 'this user';
+    if (!url) {
+      alert('No delete URL configured for this user.');
+      return;
+    }
+    if (!confirm(`Delete ${name}? This will remove the user (soft-delete if supported).`)) return;
+
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCsrfToken(),
+          'X-CSRF-Token': getCsrfToken()
+        },
+        body: JSON.stringify({ confirm: true })
+      });
+
+      if (res.redirected) {
+        console.error('Redirected to:', res.url);
+        alert('Your session is not authorized. You were redirected to login. Make sure you are logged in as admin in this browser.');
+        return;
+      }
+
+      if (!res.ok) {
+        const parsed = await jsonOrText(res);
+        const msg = (parsed && parsed.message) ? parsed.message : (typeof parsed === 'string' ? parsed : res.statusText);
+        alert('Delete failed: ' + msg);
+        return;
+      }
+
+      const data = await res.json();
+      if (data && data.status === 'ok') {
+        const card = document.getElementById('card-' + (data.user_id || ''));
+        const fallbackCard = btn.closest('article');
+        if (card) card.remove();
+        else if (fallbackCard) fallbackCard.remove();
+        filterAdminUsers();
+        alert('User deleted.');
+      } else {
+        alert('Delete failed: ' + (data && data.message ? data.message : 'unknown'));
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Request failed: ' + err);
+    }
+  }
+
+  async function toggleSuspend(btn) {
+    const userId = btn.dataset.userId;
+    const isActive = btn.dataset.active === '1';
+
+    if (!userId) {
+      alert('Missing user id.');
+      return;
+    }
+
+    if (isActive) {
+      const reason = prompt('Enter the suspension reason:', 'Violation of the website terms.');
+      if (reason === null) return;
+
+      if (!confirm('Suspend this user? They will be unable to log in.')) return;
+
+      try {
+        const res = await fetch(`/admin/users/${encodeURIComponent(userId)}/suspend`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ reason })
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (res.ok && data.status === 'ok') {
+          alert('User suspended and email sent.');
+          location.reload();
+        } else {
+          alert('Suspend failed: ' + (data.message || data.error || 'unknown'));
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Request failed: ' + err);
+      }
+
+    } else {
+      if (!confirm('Unsuspend this user? They will be able to log in again.')) return;
+
+      try {
+        const res = await fetch(`/admin/users/${encodeURIComponent(userId)}/unsuspend`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({})
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (res.ok && data.status === 'ok') {
+          alert('User unsuspended and email sent.');
+          location.reload();
+        } else {
+          alert('Unsuspend failed: ' + (data.message || data.error || 'unknown'));
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Request failed: ' + err);
+      }
+    }
+  }
+
+  function filterAdminUsers() {
+    const input = document.getElementById('adminSearch');
+    const emptyBox = document.getElementById('noSearchResults');
+    const cards = Array.from(document.querySelectorAll('.admin-user-card'));
+
+    if (!input) return;
+
+    const q = input.value.trim().toLowerCase();
+    let visibleCount = 0;
+
+    cards.forEach(card => {
+      const hay = (card.dataset.search || card.textContent || '').toLowerCase();
+      const show = !q || hay.includes(q);
+      card.style.display = show ? '' : 'none';
+      if (show) visibleCount += 1;
+    });
+
+    if (emptyBox) {
+      emptyBox.style.display = (!q || visibleCount > 0) ? 'none' : 'block';
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    const input = document.getElementById('adminSearch');
+    if (!input) return;
+
+    input.addEventListener('input', filterAdminUsers);
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') e.preventDefault();
+    });
+
+    filterAdminUsers();
+  });
+</script>
+{% endblock %}
+
+

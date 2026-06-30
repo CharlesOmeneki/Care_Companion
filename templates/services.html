@@ -1,0 +1,1835 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Care Companion — Services</title>
+
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <style>
+    /*
+      Updated: hero + modal now use the same `--card` gradient as your
+      profile_step1 page (admiral / indigo / berry gradient).
+    */
+
+    /* ---------- Color palette (aligned with profile_setup / profile_step1) ---------- */
+    :root{
+      --admiral: #062b5a;   /* deep navy */
+      --indigo:  #2b3d9a;   /* indigo */
+      --berry:   #1e5fbf;   /* berry-blue */
+      --navy:    #0a2a66;   /* navy */
+      --ice:     #f5f9ff;   /* pale */
+      --muted:   #a6bacf;
+      --accent:  #00d4ff;
+      /* exact same card gradient used in your profile page */
+      --card:    linear-gradient(180deg, rgba(8,30,66,0.9), rgba(11,51,120,0.95));
+      --glass:   rgba(255,255,255,0.04);
+      --radius:  12px;
+      --maxw:    1200px;
+      --shadow-lg: 0 30px 80px rgba(6, 27, 60, 0.35);
+    }
+
+    /* ====== ADDED: top banner + nav styles from About page (only these rules added) ====== */
+    header { margin-bottom:12px; }
+    .top-banner {
+      width:100%;
+      background: linear-gradient(90deg, #6A5CFA, #2153FF); /* var(--berry) -> var(--cobalt) equivalent */
+      color:#fff;
+      text-align:center;
+      padding:10px 14px;
+      font-weight:700;
+      border-radius:12px;
+      box-shadow: 0 8px 30px rgba(33,83,255,0.12);
+      margin-bottom:12px;
+    }
+    .off-white-section{
+      display:flex; align-items:center; gap:18px; padding:12px;
+      background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:12px;
+      border: 1px solid rgba(255,255,255,0.03);
+      color: #e6f4ff;
+      margin-bottom:12px;
+    }
+    .brand { display:flex; align-items:center; gap:12px; }
+    .brand img { width:88px; height:56px; object-fit:contain; filter: drop-shadow(0 6px 20px rgba(0,0,0,0.5)); }
+    .nav-menu { margin-left:20px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+    .nav-menu a {
+      color: rgba(255,255,255,0.9);
+      padding:8px 10px; border-radius:10px; font-weight:600; font-size:14px;
+      transition: all 220ms cubic-bezier(.2,.9,.3,1);
+    }
+    .nav-menu a[aria-current="page"]{ background: linear-gradient(90deg,#2153FF,#3B6FF6); color:#fff; box-shadow:0 10px 30px rgba(33,83,255,0.12); }
+    .nav-menu a:hover{ transform:translateY(-3px); box-shadow:0 12px 36px rgba(33,83,255,0.08); }
+
+    /* ============================================================================== */
+
+    *{ box-sizing:border-box; font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial; -webkit-font-smoothing:antialiased; }
+    html,body{ height:100%; margin:0; }
+
+    /* page background (keeps the light profile_setup background) */
+    body{
+      min-height:100vh;
+      background: linear-gradient(180deg,#e9f4ff 0%,#f6fbff 100%);
+      color:var(--admiral);
+      padding:32px 18px;
+      display:flex;
+      justify-content:center;
+      align-items:flex-start;
+    }
+
+    .wrap{ width:100%; max-width:var(--maxw); }
+
+    /* HERO — now uses your profile_step1 --card gradient exactly */
+    .hero {
+      display:grid; grid-template-columns: 1fr auto; gap:18px; align-items:center;
+      padding:26px; border-radius:14px;
+      background: var(--card);
+      color: var(--ice);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid rgba(255,255,255,0.04);
+    }
+    .hero h1 { margin:0; font-size:20px; font-weight:900; color:var(--ice); }
+    .hero p { margin:8px 0 0; color:rgba(245,249,255,0.92); font-size:14px; line-height:1.45; max-width:900px; }
+
+    .hero-cta { display:flex; gap:12px; align-items:center; }
+    .btn {
+      display:inline-flex; align-items:center; gap:10px; padding:10px 14px; border-radius:10px; font-weight:800; cursor:pointer;
+      border:0; color:#002033; text-decoration:none;
+      background: linear-gradient(90deg, var(--berry), var(--accent));
+      box-shadow: 0 8px 30px rgba(6,40,90,0.12);
+    }
+    .btn.ghost { background: transparent; color:var(--ice); border:1px solid rgba(255,255,255,0.08); padding:8px 12px; font-weight:800; }
+
+    @media (max-width:980px){ .hero { grid-template-columns:1fr; } .hero-cta { justify-self:start; } }
+
+    /* ---------- Page layout ---------- */
+    .content { display:grid; grid-template-columns: 1fr 360px; gap:24px; margin-top:20px; }
+    @media (max-width:980px) { .content { grid-template-columns: 1fr; } }
+
+    main.primary { display:flex; flex-direction:column; gap:18px; }
+
+    /* Feature strip */
+    .feature-strip {
+      display:flex; gap:12px; flex-wrap:wrap; align-items:center; padding:12px; border-radius:12px;
+      background: linear-gradient(180deg, rgba(6,43,90,0.06), rgba(6,43,90,0.03));
+      border:1px solid rgba(6,30,60,0.04);
+    }
+    .feature-item { display:flex; gap:12px; align-items:center; padding:10px 12px; border-radius:10px; cursor:pointer; min-width:220px; }
+    .glyph { width:44px; height:44px; display:inline-flex; align-items:center; justify-content:center; border-radius:10px; background:linear-gradient(180deg, rgba(30,95,191,0.12), rgba(19,136,214,0.08)); color:var(--berry); font-size:18px; }
+    .feature-item h4{ margin:0; font-size:14px; color:var(--admiral); font-weight:800; }
+    .feature-item p{ margin:0; color:var(--admiral); opacity:0.8; font-size:12px; }
+
+    /* Services cards */
+    .cards { display:grid; grid-template-columns: repeat(3, 1fr); gap:18px; }
+    @media (max-width:1100px){ .cards{ grid-template-columns: repeat(2,1fr); } }
+    @media (max-width:640px){ .cards{ grid-template-columns:1fr; } }
+
+    .svc-card { background: linear-gradient(180deg, rgba(6,30,60,0.96), rgba(10,42,102,0.96)); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:10px; box-shadow:0 10px 40px rgba(6,30,60,0.12); min-height:140px; color:var(--ice); border:1px solid rgba(255,255,255,0.04); }
+    .svc-top { display:flex; gap:12px; align-items:flex-start; }
+    .svc-badge { width:56px; height:56px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; font-size:20px; background:linear-gradient(135deg, var(--berry), var(--accent)); color:white; }
+    .svc-card h3 { margin:0; font-size:16px; color:var(--ice); font-weight:900; }
+    .svc-card p { margin:0; color:rgba(245,249,255,0.9); opacity:0.95; font-size:13px; line-height:1.45; flex:1; }
+    .pill { padding:6px 8px; border-radius:8px; background:rgba(255,255,255,0.04); color:var(--muted); font-weight:800; font-size:12px; }
+
+    /* How it works */
+    .how { display:flex; gap:12px; margin-top:6px; flex-wrap:wrap; }
+    .how .step { flex:1; min-width:200px; background: linear-gradient(180deg, rgba(6,43,90,0.06), rgba(6,43,90,0.03)); border-radius:12px; padding:12px; border:1px solid rgba(6,30,60,0.04); }
+    .how .num { width:36px; height:36px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; font-weight:900; color:white; background: linear-gradient(180deg,var(--admiral),var(--navy)); margin-right:10px; }
+
+    /* FAQ accordion */
+    .faq { display:flex; flex-direction:column; gap:10px; }
+    .qa { border-radius:12px; overflow:hidden; border:1px solid rgba(6,30,60,0.04); background: linear-gradient(180deg, rgba(6,43,90,0.04), rgba(6,43,90,0.02)); color:var(--admiral); }
+    .qa .q { padding:12px 14px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; color:var(--admiral); font-weight:900; }
+    .qa .a { padding:12px 14px; color:var(--admiral); opacity:0.95; display:none; }
+    .qa.open .a { display:block; }
+
+    /* Right sidebar */
+    aside.side { display:flex; flex-direction:column; gap:18px; }
+    .panel { padding:14px; border-radius:12px; background: linear-gradient(180deg, rgba(6,43,90,0.06), rgba(6,43,90,0.03)); border:1px solid rgba(6,30,60,0.04); color:var(--admiral); }
+    .panel h4{ margin:0 0 8px 0; color:var(--admiral); }
+    .trust { display:flex; gap:12px; align-items:center; }
+    .logo-dot { width:40px; height:40px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; background:linear-gradient(180deg, var(--navy), var(--admiral)); color:white; font-weight:900; }
+
+    /* Request button */
+    .request-btn { display:inline-flex; gap:10px; align-items:center; padding:12px 14px; border-radius:10px; border:0; cursor:pointer; font-weight:900; background: linear-gradient(90deg, var(--berry), var(--accent)); color:#002033; }
+
+    /* ------------------ MODAL / FORM ------------------ */
+    .modal-backdrop { position:fixed; inset:0; display:none; align-items:center; justify-content:center; background: rgba(2,10,30,0.75); z-index:15000; }
+    .modal { width:100%; max-width:520px; margin:16px; border-radius:12px; overflow:hidden; display:block; border:1px solid rgba(255,255,255,0.04); }
+
+    /* modal card now uses the same --card gradient as profile_step1 */
+    .modal .card {
+      padding:18px;
+      border-radius:12px;
+      background: var(--card);
+      color:var(--ice);
+      box-shadow: 0 18px 60px rgba(2,12,30,0.28);
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+
+    label{ display:block; margin-bottom:6px; color:var(--ice); font-size:13px; font-weight:700; }
+    input, select, textarea {
+      width:100%;
+      padding:10px;
+      border-radius:8px;
+      border:1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.06);
+      color:var(--ice);
+      font-size:14px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.02);
+    }
+    textarea{ min-height:100px; resize:vertical; }
+
+    /* === START: ADDED RULES - only change to make dropdown writeups visible ===
+       We target the two selects used in the form so their text/options are readable.
+       This does not touch any other part of your code or behavior. */
+    #serviceSelect, #role {
+      background: #ffffff !important;
+      color: var(--admiral) !important;
+      border: 1px solid rgba(10,40,80,0.08) !important;
+    }
+    #serviceSelect option, #role option {
+      color: var(--admiral) !important;
+      background: #ffffff !important;
+    }
+    /* For webkit-based browsers show a dark caret on the white select */
+    #serviceSelect::-ms-expand, #role::-ms-expand { display: inline-block; }
+    /* === END: ADDED RULES === */
+
+    .submit {
+      display:inline-flex; gap:10px; align-items:center; padding:10px 14px; border-radius:10px; border:0; cursor:pointer; font-weight:900; background: linear-gradient(90deg, var(--berry), var(--accent)); color:#002033;
+    }
+
+    .fab { position:fixed; right:26px; bottom:26px; z-index:14000; width:64px; height:64px; border-radius:999px; display:inline-flex; align-items:center; justify-content:center; background: linear-gradient(90deg, var(--berry), var(--accent)); color:#002033; font-weight:900; border:0; cursor:pointer; box-shadow: 0 18px 60px rgba(6,40,90,0.12); }
+
+    .btn-spinner {
+      display:inline-block;
+      width:14px; height:14px; border-radius:50%;
+      border:2px solid rgba(0,0,0,0.08);
+      border-top-color: rgba(0,0,0,0.45);
+      animation: spin 1s linear infinite;
+      margin-right:8px;
+      vertical-align:middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* centered toast for success / error, bold and visible */
+    #toast {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 17000;
+      display: none;
+      padding: 16px 22px;
+      border-radius: 12px;
+      font-weight: 900;
+      font-size: 18px;
+      min-width: 320px;
+      text-align: center;
+      box-shadow: 0 18px 60px rgba(2,12,30,0.24);
+      backdrop-filter: blur(6px);
+    }
+    #toast.success {
+      color: var(--admiral);
+      background: linear-gradient(90deg, #eaf8ff 0%, #d9f3ff 100%);
+      border: 1px solid rgba(30,95,191,0.14);
+    }
+    #toast.error {
+      color: #ffd6d6;
+      background: rgba(70,18,18,0.95);
+      border: 1px solid rgba(255,120,120,0.12);
+    }
+
+    @media (max-width:640px){ .modal{ width:calc(100% - 32px); } .fab{ right:16px; bottom:16px; } }
+
+
+    /* ------- Header contrast fixes (paste AFTER your existing header styles) ------- */
+    /* Uses your existing color vars where possible for consistent look */
+  .top-banner {
+    color: #ffffff !important;                     /* keep banner white text */
+    text-shadow: 0 3px 12px rgba(0,0,0,0.35) !important;
+    font-weight:800;
+  }
+
+  /* Off-white section: ensure brand + nav remain readable on both light & mid backgrounds */
+  .off-white-section {
+    /* keep the card-ish light background, but ensure text uses a strong navy */
+    color: var(--admiral, #041B3B) !important;
+  }
+
+  /* Brand title (large) */
+  .off-white-section .brand > div > div:first-child,
+  .brand-inline > .brand-badge + * {
+    color: var(--admiral, #041B3B) !important;
+    font-weight:800 !important;
+    letter-spacing: -0.2px;
+  }
+
+  /* Brand tagline (smaller line) */
+  .off-white-section .brand > div > div:nth-child(2),
+  .brand .tagline {
+    color: var(--muted, rgba(10,20,50,0.65)) !important;
+    opacity: 0.95;
+    font-size: 12px;
+  }
+
+  /* Nav links: dark on light background for maximum contrast */
+  .nav-menu a {
+    color: var(--admiral, #041B3B) !important;
+    background: transparent !important;
+    padding: 8px 10px;
+    border-radius: 8px;
+  }
+
+  /* Highlighted/current link: keep the blue gradient but ensure text remains white */
+  .nav-menu a[aria-current="page"]{
+    background: linear-gradient(90deg,var(--cobalt, #2153FF),var(--airforce, #3B6FF6)) !important;
+    color: #fff !important;
+    box-shadow: 0 10px 30px rgba(33,83,255,0.12) !important;
+  }
+
+  /* Login / Register links—make them slightly bolder so they read clearly */
+  .nav-menu a#loginLink, .nav-menu a#registerLink {
+    font-weight:800;
+    color: var(--admiral, #041B3B) !important;
+  }
+
+  /* If the off-white-section ever sits on dark backgrounds (rare), we preserve legibility:
+     this rule flips the nav to light text only when the parent has a dark modifier class.
+     Add .off-white-section.dark if you intentionally want the light-on-dark version. */
+  .off-white-section.dark, .off-white-section--dark {
+    color: var(--ice, #e6f4ff) !important;
+  }
+  .off-white-section.dark .nav-menu a,
+  .off-white-section--dark .nav-menu a {
+    color: rgba(255,255,255,0.95) !important;
+  }
+
+  /* Small responsive tweak for mobile: keep nav readable when it overflows */
+  @media (max-width:720px){
+    .nav-menu { gap:8px; overflow:auto; -webkit-overflow-scrolling:touch; padding-bottom:6px; }
+    .nav-menu a { white-space:nowrap; }
+  }
+
+  /* ===================== ADDITIONAL HEADER-RELATED CSS FROM about.html ===================== */
+  /* Put this inside your existing <style> (after modal rules) */
+  .modal .modal-body select,
+  .modal .modal-body select option {
+    color: var(--navy) !important;        /* dark, readable text */
+    background: var(--ice) !important;    /* light-blue background for options */
+  }
+
+  /* make the select itself clearly styled */
+  .modal .modal-body select {
+    border: 1px solid rgba(13,58,108,0.12) !important;
+    padding: 10px;
+    border-radius: 8px;
+    -webkit-appearance: none; /* nicer cross-browser look */
+    appearance: none;
+    box-shadow: none;
+  }
+
+  /* focus state for accessibility */
+  .modal .modal-body select:focus {
+    outline: 3px solid rgba(33,83,255,0.14);
+    outline-offset: 2px;
+  }
+
+  /* Top-right profile dropdown (from index header) */
+  .top-right-controls { position: absolute; right: 18px; top: 12px; z-index: 40; }
+  .profile-dropdown { position: relative; display: inline-block; }
+  .profile-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    border: none;
+    padding: 6px;
+    cursor: pointer;
+    color: #151b54;
+  }
+  .profile-btn:focus { outline: 3px solid rgba(142,130,254,0.25); border-radius: 8px; }
+
+  .profile-btn .avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 999px;
+    object-fit: cover;
+    border: 2px solid rgba(0,0,0,0.06);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+    background: #fff;
+    display:block;
+  }
+  .profile-btn .chev { font-size: 12px; color: rgba(21,27,84,0.9); }
+
+  /* Dropdown menu */
+  .dropdown-menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    min-width: 160px;
+    background: #fff;
+    color: #0b2a66;
+    border-radius: 10px;
+    box-shadow: 0 14px 34px rgba(6,27,60,0.12);
+    padding: 6px;
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    overflow: hidden;
+  }
+  .dropdown-menu.show { display: flex; }
+  .menu-item {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    padding: 8px 10px;
+    border-radius: 8px;
+    font-weight: 600;
+    background: transparent;
+    text-align: left;
+    border: 0;
+    cursor: pointer;
+  }
+  .menu-item:hover, .menu-item:focus { background: rgba(142,130,254,0.08); outline: none; }
+
+  /* small responsive tweak */
+  @media (max-width:520px) {
+    .top-right-controls { right: 10px; top: 10px; }
+    .dropdown-menu { right: 6px; left: auto; min-width: 140px; }
+  }
+
+  /* ensure .off-white-section becomes the positioning context */
+  .off-white-section { position: relative; }
+
+  /* vertically center avatar inside header on larger screens */
+  .top-right-controls {
+    position: absolute;
+    right: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 40;
+  }
+  @media (max-width: 900px) {
+    .top-right-controls {
+      right: 12px;
+      top: auto;
+      bottom: 12px;
+      transform: none;
+    }
+  }
+
+  /* Logout confirmation modal styles (used by index header) */
+  .cc-modal { position: fixed; inset: 0; z-index: 16000; display:flex; align-items:center; justify-content:center; pointer-events:none; }
+  .cc-modal[aria-hidden="true"] { opacity:0; transition: opacity 180ms ease; pointer-events:none; }
+  .cc-modal[aria-hidden="false"] { opacity:1; pointer-events:auto; }
+
+  .cc-modal-backdrop {
+    position: absolute; inset: 0; background: rgba(2,10,30,0.56);
+    backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+    opacity:0; transition: opacity 180ms ease;
+  }
+  .cc-modal[aria-hidden="false"] .cc-modal-backdrop { opacity:1; }
+
+  .cc-modal-panel {
+    position: relative;
+    width: 100%;
+    max-width: 420px;
+    margin: 18px;
+    border-radius: 12px;
+    box-shadow: 0 30px 80px rgba(2,10,30,0.45);
+    transform: translateY(12px) scale(0.995);
+    transition: transform 220ms cubic-bezier(.2,.9,.3,1), opacity 180ms ease;
+    z-index: 16010;
+    pointer-events:auto;
+  }
+  .cc-modal[aria-hidden="false"] .cc-modal-panel { transform: translateY(0) scale(1); }
+
+  .cc-modal-body {
+    background: linear-gradient(180deg,#fff,#f7fbff);
+    padding: 20px;
+    border-radius: 12px;
+    color: #08243f;
+    text-align: center;
+  }
+  .cc-modal-close {
+    position: absolute; right: 10px; top: 8px; border: none; background: transparent; font-size: 22px; color: #0b2a4a; cursor:pointer;
+  }
+  .cc-modal-avatar { width:64px; height:64px; margin: 6px auto 12px; border-radius:999px; overflow:hidden; border:2px solid rgba(13,58,108,0.06); }
+  .cc-modal-avatar img { width:100%; height:100%; object-fit:cover; display:block; }
+
+  .cc-modal-body h2 { margin:6px 0 8px; font-size:18px; color:#0b2a4a; }
+  .cc-modal-body p { margin:0 0 16px; color:#2a4c7a; font-size:14px; }
+
+  .cc-modal-actions { display:flex; gap:10px; justify-content:center; align-items:center; margin-top:6px; flex-wrap:wrap; }
+  .cc-btn-ghost { background: transparent; color:#0b2a4a; border: 1px solid rgba(13,58,108,0.06); padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:700; }
+  .cc-btn-danger { background: linear-gradient(90deg,#e24b4b,#d33b3b); color:#fff; padding:10px 14px; border-radius:10px; border:0; font-weight:800; cursor:pointer; display:inline-flex; align-items:center; gap:8px; }
+
+  .btn-spinner { width:14px; height:14px; border-radius:50%; border:2px solid rgba(255,255,255,0.9); border-top-color: rgba(255,255,255,0.25); animation: spin 1s linear infinite; display:inline-block; margin-right:6px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width:520px) {
+    .cc-modal-panel { max-width: 92%; margin: 12px; }
+    .cc-modal-avatar { width:52px; height:52px; }
+  }
+
+  /* Caregiver / Family Block (modal css) */
+  /* Shared modal styles used by caregiver/family block modals */
+  .cc-modal-inline { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 20000; font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial; }
+  .cc-modal-inline.show { display:flex; }
+  .cc-modal-card { width:100%; max-width:520px; margin:16px; border-radius:12px; background: linear-gradient(180deg,#fff,#f6f8ff); box-shadow: 0 20px 60px rgba(8,18,60,0.18); padding:18px; color:#072049; display:flex; gap:12px; align-items:flex-start; }
+  .cc-modal-left{width:56px;height:56px;border-radius:12px;background:linear-gradient(180deg,#e6e9ff,#cfcfff); display:flex;align-items:center;justify-content:center;font-weight:700;color:#24307a}
+  .cc-modal-content h3{margin:0 0 6px;font-size:18px}
+  .cc-modal-content p{margin:0;font-size:14px;color:#0b2a4a;opacity:.95}
+  .cc-modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:12px}
+  .cc-btn-primary{background:linear-gradient(90deg,#3b6cff,#6aa8ff);color:#fff;padding:10px 14px;border-radius:10px;border:0;font-weight:700;cursor:pointer}
+  .cc-btn-ghost{background:transparent;border:1px solid rgba(11,42,90,0.06);padding:10px 12px;border-radius:10px;color:#0b2a4a;font-weight:700;cursor:pointer}
+  @media(max-width:520px){.cc-modal-left{display:none}.cc-modal-actions{flex-direction:column}.cc-btn-primary,.cc-btn-ghost{width:100%}}
+
+  /* ================================================================================== */
+
+
+
+
+.off-white-section{
+  position: relative;
+}
+
+.mobile-hamburger{
+  display:none;
+}
+
+.mobile-nav-panel{
+  display:none;
+}
+
+@media (max-width: 760px) {
+  .off-white-section {
+    height: 56px !important;
+    padding: 0 !important;
+    background-color: #ffffff !important;
+    align-items: stretch;
+    position: relative;
+  }
+
+  /* show only the logo on mobile */
+  .off-white-section .brand > div{
+    display: none !important;
+  }
+
+  .off-white-section .brand img,
+  .off-white-section #siteLogo {
+    height: 100%;
+    width: auto;
+    display: block;
+    object-fit: contain;
+    margin: 0;
+    padding: 0;
+    vertical-align: middle;
+  }
+
+  .mobile-hamburger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: transparent;
+    border: 0;
+    padding: 8px;
+    margin-left: 6px;
+    cursor: pointer;
+    color: #062c55;
+    height: 56px;
+    box-sizing: border-box;
+  }
+
+  .mobile-hamburger svg { fill: #062c55; }
+
+  .nav-menu {
+    display: none !important;
+  }
+
+  .top-right-controls {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 80;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    pointer-events: auto;
+  }
+
+  .top-right-controls .profile-btn .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    object-fit: cover;
+  }
+
+  .top-right-controls .call-btn {
+    display: inline-flex !important;
+    color: #062c55 !important;
+    background: linear-gradient(180deg,#ffffff,#f2f8ff);
+    border: 1px solid rgba(6,20,50,0.06);
+    box-shadow: 0 6px 18px rgba(6,20,50,0.06);
+    width: 40px;
+    height: 40px;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    padding: 6px;
+    box-sizing: border-box;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .top-right-controls .call-btn svg {
+    display: block;
+    width: 18px;
+    height: 18px;
+    fill: currentColor;
+  }
+
+  .mobile-nav-panel {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100dvh;
+    width: var(--nav-width, 270px);
+    max-width: 92vw;
+    background: #ffffff;
+    transform: translateX(calc(-1 * var(--nav-width, 270px)));
+    transition: transform 420ms cubic-bezier(.22,.61,.36,1);
+    z-index: 10100;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    box-shadow: 10px 0 36px rgba(6,20,50,0.12);
+    display: block;
+  }
+
+  .mobile-nav-panel.open {
+    transform: translateX(0);
+  }
+
+  .mobile-nav-panel .mobile-nav-inner {
+    padding: 20px 8px;
+  }
+
+  .mobile-nav-panel .mobile-nav-inner a {
+    display: block;
+    padding: 16px 20px;
+    color: #072049;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 16px;
+    background: transparent;
+    position: relative;
+  }
+
+  .mobile-nav-panel .mobile-nav-inner a:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    left: 20px;
+    right: 20px;
+    bottom: 0;
+    height: 1px;
+    border-radius: 1px;
+    background: linear-gradient(90deg, rgba(6,20,50,0.06), rgba(6,20,50,0.03));
+  }
+
+  .mobile-nav-panel .mobile-nav-inner a:hover,
+  .mobile-nav-panel .mobile-nav-inner a:focus {
+    background: rgba(33,83,255,0.06);
+    outline: none;
+  }
+
+  @media (max-width: 420px) {
+    .mobile-hamburger { padding: 6px; margin-left: 4px; height: 52px; }
+    .off-white-section { height: 52px !important; }
+    .mobile-nav-panel { padding: 10px 12px; }
+  }
+}
+
+.top-right-controls .call-btn {
+  display: none !important;
+}
+
+@media (max-width: 760px) {
+  .top-right-controls .call-btn {
+    display: inline-flex !important;
+  }
+}
+.top-banner{
+    display:none !important;
+  }
+
+
+@media (max-width:980px){
+  html, body{
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #f6fbff !important;
+  }
+
+  .page{
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  header{
+    margin-bottom: 0 !important;
+  }
+
+  .off-white-section{
+    margin-top: 0 !important;
+  }
+
+  .grid{
+    margin-top: 12px !important;
+    padding-bottom: 0 !important;
+  }
+}
+
+@media (max-width: 760px) {
+  /* Hero section */
+  .hero {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+    padding: 18px 16px !important;
+    margin: 12px 12px 0 12px !important;
+    border-radius: 14px !important;
+  }
+
+  .hero h1 {
+    font-size: 22px !important;
+    line-height: 1.2 !important;
+  }
+
+  .hero p {
+    font-size: 14px !important;
+    max-width: 100% !important;
+  }
+
+  .hero-cta {
+    width: 100% !important;
+    justify-content: stretch !important;
+  }
+
+  .hero-cta .btn,
+  .hero-cta .btn.ghost {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+ @media (max-width: 760px) {
+  .cards {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+    margin: 12px 12px 0 12px !important;
+  }
+
+  .cards > article {
+    width: 100% !important;
+  }
+
+  .svc-card {
+    min-height: auto !important;
+    padding: 14px !important;
+    border-radius: 14px !important;
+  }
+
+  .svc-top {
+    gap: 10px !important;
+  }
+
+  .svc-badge {
+    width: 50px !important;
+    height: 50px !important;
+    flex: 0 0 50px !important;
+    font-size: 18px !important;
+  }
+
+  .svc-card h3 {
+    font-size: 15px !important;
+  }
+
+  .svc-card p {
+    font-size: 13px !important;
+    line-height: 1.45 !important;
+  }
+
+  .pill {
+    font-size: 11px !important;
+    padding: 5px 7px !important;
+  }
+} 
+  .cards > article {
+    width: 100% !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .hero {
+    margin: 10px 10px 0 10px !important;
+    padding: 16px 14px !important;
+  }
+
+  .hero h1 {
+    font-size: 20px !important;
+  }
+
+  .cards {
+    gap: 12px !important;
+  }
+
+  .svc-card {
+    padding: 12px !important;
+  }
+}
+  </style>
+
+
+
+</head>
+
+<!-- NOTE: added body data attributes for "hide login when signed in" + caregiver/family logic -->
+<body
+  data-logged-in="{{ 1 if session.get('user_id') else 0 }}"
+  data-user-role="{{ user.role if user else '' }}"
+  data-profile-published="{{ 1 if (user and user.profile and user.profile.published) else 0 }}"
+>
+  <div class="wrap" role="main">
+
+    <!-- ===== REPLACED HEADER: TOP BANNER + NAV (exact from about.html) ===== -->
+    <header>
+      <div class="top-banner" role="banner">
+        Concerned about a senior loved one living alone? Care Companion connects families with trusted caregivers.
+      </div>
+
+      <div class="off-white-section" role="navigation" aria-label="Primary navigation">
+        <div class="brand">
+          <img src="{{ url_for('static', filename='images/caregiver_logo.png') }}" alt="Care Companion logo">
+          <div>
+            <div style="font-weight:800; color:var(--ice); font-size:18px;">Care Companion</div>
+            <div style="font-size:12px; color:rgba(230,245,255,0.75)">Find trusted caregivers near you</div>
+          </div>
+        </div>
+
+
+
+            <button id="mobileHamburger" class="mobile-hamburger" aria-controls="mobileNav" aria-expanded="false" aria-label="Open menu">
+  <svg width="22" height="16" viewBox="0 0 22 16" aria-hidden="true" focusable="false">
+    <rect width="22" height="2" rx="1"></rect>
+    <rect y="7" width="22" height="2" rx="1" opacity="0.95"></rect>
+    <rect y="14" width="22" height="2" rx="1" opacity="0.85"></rect>
+  </svg>
+</button> 
+
+
+         <nav class="nav-menu" aria-label="Primary links">
+          <a href="{{ url_for('home') }}">Home</a>
+          <a id="navFindCaregiver" href="/find-caregiver">Find Caregiver</a>
+          <a id="navFindFamily" href="/find-family">Find Family</a>
+
+          <a href="{{ url_for('how_it_works') }}">How It Works</a>
+          <a href="{{ url_for('about') }}">About Us</a>
+          <a id="loginLink" href="{{ url_for('login') }}">Login</a>
+          <a id="registerLink" href="{{ url_for('register') }}">Sign Up</a>
+        </nav>
+
+        <!-- PROFILE DROPDOWN: pasted inside .off-white-section right after </nav> (from about.html) -->
+        <div class="top-right-controls">
+
+
+
+            <button class="call-btn"
+        type="button"
+        aria-label="Call Care Companion +234 913 227 2022"
+        onclick="window.location.href='tel:+2349132272022'">
+  <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.02-.24c1.12.37 2.33.57 3.59.57a1 1 0 011 1V20a1 1 0 01-1 1C10.07 21 3 13.93 3 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.26.2 2.47.57 3.59a1 1 0 01-.24 1.02l-2.21 2.18z" />
+  </svg>
+</button> 
+
+
+
+          <div class="profile-dropdown" id="profileDropdown">
+            <button id="profileBtn" class="profile-btn" aria-haspopup="true" aria-expanded="false" title="Open profile menu">
+              <img
+                class="avatar"
+                src="{{ url_for('uploaded_file', filename=(user.profile.profile_photo|basename)) if (user and user.profile and user.profile.profile_photo) else ( url_for('uploaded_file', filename=(user.profile_photo|basename)) if (user and user.profile_photo) else url_for('static', filename='images/avatar cc.jfif') ) }}"
+                alt="Profile"
+              >
+              <span class="chev" aria-hidden="true">▾</span>
+            </button>
+
+            <div class="dropdown-menu" id="profileMenu" role="menu" aria-hidden="true">
+               <a class="menu-item" href="{{ url_for('profile_setup') }}?suppress_overlay=1" role="menuitem">My profile</a>
+              <a class="menu-item" href="{{ url_for('contact') }}" role="menuitem">Contact Us</a>
+              <!-- Using GET logout because your app.py shows @app.route('/logout') (no methods param) -->
+              <a id="logoutLink" class="menu-item" href="{{ url_for('logout') }}" role="menuitem" data-method="get">Log out</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </header>
+    <!-- ================= END REPLACED HEADER ================= -->
+
+    <!-- HERO — EXACT text preserved (now uses profile_step1 card gradient) -->
+    <header class="hero" role="banner" aria-label="Services hero">
+      <div>
+        <h1>Care Companion — Services</h1>
+        <p>Find trusted caregivers &amp; families. Browse our services and get in touch — we’ll help you match and onboard the right person.</p>
+      </div>
+
+      <div class="hero-cta">
+        {% if user %}
+          <a class="btn" href="{{ url_for('connections') }}"><i class="fa-solid fa-users"></i> My connections</a>
+        {% else %}
+          <a class="btn ghost" href="{{ url_for('login', next=request.path) }}"><i class="fa-solid fa-right-to-bracket"></i> Sign in</a>
+        {% endif %}
+      </div>
+    </header>
+
+    <div class="content" role="region" aria-label="Services content">
+      <!-- MAIN -->
+      <main class="primary">
+
+        <!-- Quick features -->
+        <div class="feature-strip" role="toolbar" aria-label="Quick services">
+          <div class="feature-item" data-service="personal_care"><div class="glyph"><i class="fa-solid fa-person-dress"></i></div><div><h4>Personal care</h4><p>Bathing, dressing & mobility</p></div></div>
+          <div class="feature-item" data-service="medication"><div class="glyph"><i class="fa-solid fa-pills"></i></div><div><h4>Medication</h4><p>Reminders & basic support</p></div></div>
+          <div class="feature-item" data-service="infant_care"><div class="glyph"><i class="fa-solid fa-baby"></i></div><div><h4>Infant care</h4><p>Feeding & safe supervision</p></div></div>
+          <div class="feature-item" data-service="specialist"><div class="glyph"><i class="fa-solid fa-user-nurse"></i></div><div><h4>Specialist</h4><p>Dementia & post-op</p></div></div>
+        </div>
+
+        <!-- Services grid -->
+        <div class="cards" role="list" aria-label="Available services">
+          <article class="svc-card" role="listitem" data-service="personal_care">
+            <div class="svc-top">
+              <div class="svc-badge"><i class="fa-solid fa-hand-holding-heart"></i></div>
+              <div>
+                <h3>Personal care</h3>
+                <p>Assistance with bathing, dressing and personal hygiene delivered with dignity-first support.</p>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;margin-top:8px;">
+              <span class="pill">Trusted carers</span>
+              <span style="color:var(--admiral);opacity:0.7;font-size:13px;">Available globally</span>
+            </div>
+          </article>
+
+          <article class="svc-card" role="listitem" data-service="medication">
+            <div class="svc-top">
+              <div class="svc-badge"><i class="fa-solid fa-pills"></i></div>
+              <div>
+                <h3>Medication reminder</h3>
+                <p>Scheduled reminders and records — carers follow the plans you or clinicians set.</p>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;margin-top:8px;">
+              <span class="pill">Documented</span>
+              <span style="color:var(--admiral);opacity:0.7;font-size:13px;">Safe & reliable</span>
+            </div>
+          </article>
+
+          <article class="svc-card" role="listitem" data-service="infant_care">
+            <div class="svc-top">
+              <div class="svc-badge"><i class="fa-solid fa-child"></i></div>
+              <div>
+                <h3>Infant & child care</h3>
+                <p>Feeding, naps and age-appropriate activities from carers experienced with children.</p>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;margin-top:8px;">
+              <span class="pill">Child-safe</span>
+              <span style="color:var(--admiral);opacity:0.7;font-size:13px;">Background screened</span>
+            </div>
+          </article>
+
+          <article class="svc-card" role="listitem" data-service="meal_prep">
+            <div class="svc-top">
+              <div class="svc-badge"><i class="fa-solid fa-utensils"></i></div>
+              <div>
+                <h3>Meal prep & errands</h3>
+                <p>Healthy meal preparation, shopping and light errands to support daily routines.</p>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;margin-top:8px;">
+              <span class="pill">Flexible</span>
+              <span style="color:var(--admiral);opacity:0.7;font-size:13px;">Short notice options</span>
+            </div>
+          </article>
+
+          <article class="svc-card" role="listitem" data-service="companionship">
+            <div class="svc-top">
+              <div class="svc-badge"><i class="fa-solid fa-heart"></i></div>
+              <div>
+                <h3>Companionship</h3>
+                <p>Visits, conversation and social activities to reduce isolation and support wellbeing.</p>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;margin-top:8px;">
+              <span class="pill">Person-centred</span>
+              <span style="color:var(--admiral);opacity:0.7;font-size:13px;">Flexible hours</span>
+            </div>
+          </article>
+
+          <article class="svc-card" role="listitem" data-service="specialist">
+            <div class="svc-top">
+              <div class="svc-badge"><i class="fa-solid fa-user-nurse"></i></div>
+              <div>
+                <h3>Specialist care</h3>
+                <p>Carers with certifications for dementia, post-op recovery and more complex needs.</p>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;margin-top:8px;">
+              <span class="pill">Certified</span>
+              <span style="color:var(--admiral);opacity:0.7;font-size:13px;">Tailored plans</span>
+            </div>
+          </article>
+        </div>
+
+        <!-- How it works -->
+        <section class="panel" aria-label="How we help">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h4 style="margin:0;">How we help</h4>
+            <div style="color:var(--admiral); font-weight:900;">MATCH • VERIFY • SUPPORT</div>
+          </div>
+
+          <div class="how" aria-hidden="false" style="margin-top:12px;">
+            <div class="step"><div style="display:flex;align-items:center;"><div class="num">1</div><div><strong>Tell us what you need</strong><p style="margin:6px 0 0;color:var(--admiral);opacity:0.85;">Give a brief — schedule, location and care type.</p></div></div></div>
+            <div class="step"><div style="display:flex;align-items:center;"><div class="num">2</div><div><strong>We match & verify</strong><p style="margin:6px 0 0;color:var(--admiral);opacity:0.85;">Shortlist carers, verify credentials & references.</p></div></div></div>
+            <div class="step"><div style="display:flex;align-items:center;"><div class="num">3</div><div><strong>Connect & onboard</strong><p style="margin:6px 0 0;color:var(--admiral);opacity:0.85;">Trial sessions and finalize the plan with our support.</p></div></div></div>
+          </div>
+        </section>
+
+        <!-- FAQ -->
+        <section class="panel" aria-label="FAQ">
+          <h4 style="margin:0 0 10px 0;">Frequently asked</h4>
+          <div class="faq" role="list">
+            <div class="qa" id="qa1">
+              <div class="q">Do you provide background checks? <i class="fa-solid fa-chevron-down"></i></div>
+              <div class="a">Yes. We perform background and reference checks for every caregiver and family we recommend. Verification is completed before we share personal details or connect either party.</div>
+            </div>
+
+            <div class="qa" id="qa2">
+              <div class="q">How do payments work? <i class="fa-solid fa-chevron-down"></i></div>
+              <div class="a">Payment is agreed between family and caregiver. We recommend standard hourly rates and can advise invoicing options. We do not handle payments on behalf of users unless explicitly stated.</div>
+            </div>
+
+            <div class="qa" id="qa3">
+              <div class="q">Do you operate internationally? <i class="fa-solid fa-chevron-down"></i></div>
+              <div class="a">Yes — we support multiple countries. Local regulations apply; we provide onboarding guidance for your region and ensure candidates meet local requirements when possible.</div>
+            </div>
+
+            <div class="qa" id="qa4">
+              <div class="q">Is this service online-only? <i class="fa-solid fa-chevron-down"></i></div>
+              <div class="a">Our platform is online-first: we match, vet and introduce caregivers and families using our digital tools. All initial matching, interviews and paperwork are handled online. If local in-person support is required, we advise on next steps but do not provide in-person services directly.</div>
+            </div>
+
+            <div class="qa" id="qa5">
+              <div class="q">When will I get matched? <i class="fa-solid fa-chevron-down"></i></div>
+              <div class="a">After you submit a request we typically shortlist candidates within 24–72 hours depending on availability and location. We’ll reach out with verified matches and suggested next steps.</div>
+            </div>
+
+          </div>
+        </section>
+
+      </main>
+
+      <!-- RIGHT SIDEBAR -->
+      <aside class="side" aria-label="Support & contact">
+        <div class="panel">
+          <div style="display:flex; gap:12px; align-items:center;">
+            <div class="logo-dot">CC</div>
+            <div>
+              <div style="font-weight:900; color:var(--admiral);">Care Companion</div>
+              <div style="color:var(--admiral); font-size:13px; opacity:0.8;">Trusted carers & families worldwide</div>
+            </div>
+          </div>
+
+          <div style="margin-top:12px;">
+            <button class="request-btn" id="openForm" style="width:100%;"><i class="fa-solid fa-paper-plane"></i> Request matching</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h4 style="margin:0 0 8px 0;">Quick facts</h4>
+          <div style="display:flex; flex-direction:column; gap:8px;">
+            <div style="color:var(--admiral); font-size:13px;"> <strong style="color:var(--berry)">Vetted carers</strong> — background & reference checks before any introduction</div>
+            <div style="color:var(--admiral); font-size:13px;"> <strong style="color:var(--berry)">Flexible</strong> — hourly, part-time & remote assistance</div>
+            <div style="color:var(--admiral); font-size:13px;"> <strong style="color:var(--berry)">Global</strong> — we support multiple countries; availability varies</div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h4 style="margin:0 0 8px 0;">Contact</h4>
+          <div style="color:var(--admiral); font-size:13px; margin-bottom:8px;">
+            Prefer email?
+            <a id="contactEmail" href="mailto:carecompanion@zohomail.com" style="color:var(--berry); text-decoration:none;" onclick="openMailComposer(event)">
+              carecompanion@zohomail.com
+            </a>
+          </div>
+          <div style="color:var(--admiral); font-size:13px;">Support (urgent): <strong style="color:var(--berry)">+234 9132272022</strong></div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- Floating action button -->
+  <button class="fab" id="fab" aria-label="Request service"><i class="fa-solid fa-comment-dots" style="font-size:20px;color:white;"></i></button>
+
+  <!-- Modal: contact form -->
+  <div class="modal-backdrop" id="modalBackdrop" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal" role="document" aria-labelledby="modalTitle">
+      <div class="card">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="color:#fff; font-weight:800; font-size:12px; letter-spacing:0.6px;">SERVICE REQUEST</div>
+            <h2 id="modalTitle" style="margin:6px 0 0 0; color:#fff;">Request matching & contact</h2>
+            <p style="margin-top:8px; color:rgba(255,255,255,0.92);">Tell us briefly what you need and we'll find a short list of carers or families for you.</p>
+          </div>
+          <button id="closeModal" class="btn" style="background:transparent; color:#fff; border:1px solid rgba(255,255,255,0.12);"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+
+        <form id="requestForm" method="post" action="{{ url_for('services_contact') }}" style="margin-top:16px;">
+          <div style="margin-bottom:10px;">
+            <label for="name">Name</label>
+            <input id="name" name="name" type="text" placeholder="Full name" value="{{ user.name if user else '' }}" required>
+          </div>
+
+          <div style="margin-bottom:10px;">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" placeholder="you@example.com" value="{{ (user and user.email) or '' }}" required>
+          </div>
+
+          <div style="margin-bottom:10px;">
+            <label for="serviceSelect">Service</label>
+            <select id="serviceSelect" name="service">
+              <option value="personal_care">Personal care</option>
+              <option value="medication">Medication reminder</option>
+              <option value="infant_care">Infant / child care</option>
+              <option value="meal_prep">Meal prep & errands</option>
+              <option value="companionship">Companionship</option>
+              <option value="specialist">Specialist care</option>
+              <option value="other">Other / Multiple</option>
+            </select>
+          </div>
+
+          <div style="margin-bottom:10px;">
+            <label for="role">I am a</label>
+            <select id="role" name="role">
+              <option value="family">Family (seeking caregiver)</option>
+              <option value="caregiver">Caregiver (offering services)</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <div style="margin-bottom:10px;">
+            <label for="message">Brief message</label>
+            <textarea id="message" name="message" placeholder="e.g. 3 days/week mornings, location, special needs"></textarea>
+          </div>
+
+          <div style="display:flex; gap:8px; justify-content:flex-end; margin-top:8px;">
+            <button type="button" id="cancelBtn" class="btn" style="background:transparent; color:#fff; border:1px solid rgba(255,255,255,0.12);">Cancel</button>
+            <button type="submit" class="submit"><i class="fa-solid fa-paper-plane"></i> Send request</button>
+          </div>
+
+          <input type="hidden" name="referrer" value="{{ request.path }}">
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- centered toast -->
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (function(){
+      // open Gmail compose, fallback to mailto if popup blocked or Gmail unavailable
+      window.openMailComposer = function(e){
+        try {
+          if(e && e.preventDefault) e.preventDefault();
+          var to = 'carecompanion@zohomail.com';
+          var subject = '';
+          var body = '';
+          var gmail = 'https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(to) + '&su=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+          var w = window.open(gmail, '_blank', 'noopener');
+          if (!w) {
+            // popup blocked -> fallback to mailto
+            window.location.href = 'mailto:' + to;
+          }
+          return false;
+        } catch (err) {
+          try { window.location.href = 'mailto:carecompanion@zohomail.com'; } catch(e) {}
+          return false;
+        }
+      };
+
+      const modal = document.getElementById('modalBackdrop');
+      const fab = document.getElementById('fab');
+      const openForm = document.getElementById('openForm');
+      const closeModal = document.getElementById('closeModal');
+      const cancelBtn = document.getElementById('cancelBtn');
+      const toast = document.getElementById('toast');
+      const form = document.getElementById('requestForm');
+      const submitBtn = form ? form.querySelector('button[type="submit"]') : null;
+
+      function showModal(preselect){
+        const sel = document.getElementById('serviceSelect');
+        if(preselect && sel) sel.value = preselect;
+        if(modal){ modal.style.display = 'flex'; modal.setAttribute('aria-hidden','false'); }
+        setTimeout(()=>{ const n = document.getElementById('name'); if(n) n.focus(); }, 80);
+      }
+      function hideModal(){ if(modal){ modal.style.display = 'none'; modal.setAttribute('aria-hidden','true'); } }
+
+      if(fab) fab.addEventListener('click', ()=> showModal());
+      if(openForm) openForm.addEventListener('click', ()=> showModal());
+      if(closeModal) closeModal.addEventListener('click', hideModal);
+      if(cancelBtn) cancelBtn.addEventListener('click', hideModal);
+      if(modal) modal.addEventListener('click', (e)=>{ if(e.target === modal) hideModal(); });
+
+      // animate service cards -> open modal preselect
+      document.querySelectorAll('.svc-card, .feature-item').forEach(el=>{
+        el.addEventListener('click', ()=> {
+          const svc = el.dataset.service || 'other';
+          try { el.animate([{ transform:'translateY(0)' }, { transform:'translateY(-6px)' }, { transform:'translateY(0)' }], { duration:280, easing:'cubic-bezier(.2,.9,.3,1)' }); } catch(e){ }
+          showModal(svc);
+        });
+      });
+
+      // accordion
+      document.querySelectorAll('.qa .q').forEach(q=>{
+        q.addEventListener('click', function(){
+          const parent = q.parentElement;
+          const open = parent.classList.contains('open');
+          document.querySelectorAll('.qa.open').forEach(x=>x.classList.remove('open'));
+          if(!open) parent.classList.add('open');
+        });
+      });
+
+      // showToast helper (centered)
+      function showToast(msg, ok=true, persistMs=4200){
+        if(!toast) return;
+        toast.className = ok ? 'success' : 'error';
+        toast.textContent = msg;
+        toast.style.display = 'block';
+        toast.style.opacity = '0';
+        toast.style.transform = 'translate(-50%, -50%) scale(0.96)';
+        requestAnimationFrame(()=>{ toast.style.transition = 'opacity 240ms ease, transform 240ms cubic-bezier(.2,.9,.3,1)'; toast.style.opacity='1'; toast.style.transform='translate(-50%,-50%) scale(1)'; });
+        if(persistMs > 0){
+          setTimeout(()=> hideToast(), persistMs);
+        }
+      }
+      function hideToast(){
+        if(!toast) return;
+        toast.style.opacity = '0';
+        toast.style.transform = 'translate(-50%, -50%) scale(0.98)';
+        setTimeout(()=>{ toast.style.display = 'none'; toast.textContent = ''; toast.className = ''; toast.style.transition = ''; toast.style.transform = ''; toast.style.opacity = ''; }, 280);
+      }
+
+      // ensure at least `minMs` elapses (used to keep loading visible a minimum time)
+      function waitMin(minMs, startTs){
+        const elapsed = Math.max(0, Date.now() - (startTs || Date.now()));
+        return new Promise(resolve => setTimeout(resolve, Math.max(0, minMs - elapsed)));
+      }
+
+      // enhanced submit: loading state + min 5s delay + centered toast
+      if(form){
+        form.addEventListener('submit', async function(e){
+          e.preventDefault();
+          const fd = new FormData(form);
+          const payload = Object.fromEntries(fd.entries());
+          if(!payload.name || !payload.email){
+            showToast('Please provide name & email', false, 4200);
+            return;
+          }
+
+          const origHtml = submitBtn ? submitBtn.innerHTML : null;
+          if(submitBtn){
+            submitBtn.disabled = true;
+            submitBtn.setAttribute('aria-busy','true');
+            submitBtn.innerHTML = '<span class="btn-spinner" aria-hidden="true"></span> Sending…';
+          }
+
+          const start = Date.now();
+          let fetchOk = false;
+          let fetchMsg = 'Request sent — we will contact you shortly';
+
+          try {
+            const res = await fetch(form.action, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'same-origin',
+              body: JSON.stringify(payload)
+            }).catch(()=>null);
+
+            const data = res ? await res.json().catch(()=>null) : null;
+            if(res && (res.ok) && (data && (data.success || data.sent || data.status === 'ok' || data.message))) {
+              fetchOk = true;
+              if(data && data.message) fetchMsg = data.message;
+            } else if (res && !res.ok) {
+              let err = (data && (data.error || data.message)) || ('Send failed (' + (res.status || 'error') + ')');
+              fetchOk = false;
+              fetchMsg = err;
+            } else {
+              // network fallback -> treat as success
+              fetchOk = true;
+            }
+          } catch (err) {
+            fetchOk = false;
+            fetchMsg = (err && err.message) ? err.message : 'Network error';
+          }
+
+          await waitMin(5000, start);
+
+          if(submitBtn){
+            submitBtn.disabled = false;
+            submitBtn.removeAttribute('aria-busy');
+            submitBtn.innerHTML = origHtml || '<i class="fa-solid fa-paper-plane"></i> Send request';
+          }
+
+          if(fetchOk){
+            showToast(fetchMsg || 'Request sent — we will contact you shortly', true, 4200);
+            try { form.reset(); } catch(e){}
+            hideModal();
+          } else {
+            showToast(fetchMsg || 'Send failed — try again', false, 5200);
+          }
+        });
+      }
+
+    })();
+  </script>
+
+  <!-- ==================== HEADER-RELATED MODALS & SCRIPTS FROM about.html ==================== -->
+
+  <!-- LOGOUT CONFIRMATION MODAL (inserted at end of body) -->
+  <div id="logoutConfirmModal" class="cc-modal" role="dialog" aria-modal="true" aria-labelledby="logoutConfirmTitle" aria-hidden="true" style="display:none;">
+    <div class="cc-modal-backdrop" data-close="backdrop"></div>
+    <div class="cc-modal-panel" role="document">
+      <button class="cc-modal-close" type="button" aria-label="Close confirmation">&times;</button>
+
+      <div class="cc-modal-body">
+        <div class="cc-modal-avatar" id="logoutConfirmAvatarWrap" aria-hidden="true">
+          <img id="logoutConfirmAvatar" src="{{ url_for('static', filename='images/avatar cc.jfif') }}" alt="Avatar">
+        </div>
+
+        <h2 id="logoutConfirmTitle">Are you sure you want to sign out?</h2>
+        <p id="logoutConfirmText">Signing out will end your session on this device. You can sign in again anytime.</p>
+
+        <div class="cc-modal-actions">
+          <button id="logoutCancelBtn" class="btn cc-btn-ghost" type="button">Cancel</button>
+          <button id="logoutConfirmBtn" class="btn cc-btn-danger" type="button">
+            <span class="btn-spinner" style="display:none;"></span>
+            Sign out
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- end logout modal -->
+
+  <script>
+  (function(){
+    const logoutLink = document.getElementById('logoutLink');
+    const modal = document.getElementById('logoutConfirmModal');
+    const backdrop = modal && modal.querySelector('.cc-modal-backdrop');
+    const closeBtn = modal && modal.querySelector('.cc-modal-close');
+    const cancelBtn = document.getElementById('logoutCancelBtn');
+    const confirmBtn = document.getElementById('logoutConfirmBtn');
+    const avatarImg = document.getElementById('logoutConfirmAvatar');
+
+    if(!logoutLink || !modal || !confirmBtn || !cancelBtn) return;
+
+    // Fill avatar if available in page (best-effort)
+    try {
+      const pageAvatar = document.querySelector('.profile-btn .avatar') || document.querySelector('.avatar-link .avatar') || document.querySelector('#heroAvatar');
+      if(pageAvatar && pageAvatar.src) avatarImg.src = pageAvatar.src;
+    } catch(e){ /* ignore */ }
+
+    // utility: open/close modal and manage aria
+    function openModal() {
+      modal.style.display = 'flex';
+      modal.setAttribute('aria-hidden', 'false');
+      modal._previousActive = document.activeElement;
+      setTimeout(()=> cancelBtn.focus(), 50);
+      trapFocus(modal);
+    }
+    function closeModal() {
+      modal.setAttribute('aria-hidden','true');
+      setTimeout(()=> { try { modal.style.display='none'; } catch(e){} }, 220);
+      if(modal._previousActive && typeof modal._previousActive.focus === 'function') modal._previousActive.focus();
+      releaseFocusTrap();
+    }
+
+    // click handler for logout link: intercept and show modal
+    logoutLink.addEventListener('click', function(ev){
+      if(ev.ctrlKey || ev.metaKey || logoutLink.target === '_blank') return;
+      ev.preventDefault();
+      openModal();
+    });
+
+    // close handlers
+    backdrop && backdrop.addEventListener('click', closeModal);
+    closeBtn && closeBtn.addEventListener('click', closeModal);
+    cancelBtn && cancelBtn.addEventListener('click', closeModal);
+    document.addEventListener('keydown', function(ev){
+      if(ev.key === 'Escape' || ev.key === 'Esc') {
+        if(modal.getAttribute('aria-hidden') === 'false') closeModal();
+      }
+    });
+
+    // Focus trap implementation (simple)
+    let _trap = null;
+    function trapFocus(el) {
+      const focusable = Array.from(el.querySelectorAll('a[href], button:not([disabled]), input, textarea, select, [tabindex]:not([tabindex="-1"])'))
+        .filter(i => i.offsetWidth || i.offsetHeight || i === document.activeElement);
+      if (focusable.length === 0) return;
+      let iFirst = focusable[0], iLast = focusable[focusable.length-1];
+      _trap = function(e){
+        if(e.key !== 'Tab') return;
+        if(e.shiftKey && document.activeElement === iFirst) { e.preventDefault(); iLast.focus(); }
+        else if(!e.shiftKey && document.activeElement === iLast) { e.preventDefault(); iFirst.focus(); }
+      };
+      document.addEventListener('keydown', _trap);
+    }
+    function releaseFocusTrap() { if(_trap) { document.removeEventListener('keydown', _trap); _trap = null; } }
+
+    // Confirm: perform logout (supports GET or POST depending on data-method)
+    confirmBtn.addEventListener('click', async function(ev){
+      ev.preventDefault();
+      const method = (logoutLink.dataset.method || 'get').toLowerCase();
+      const href = logoutLink.getAttribute('href') || '';
+      const spinner = confirmBtn.querySelector('.btn-spinner');
+      if(spinner) spinner.style.display = 'inline-block';
+      confirmBtn.disabled = true;
+      cancelBtn.disabled = true;
+      logoutLink.disabled = true;
+
+      try {
+        if(method === 'post') {
+          const res = await fetch(href, { method: 'POST', credentials: 'same-origin', headers: { 'X-Requested-With': 'XMLHttpRequest' } }).catch(()=>null);
+          if(res && res.redirected && res.url) {
+            window.location.href = res.url;
+            return;
+          }
+          if(res && (res.ok || res.status === 200 || res.status === 204)) {
+            window.location.href = href;
+            return;
+          }
+          // fallback
+          window.location.href = href;
+        } else {
+          // GET logout: navigate
+          window.location.href = href;
+        }
+      } catch (err) {
+        console.error('Logout failed', err);
+        window.location.href = href;
+      } finally {
+        if(confirmBtn) { confirmBtn.disabled = false; if(spinner) spinner.style.display = 'none'; }
+        if(cancelBtn) cancelBtn.disabled = false;
+        logoutLink.disabled = false;
+      }
+    });
+  })();
+  </script>
+
+  <!-- LOGIN VISIBILITY (hide "Login" when server says user is logged in) -->
+  <script>
+  (function(){
+    const login = document.getElementById('loginLink');
+    if (!login) return;
+
+    // Prefer server-rendered body flag (0/1 or true/false). Fallback: basic avatar check.
+    function detectLoggedIn() {
+      try {
+        const bodyFlag = document.body.getAttribute('data-logged-in');
+        if (bodyFlag !== null && bodyFlag !== undefined) {
+          return String(bodyFlag) === '1' || String(bodyFlag).toLowerCase() === 'true';
+        }
+      } catch (e) { /* ignore */ }
+
+      // Fallback: if avatar exists and is not the default guest image, treat as logged in
+      try {
+        const avatar = document.querySelector('.profile-btn .avatar');
+        if (avatar && avatar.src && avatar.src.indexOf('/static/images/avatar cc.jfif') === -1) return true;
+      } catch (e) { /* ignore */ }
+
+      return false;
+    }
+
+    function refreshLoginVisibility() {
+      const logged = detectLoggedIn();
+      if (logged) {
+        login.style.display = 'none';
+        login.setAttribute('aria-hidden','true');
+        login.tabIndex = -1;
+      } else {
+        login.style.display = '';
+        login.removeAttribute('aria-hidden');
+        login.tabIndex = 0;
+      }
+    }
+
+    // Run once immediately
+    refreshLoginVisibility();
+
+    // Minor safeguard: re-check a short time later in case avatar or DOM is updated by other scripts
+    setTimeout(refreshLoginVisibility, 300);
+    setTimeout(refreshLoginVisibility, 1200);
+  })();
+  </script>
+
+  <!-- CAREGIVER / FAMILY BLOCK (modals + click interception) -->
+  <!-- Caregiver-block modal -->
+  <div id="caregiverBlockedModal" class="cc-modal-inline" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="cc-modal-card" role="document" aria-labelledby="cbTitle" aria-describedby="cbDesc">
+      <div class="cc-modal-left" aria-hidden="true">i</div>
+      <div class="cc-modal-content" style="flex:1">
+        <h3 id="cbTitle">Access restricted</h3>
+        <p id="cbDesc">Sorry — caregivers cannot view the <strong>Find Caregiver</strong> page. You can browse families instead.</p>
+        <div class="cc-modal-actions">
+          <button id="cbCloseBtn" class="cc-btn-ghost" type="button">Close</button>
+          <button id="cbViewFamiliesBtn" class="cc-btn-primary" type="button">View Families</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Family-block modal -->
+  <div id="familyBlockedModal" class="cc-modal-inline" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="cc-modal-card" role="document" aria-labelledby="fbTitle" aria-describedby="fbDesc">
+      <div class="cc-modal-left" aria-hidden="true">i</div>
+      <div class="cc-modal-content" style="flex:1">
+        <h3 id="fbTitle">Access restricted</h3>
+        <p id="fbDesc">Sorry — families cannot view the <strong>Find Family</strong> page. You can browse caregivers instead.</p>
+        <div class="cc-modal-actions">
+          <button id="fbCloseBtn" class="cc-btn-ghost" type="button">Close</button>
+          <button id="fbViewCaregiversBtn" class="cc-btn-primary" type="button">View Caregivers</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    // Read server flags from body data attributes (must exist)
+    function readFlags() {
+      const b = document.body;
+      const loggedAttr = String(b.getAttribute('data-logged-in') || '').toLowerCase();
+      const roleAttr = String(b.getAttribute('data-user-role') || '').toLowerCase();
+      const pubAttr = String(b.getAttribute('data-profile-published') || '').toLowerCase();
+      return {
+        isLogged: (loggedAttr === '1' || loggedAttr === 'true'),
+        role: roleAttr,
+        isPublished: (pubAttr === '1' || pubAttr === 'true')
+      };
+    }
+
+    function shouldBlockCaregiver() {
+      const f = readFlags();
+      return f.isLogged && f.role === 'caregiver' && f.isPublished;
+    }
+    function shouldBlockFamily() {
+      const f = readFlags();
+      return f.isLogged && f.role === 'family' && f.isPublished;
+    }
+
+    // Modal elements
+    const caregiverModal = document.getElementById('caregiverBlockedModal');
+    const caregiverClose = document.getElementById('cbCloseBtn');
+    const caregiverViewFamilies = document.getElementById('cbViewFamiliesBtn');
+
+    const familyModal = document.getElementById('familyBlockedModal');
+    const familyClose = document.getElementById('fbCloseBtn');
+    const familyViewCaregivers = document.getElementById('fbViewCaregiversBtn');
+
+    // Generic open/close helpers (works for either modal element)
+    function openModal(modalEl, primaryFocusEl) {
+      if (!modalEl) return;
+      modalEl.classList.add('show');
+      modalEl.setAttribute('aria-hidden', 'false');
+      // move focus to primary action
+      setTimeout(()=> { try { primaryFocusEl && primaryFocusEl.focus(); } catch(e){} }, 30);
+      document.addEventListener('keydown', onKeyDown);
+      modalEl._prevActive = document.activeElement;
+    }
+    function closeModal(modalEl) {
+      if (!modalEl) return;
+      modalEl.classList.remove('show');
+      modalEl.setAttribute('aria-hidden', 'true');
+      document.removeEventListener('keydown', onKeyDown);
+      try { if (modalEl._prevActive && typeof modalEl._prevActive.focus === 'function') modalEl._prevActive.focus(); } catch(e){}
+    }
+    function onKeyDown(e) {
+      if (e.key === 'Escape' || e.key === 'Esc') {
+        // close whichever modal is open
+        if (caregiverModal && caregiverModal.classList.contains('show')) closeModal(caregiverModal);
+        if (familyModal && familyModal.classList.contains('show')) closeModal(familyModal);
+      }
+      if (e.key === 'Tab') {
+        // trap focus inside whichever modal is open
+        const activeModal = caregiverModal.classList.contains('show') ? caregiverModal : (familyModal.classList.contains('show') ? familyModal : null);
+        if (!activeModal) return;
+        const focusables = Array.from(activeModal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')).filter(el=>el.offsetWidth || el.offsetHeight);
+        if (!focusables.length) return;
+        const first = focusables[0], last = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+      }
+    }
+
+    // Delegated click interception for both links/buttons
+    document.addEventListener('click', function (ev) {
+      // allow ctrl/cmd/new-tab and middle-click
+      if (ev.ctrlKey || ev.metaKey || ev.button === 1) return;
+      const el = ev.target;
+      if (!el) return;
+      const a = el.closest ? el.closest('a, button') : null;
+      if (!a) return;
+      const href = a.getAttribute && a.getAttribute('href') || '';
+      const id = a.id || '';
+      const classes = a.className || '';
+
+      const wantsCaregiver = (href.indexOf('/find-caregiver') !== -1 || id === 'navFindCaregiver' || (classes && classes.indexOf('find-care') !== -1));
+      const wantsFamily = (href.indexOf('/find-family') !== -1 || id === 'navFindFamily' || (classes && classes.indexOf('find-jobs') !== -1));
+
+      if (wantsCaregiver && shouldBlockCaregiver()) {
+        ev.preventDefault(); ev.stopPropagation();
+        openModal(caregiverModal, caregiverViewFamilies);
+        return;
+      }
+      if (wantsFamily && shouldBlockFamily()) {
+        ev.preventDefault(); ev.stopPropagation();
+        openModal(familyModal, familyViewCaregivers);
+        return;
+      }
+      // otherwise allow navigation
+    }, { capture: true });
+
+    // Wire modal buttons
+    if (caregiverClose) caregiverClose.addEventListener('click', ()=> closeModal(caregiverModal));
+    if (caregiverViewFamilies) caregiverViewFamilies.addEventListener('click', ()=> { window.location.href = '/find-family'; });
+
+    if (familyClose) familyClose.addEventListener('click', ()=> closeModal(familyModal));
+    if (familyViewCaregivers) familyViewCaregivers.addEventListener('click', ()=> { window.location.href = '/find-caregiver'; });
+
+  })();
+  </script>
+
+  <!-- PROFILE DROPDOWN SCRIPT (copy of index behavior) -->
+  <script>
+  (function(){
+    const btn = document.getElementById('profileBtn');
+    const menu = document.getElementById('profileMenu');
+
+    if(!btn || !menu) return;
+
+    function openMenu() {
+      menu.classList.add('show');
+      menu.setAttribute('aria-hidden','false');
+      btn.setAttribute('aria-expanded','true');
+      // Move focus into first menu item for keyboard users
+      const first = menu.querySelector('.menu-item');
+      if(first && typeof first.focus === 'function') first.focus();
+    }
+    function closeMenu() {
+      menu.classList.remove('show');
+      menu.setAttribute('aria-hidden','true');
+      btn.setAttribute('aria-expanded','false');
+    }
+
+    btn.addEventListener('click', function(e){
+      e.stopPropagation();
+      if(menu.classList.contains('show')) closeMenu(); else openMenu();
+    });
+
+    // close on outside click or Escape
+    document.addEventListener('click', function(){ closeMenu(); });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape' || e.key === 'Esc') closeMenu();
+    });
+
+    // ensure clicks inside menu don't close (links will still navigate)
+    menu.addEventListener('click', function(e){ e.stopPropagation(); });
+  })();
+  </script>
+
+
+ <script>
+(function () {
+  const ham = document.getElementById('mobileHamburger');
+  const topRight = document.querySelector('.top-right-controls');
+  if (!ham || !topRight) return;
+
+  function isMobileView() {
+    return window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
+  }
+
+  // Get existing panel or create one if missing
+  let nav = document.getElementById('mobileNav') || document.querySelector('.mobile-nav-panel');
+
+  if (!nav) {
+    nav = document.createElement('nav');
+    nav.id = 'mobileNav';
+    nav.className = 'mobile-nav-panel';
+    nav.setAttribute('aria-hidden', 'true');
+
+    const inner = document.createElement('div');
+    inner.className = 'mobile-nav-inner mobile-links';
+
+    const src = document.querySelector('.nav-menu');
+    if (src) {
+      inner.innerHTML = src.innerHTML;
+    }
+
+    nav.appendChild(inner);
+    document.body.appendChild(nav);
+  }
+
+  function computeNavWidthRespectingAvatar() {
+    try {
+      const tr = topRight.getBoundingClientRect();
+      const avatarLeft = Math.max(0, Math.floor(tr.left));
+      const gap = 12;
+      let desired = Math.max(160, avatarLeft - gap);
+      const maxAllowed = Math.round(window.innerWidth * 0.92);
+      desired = Math.min(desired, maxAllowed);
+
+      nav.style.setProperty('--nav-width', desired + 'px');
+      nav.style.width = desired + 'px';
+    } catch (e) {}
+  }
+
+  // Overlay
+  let overlay = document.getElementById('mobileNavOverlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'mobileNavOverlay';
+    overlay.style.cssText = [
+      'position:fixed',
+      'inset:0',
+      'background:rgba(0,0,0,0.32)',
+      'opacity:0',
+      'pointer-events:none',
+      'transition:opacity .28s ease',
+      'z-index:10090'
+    ].join(';');
+    document.body.appendChild(overlay);
+  }
+
+  function syncNavMode() {
+    computeNavWidthRespectingAvatar();
+
+    if (isMobileView()) {
+      nav.style.display = 'block';
+    } else {
+      nav.classList.remove('open');
+      nav.setAttribute('aria-hidden', 'true');
+      overlay.style.opacity = '0';
+      overlay.style.pointerEvents = 'none';
+      ham.setAttribute('aria-expanded', 'false');
+      document.body.classList.remove('mobile-nav-open');
+      document.documentElement.style.overflow = '';
+      nav.style.display = 'none';
+    }
+  }
+
+  function openNav() {
+    if (!isMobileView()) return;
+    nav.style.display = 'block';
+    nav.classList.add('open');
+    nav.setAttribute('aria-hidden', 'false');
+    overlay.style.opacity = '1';
+    overlay.style.pointerEvents = 'auto';
+    ham.setAttribute('aria-expanded', 'true');
+    document.body.classList.add('mobile-nav-open');
+    document.documentElement.style.overflow = 'hidden';
+  }
+
+  function closeNav() {
+    nav.classList.remove('open');
+    nav.setAttribute('aria-hidden', 'true');
+    overlay.style.opacity = '0';
+    overlay.style.pointerEvents = 'none';
+    ham.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('mobile-nav-open');
+    document.documentElement.style.overflow = '';
+
+    if (!isMobileView()) {
+      nav.style.display = 'none';
+    }
+  }
+
+  if (!ham.__mobileNavHandlerAttached) {
+    ham.addEventListener('click', function (ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      if (!isMobileView()) return;
+      if (nav.classList.contains('open')) closeNav();
+      else openNav();
+    });
+    ham.__mobileNavHandlerAttached = true;
+  }
+
+  overlay.addEventListener('click', function (ev) {
+    ev.stopPropagation();
+    closeNav();
+  });
+
+  document.addEventListener('click', function (ev) {
+    if (!isMobileView()) return;
+    if (!nav.contains(ev.target) && !ham.contains(ev.target)) {
+      if (nav.classList.contains('open')) closeNav();
+    }
+  }, { passive: true });
+
+  document.addEventListener('keydown', function (ev) {
+    if ((ev.key === 'Escape' || ev.key === 'Esc') && nav.classList.contains('open')) {
+      closeNav();
+    }
+  });
+
+  // Hide login/register inside mobile panel when logged in
+  const logged = String(document.body.getAttribute('data-logged-in') || '').toLowerCase();
+  const isLogged = logged === '1' || logged === 'true';
+  if (isLogged) {
+    const hideLoginInPanel = function (panel) {
+      if (!panel) return;
+      panel.querySelectorAll('a[href]').forEach(a => {
+        const href = (a.getAttribute('href') || '').toLowerCase();
+        if (href.indexOf('/login') !== -1 || href.indexOf('/register') !== -1) {
+          a.style.display = 'none';
+        }
+      });
+    };
+    hideLoginInPanel(nav);
+  }
+
+  window.addEventListener('resize', syncNavMode, { passive: true });
+  window.addEventListener('orientationchange', syncNavMode, { passive: true });
+
+  // initial state
+  syncNavMode();
+})();
+</script>  
+
+
+
+
+  <!-- ===================================================================================== -->
+</body>
+</html>

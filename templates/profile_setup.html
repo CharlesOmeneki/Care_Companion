@@ -1,0 +1,3859 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Profile — Review & Publish</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    :root{
+      --admiral: #062b5a;
+      --indigo:  #2b3d9a;
+      --berry:   #1e5fbf;
+      --navy:    #0a2a66;
+      --ice:     #f5f9ff;
+      --muted:   #a6bacf;
+      --accent:  #00d4ff;
+      --card:    linear-gradient(180deg, rgba(8,30,66,0.94), rgba(11,51,120,0.98));
+      --dotted-box-bg: #062235;
+      --success-bg: rgba(0, 16, 26, 0.72);
+    }
+    *{box-sizing:border-box;font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial; -webkit-font-smoothing:antialiased;}
+    body{ margin:0; min-height:100vh; background: #151b54;  display:flex; align-items:flex-start; justify-content:center; padding:36px 16px; color:var(--ice); }
+
+    .wrap{ width:980px; max-width:98%; background:var(--card); border-radius:12px; padding:22px; box-shadow:0 30px 80px rgba(6,27,60,0.35); position:relative; overflow:visible; }
+    header.hdr{ display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:18px; }
+    header.hdr h1{ margin:0; font-size:20px; color:var(--ice); }
+    header.hdr p{ margin:0; color:var(--muted); font-size:13px; }
+
+    .top-box{ background: var(--dotted-box-bg); border-radius:10px; padding:34px 18px 28px 18px; border: 3px dashed rgba(0,212,255,0.25); box-shadow: inset 0 1px 0 rgba(255,255,255,0.02); text-align:center; }
+    .hero-avatar{ width:180px; height:180px; border-radius:50%; margin:6px auto 8px; position:relative; overflow:visible; border:6px solid var(--accent); background:#00314a; box-shadow: 0 14px 36px rgba(2,20,40,0.6); z-index:1; }
+    .hero-avatar img{ width:100%; height:100%; object-fit:cover; display:block; border-radius:50%; }
+    .hero-avatar .plus{ position:absolute; right:-18px; top:50%; transform: translateY(-50%); width:36px; height:36px; border-radius:50%; background:var(--accent); color:#002233; display:flex; align-items:center; justify-content:center; font-weight:800; border:4px solid #fff; cursor:pointer; box-shadow: 0 6px 12px rgba(0,0,0,0.25); z-index:4; }
+    .display-name{ margin-top:10px; font-size:20px; font-weight:800; color:var(--accent); letter-spacing:0.2px; }
+
+    .controls-row{ margin-top:18px; padding-top:12px; border-top:1px solid rgba(255,255,255,0.03); display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; align-items:center; justify-items:center; }
+    .control{ text-align:center; color:var(--muted); cursor:pointer; text-decoration:none; }
+    .control .icon{ font-size:24px; color:var(--ice); display:block; margin-bottom:8px; }
+    .control .label{ font-size:13px; }
+
+    .buttons-row{ margin-top:18px; display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; align-items:center; justify-items:center; }
+    .btn{ padding:10px 14px; border-radius:8px; font-weight:700; background: linear-gradient(90deg,var(--berry),var(--indigo)); color:#fff; border:none; cursor:pointer; min-width:120px; }
+    .btn.ghost{ background:#fff; color:var(--admiral); border-radius:6px; padding:8px 12px; border:0; min-width:120px; font-weight:700; display:inline-block; text-align:center; }
+    .invite-pill{ width:52px; height:52px; border-radius:50%; background:#fff; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 18px rgba(0,0,0,0.18); cursor:pointer; }
+    .invite-pill .fa-user-plus{ color:var(--admiral); font-size:20px; }
+
+/* Permanent fix for invite-pill icon rendering */
+.invite-pill::before,
+.invite-pill::after {
+  content: none !important;
+  display: none !important;
+}
+
+.invite-pill i,
+.invite-pill i::before {
+  font-family: "Font Awesome 6 Free" !important;
+  font-weight: 900 !important;      /* ensure Solid style shows */
+  font-size: 20px !important;
+  line-height: 1;
+  display: inline-block;
+  color: var(--admiral, #062b5a);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+  
+
+    .bio-row{ margin-top:18px; text-align:center; color:var(--accent); font-weight:700; line-height:1.3; }
+    .photos{ margin-top:18px; display:grid; grid-template-columns: repeat(4,1fr); gap:8px; }
+    .photo{ width:100%; padding-top:100%; position:relative; border-radius:8px; overflow:hidden; background:#07213a; border:1px solid rgba(255,255,255,0.03); cursor: pointer; }
+    .photo img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; display:block; }
+    .photos.empty{ display:none; }
+
+    .meta-tiles{ margin-top:18px; display:grid; grid-template-columns: repeat(4,1fr); gap:12px; }
+    .tile{ background: rgba(255,255,255,0.02); padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.03); text-align:center; }
+    .tile .label{ font-size:12px; color:var(--muted); }
+    .tile .value{ margin-top:6px; font-weight:800; color:var(--ice); }
+
+    .more-info{ margin-top:12px; color:var(--muted); font-size:13px; text-align:center; }
+
+    /* SUCCESS OVERLAY */
+    .publish-overlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--success-bg);
+      z-index: 9999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 320ms cubic-bezier(.2,.9,.3,1);
+    }
+    .publish-overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .publish-card {
+      width: 720px;
+      max-width: calc(100% - 48px);
+      background: linear-gradient(180deg, #07253b 0%, #0f3b5d 100%);
+      border-radius: 12px;
+      padding: 18px 20px;
+      box-shadow: 0 18px 60px rgba(2,10,30,0.45);
+      color: var(--ice);
+      display:flex;
+      gap:16px;
+      align-items:center;
+    }
+    .publish-avatar { width:84px; height:84px; border-radius:50%; overflow:hidden; border:4px solid rgba(255,255,255,0.06); background:#002a3a; display:flex; align-items:center; justify-content:center; }
+    .publish-avatar img{ width:100%; height:100%; object-fit:cover; display:block; }
+    .publish-body { flex:1; }
+    .publish-body h2 { margin:0; font-size:18px; letter-spacing:0.2px; }
+    .publish-body p { margin:6px 0 0; color:rgba(255,255,255,0.9); }
+    .publish-actions { display:flex; gap:10px; margin-left:8px; }
+    .publish-cta { background: var(--accent); border: none; color:#002233; font-weight:800; padding:10px 12px; border-radius:8px; cursor:pointer; text-decoration:none; display:inline-block; }
+    .publish-small { background: rgba(255,255,255,0.06); border: none; color:var(--ice); font-weight:700; padding:8px 10px; border-radius:8px; cursor:pointer; text-decoration:none; display:inline-block; }
+
+    .close-x { position:absolute; right:18px; top:18px; background:transparent; border:0; color:var(--ice); font-size:20px; cursor:pointer; }
+
+    /* Photo context menu */
+    .photo-menu {
+      position: fixed;
+      display: none;
+      min-width:140px;
+      background: #042433;
+      color: var(--ice);
+      border-radius:8px;
+      box-shadow: 0 10px 30px rgba(2,10,30,0.6);
+      z-index: 12000;
+      padding:6px 6px;
+      border: 1px solid rgba(255,255,255,0.04);
+      font-size:14px;
+    }
+    .photo-menu .item {
+      padding:8px 10px;
+      border-radius:6px;
+      cursor:pointer;
+      display:flex;
+      gap:8px;
+      align-items:center;
+    }
+    .photo-menu .item:hover { background: rgba(255,255,255,0.02); }
+
+    /* Image modal */
+    .img-modal {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.7);
+      z-index: 13000;
+    }
+    .img-modal.show { display:flex; }
+    .img-modal .frame {
+      max-width: 94%;
+      max-height: 88%;
+      background: transparent;
+      border-radius: 10px;
+      overflow: hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .img-modal img { max-width:100%; max-height:100%; object-fit:contain; display:block; border-radius:6px; box-shadow:0 12px 40px rgba(0,0,0,0.6); }
+
+    @media(max-width:980px){ .controls-row, .buttons-row{ grid-template-columns: repeat(3, 1fr); } .photos{ grid-template-columns: repeat(2,1fr); } .meta-tiles{ grid-template-columns: repeat(2,1fr); } .publish-card{ flex-direction:column; align-items:flex-start; } .publish-actions{ margin-left:0; width:100%; justify-content:stretch; } .publish-actions button{ width:100%; } }
+    @media(max-width:520px){ .wrap{ padding:16px; } .hero-avatar{ width:140px; height:140px; } .publish-card{ padding:14px; } .publish-avatar{ width:64px;height:64px;} }
+
+     /* ----- START: disable-interactive-controls styles ----- */
+.actions-disabled {
+  /* top-level switch: used on <body> or root wrapper */
+}
+
+.actions-disabled a,
+.actions-disabled button:not(#savePublishBtn),
+.actions-disabled input:not(#profile_photo_input):not([type="hidden"]),
+.actions-disabled select,
+.actions-disabled textarea,
+.actions-disabled label[for="profile_photo_input"],
+.actions-disabled label[for="otherPhotosInput"],
+.actions-disabled .invite-pill,
+.actions-disabled .control {
+  pointer-events: none !important;   /* prevent clicks */
+  opacity: 0.55 !important;          /* visually disabled */
+  filter: grayscale(0.06) !important;
+}
+
+/* ensure interactive elements look not-allowed on hover (accessibility cue) */
+.actions-disabled a,
+.actions-disabled button,
+.actions-disabled .control {
+  cursor: not-allowed !important;
+}
+
+/* keep Save & Publish visible and enabled */
+#savePublishBtn {
+  pointer-events: auto !important;
+  opacity: 1 !important;
+  cursor: pointer !important;
+}
+
+/* for elements that rely on :focus, prevent focusing when disabled */
+.actions-disabled a, .actions-disabled button, .actions-disabled input, .actions-disabled select, .actions-disabled textarea {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+
+/* Message badge for profile_setup messages icon */
+#messagesBadge {
+  pointer-events: none;
+  transform-origin: center;
+  white-space: nowrap;
+}
+@media (max-width:520px) {
+  #messagesBadge { right: -8px; top: -6px; min-width:18px; height:18px; font-size:11px; }
+}
+
+
+
+/* accessibility helper: show aria-disabled state */
+.interactive-disabled[aria-disabled="true"] { cursor: not-allowed; }
+/* ----- END: disable-interactive-controls styles ----- */
+
+
+
+
+
+
+
+
+/* MOBILE-ONLY: keep desktop layout unchanged; only tweak <=520px */
+@media (max-width: 520px) {
+  /* 1) hide the page header (title / subtitle / signed-in line) on mobile only */
+  header.hdr { display: none !important; }
+
+  /* 2) keep controls-row exactly like desktop: 3 equal columns (home, messages, notifications remain) */
+  .controls-row {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 8px !important;
+    align-items: center !important;
+    justify-items: center !important;
+  }
+  .control .icon { font-size: 20px !important; } /* slightly smaller icons for mobile */
+
+  /* 3) Buttons row: keep three columns (Edit | Find | Invite),
+       add a small extra gap between Edit and Find on mobile;
+       we'll hide the invite in the buttons-row (we'll move it elsewhere with JS). */
+  .buttons-row {
+    grid-template-columns: 1fr auto auto !important;
+    gap: 10px !important;
+    align-items: center !important;
+    justify-items: center !important;
+  }
+  /* make edit button left-aligned and allow it to shrink */
+  #editProfileBtn { justify-self: start !important; min-width: 100px; box-sizing: border-box; }
+  /* small right margin for the Find families button so there's visible space */
+  .buttons-row > div:nth-child(2) .btn { margin-left: 8px !important; }
+
+  /* hide the invite-pill where it originally sits (in the buttons row) */
+  .buttons-row .invite-pill { display: none !important; }
+
+  /* 4) style for the new invite + add-photos row we will insert */
+  .mobile-invite-row {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    gap: 12px !important;
+    margin: 8px 0 8px 0 !important;
+  }
+  .mobile-invite-row .invite-pill {
+    display: inline-flex !important;
+    width: 52px !important;
+    height: 52px !important;
+    border-radius: 10px !important;
+    align-items: center;
+    justify-content: center;
+    min-width: 52px;
+    box-sizing: border-box;
+    /* keep same visual look as desktop invite-pill (but more rectangular) */
+    background: #fff !important;
+    color: var(--admiral) !important;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.18) !important;
+  }
+  .mobile-invite-row .add-photos-wrap { margin: 0 !important; display:flex; justify-content:flex-end; width:auto; }
+
+  /* 5) keep tiles in their original desktop grid — do NOT stack them on mobile */
+  .meta-tiles {
+    display: grid !important;
+    grid-template-columns: repeat(4, 1fr) !important; /* same as desktop */
+    gap: 12px !important;
+  }
+
+  /* 6) hide the "Tip: Make sure you Save & Publish..." and footer on mobile */
+  .more-info, footer { display: none !important; }
+
+  /* 7) small extra adjustments so bio & photos remain tidy */
+  .bio-row { text-align: left !important; padding: 6px 0 !important; }
+  .photos { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+
+  /* keep publish overlay mobile-friendly */
+  .publish-card { max-width: 96% !important; }
+}
+
+
+/* Mobile tweaks: 2-column tiles + slight nudge for Find families button
+   Paste at end of your existing <style> block (mobile-only) */
+@media (max-width: 520px) {
+
+  /* make meta tiles a 2-column grid on phones */
+  .meta-tiles {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+    align-items: start;
+  }
+
+  /* keep tile content tidy */
+  .meta-tiles .tile {
+    padding: 10px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    min-height: auto !important;
+  }
+  .meta-tiles .tile .label { margin-bottom: 6px; font-size: 12px; }
+  .meta-tiles .tile .value  { font-size: 14px; font-weight: 800; word-break: break-word; }
+
+  /* if any tiles used a fixed width on desktop, make them fluid here */
+  .meta-tiles .tile, .meta-tiles .tile * { max-width: 100% !important; box-sizing: border-box !important; }
+
+  /* slight right shift for Find families button (a bit = 12px) */
+  .buttons-row > div:nth-child(2) .btn {
+    margin-left: 12px !important;
+  }
+
+  /* if the buttons-row used fixed column layout, ensure it still fits on small screens */
+  .buttons-row {
+    grid-auto-flow: column;
+    align-items: center;
+    gap: 10px !important;
+  }
+}
+
+
+
+
+
+/* MOBILE: 2-column tiles + top/bottom grouping + line clamps
+   Paste inside your existing <style> (end). */
+@media (max-width:520px) {
+  /* make meta tiles a two-column wrapping grid using flexbox */
+  .meta-tiles {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+    align-items: flex-start !important;
+  }
+
+  /* each tile becomes half width (two columns) */
+  .meta-tiles .tile {
+    flex: 0 0 calc(50% - 10px) !important; /* adjust -10px = gap compensation */
+    box-sizing: border-box !important;
+  }
+
+  /* default: clamp tile values to 2 lines (top group) */
+  .meta-tiles .tile .value {
+    display: -webkit-box !important;
+    -webkit-box-orient: vertical !important;
+    -webkit-line-clamp: 2 !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: normal !important;
+    line-height: 1.25 !important;
+    max-height: 2.6em !important; /* ~ 2 * 1.25 */
+    cursor: default !important;
+    word-break: break-word !important;
+  }
+
+  /* Allow the four specific long tiles to show up to 3 lines */
+  /* IDs are on the .value nodes in your template, so this targets them directly */
+  #dependentsTile,
+  #preferredScheduleTile,
+  #preferredGenderTile,
+  #locationTile {
+    -webkit-line-clamp: 3 !important;
+    max-height: 3.9em !important; /* ~ 3 * 1.25 */
+  }
+
+  /* small visual polish so rows align nicely */
+  .meta-tiles .tile { padding: 10px !important; }
+  .meta-tiles .tile .label { margin-bottom:6px; font-size:12px; color:var(--muted); }
+  .meta-tiles .tile .value { font-size:14px; font-weight:800; color:var(--ice); }
+
+  /* keep tiles fluid if content long */
+  .meta-tiles .tile, .meta-tiles .tile * { max-width: 100% !important; }
+
+  /* ensure the new layout doesn't conflict with earlier mobile rules */
+  .meta-tiles { min-height: 0 !important; }
+}
+
+
+
+
+
+
+
+
+
+/* ===== FULL REPLACEMENT: mobile-only customizations (paste once at end of <style>) ===== */
+@media (max-width:520px) {
+
+  /* avoid clipping/scrollbar issues */
+  html, body {
+    overflow-x: hidden !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    padding-top: 0 !important;
+    background: var(--dotted-box-bg) !important;
+  }
+
+  /* wrapper: full width, keep gutters via padding, remove desktop chrome */
+  .wrap {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    padding: 10px 12px 16px !important; /* keep small gutter */
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    box-sizing: border-box !important;
+  }
+
+  /* top-box becomes the visible blue area and respects page gutters */
+  .top-box {
+    margin: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    padding: 18px 16px 16px !important;
+    border-radius: 0 0 12px 12px !important;
+    position: relative !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+    left: auto !important;
+    right: auto !important;
+  }
+
+  /* avatar + name sizing */
+  .hero-avatar { width: 140px !important; height: 140px !important; margin: 6px auto 6px !important; }
+  .display-name { font-size: 18px !important; text-align:center; }
+
+  /* general buttons: smaller padding & font, allow wrapping for full labels */
+  .buttons-row {
+    display: grid !important;
+    grid-template-columns: 1fr auto auto !important; /* keep Edit | Find | Invite layout */
+    gap: 8px !important;
+    align-items: center !important;
+    justify-items: center !important;
+    box-sizing: border-box !important;
+  }
+
+  .buttons-row .btn {
+    padding: 6px 10px !important;      /* reduce height */
+    font-size: 13px !important;        /* smaller label size */
+    min-width: 0 !important;           /* allow flexible widths */
+    white-space: normal !important;    /* allow wrap instead of truncation */
+    line-height: 1.15 !important;
+    box-sizing: border-box !important;
+    display: inline-block !important;
+    text-align: center !important;
+  }
+
+  /* EDIT button: keep it compact but shift a little left visually */
+  #editProfileBtn {
+    justify-self: start !important;
+    min-width: 0 !important;
+    padding-left: 8px !important;
+    transform: translateX(-50px) !important;  /* nudge left */
+  }
+
+  /* FIND button: make it narrower and nudge it right */
+  .buttons-row > div:nth-child(2) .btn {
+    width: 110px !important;       /* explicit narrower width */
+    max-width: 110px !important;
+    padding: 6px 8px !important;
+    margin-left: 14px !important;  /* shift to the right a bit */
+    box-sizing: border-box !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  /* Invite pill: compact square, top-left above avatar */
+  .invite-pill {
+    position: absolute !important;
+    top: 10px !important;
+    left: 12px !important;
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 6px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #fff !important;
+    color: var(--admiral) !important;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.18) !important;
+    z-index: 40 !important;
+    border: 0 !important;
+  }
+  .invite-pill i { font-size: 16px !important; line-height: 1 !important; color: var(--admiral) !important; }
+
+  /* hide the original Add photos label (we add a floating link instead) */
+  label[for="otherPhotosInput"] { display: none !important; }
+
+  /* floating Add photos on top-right */
+  .mobile-add-photos {
+    position: absolute !important;
+    top: 12px !important;
+    right: 12px !important;
+    z-index: 40 !important;
+    color: var(--accent) !important;
+    font-weight: 700 !important;
+    background: transparent !important;
+    padding: 6px 8px !important;
+    font-size: 13px !important;
+    cursor: pointer !important;
+    border-radius: 6px !important;
+    text-decoration: none !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+  }
+  .mobile-add-photos:active, .mobile-add-photos:focus { transform: translateY(-1px); outline: none; }
+
+  /* photo grid keeps two columns */
+  .photos { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+
+  /* meta tiles readable */
+  .meta-tiles .tile .value { font-size: 14px !important; word-break: break-word !important; }
+
+  /* small safety if invite is inside top-box so it doesn't push content */
+  .top-box .invite-pill { z-index: 40 !important; pointer-events: auto; }
+
+  /* preserve accessible hit area for small buttons (increase tap target without changing visual size) */
+  .buttons-row .btn::before {
+    content: '';
+    display: inline-block;
+    width: 0;
+    height: 10px; /* increases vertical hit area slightly for accessibility */
+    vertical-align: middle;
+  }
+}
+
+
+/* ===== Mobile: make the entire page background #151b54 ===== */
+@media (max-width:520px) {
+  /* page background */
+  html, body {
+    background: #151b54 !important;
+    overflow-x: hidden !important;
+  }
+
+  /* allow the page color to show by making the wrapper transparent */
+  .wrap {
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* keep the avatar/top card visually consistent but transparent so bg shows */
+  .top-box {
+    background: transparent !important;
+    border-radius: 0 0 12px 12px !important;
+    padding-top: 18px !important;
+    padding-bottom: 16px !important;
+    box-shadow: none !important;
+  }
+
+  /* make lower sections transparent so the page bg is continuous */
+  .top-box ~ * {
+    background: transparent !important;
+    box-shadow: none !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  /* ensure components remain readable on dark background */
+  .display-name,
+  .top-box .control .label,
+  .top-box .control .icon,
+  .bio-row,
+  .meta-tiles .tile .label,
+  .meta-tiles .tile .value,
+  footer,
+  .more-info {
+    color: rgba(255,255,255,0.95) !important;
+  }
+
+  /* buttons: keep their style but ensure text is readable */
+  .btn, .btn.ghost {
+    color: #fff !important;
+  }
+  .btn.ghost { color: var(--admiral) !important; background: #fff !important; }
+
+  /* photo tiles and other cards: make backgrounds slightly translucent so images / tiles still look correct */
+  .photos .photo,
+  .meta-tiles .tile {
+    background: rgba(255,255,255,0.03) !important;
+    border: 1px solid rgba(255,255,255,0.04) !important;
+  }
+
+  /* keep invite pill and add-photos visible on top */
+  .invite-pill { z-index: 60 !important; background: #fff !important; color: var(--admiral) !important; }
+  .mobile-add-photos { z-index: 60 !important; color: var(--accent) !important; }
+
+  /* small safety: keep photo grid two columns */
+  .photos { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+
+  /* preserve meta-tile legibility */
+  .meta-tiles .tile .value { font-size: 14px !important; word-break: break-word !important; }
+
+  /* if any elements still carry a solid background that hides the page color,
+     you can add them here as transparent, e.g.:
+     .buttons-row, .bio-row { background: transparent !important; }
+  */
+}
+
+
+/* MOBILE: modal close button + photo delete spinner (paste at end of <style>) */
+@media (max-width:520px) {
+
+  /* modal close X button (top-right) */
+  .img-modal .modal-close-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 14010;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.45);
+    color: #fff;
+    font-weight: 800;
+    font-size: 18px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.45);
+    backdrop-filter: blur(4px);
+  }
+
+  .img-modal .modal-close-btn:active { transform: translateY(1px); }
+
+  /* spinner overlay for a single photo (centered) */
+  .photo .photo-spinner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(4,8,12,0.45);
+    z-index: 14005;
+    border-radius: 8px;
+  }
+
+  .photo .photo-spinner .dot {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 4px solid rgba(255,255,255,0.14);
+    border-top-color: #fff;
+    animation: cc-spin 1s linear infinite;
+    box-sizing: border-box;
+  }
+
+  @keyframes cc-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+  /* make sure the photo element is positioned relatively to host spinner */
+  .photo { position: relative; overflow: hidden; }
+
+  /* small adjustment: increased hit area for the modal close on mobile */
+  .img-modal .frame { padding-top: 12px; box-sizing: border-box; }
+}
+
+
+
+/* Loading Overlay */
+.loading-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.45);
+    display:none;
+    justify-content:center;
+    align-items:center;
+    z-index:99999;
+}
+
+.loading-overlay.show{
+    display:flex;
+}
+
+.loader{
+    width:55px;
+    height:55px;
+    border:6px solid rgba(255,255,255,.3);
+    border-top:6px solid #ffffff;
+    border-radius:50%;
+    animation:spin .8s linear infinite;
+}
+
+@keyframes spin{
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+  </style>
+
+  <!-- Provide per-user id for profile-sync and load the shim BEFORE inline scripts that read localStorage -->
+  <script>window.__USER_ID__ = {{ (user.id if user is defined and user else '_anon') | tojson }};</script>
+  <script src="{{ url_for('static', filename='js/profile-sync.js') }}"></script>
+</head>
+
+<!-- SMALL CHANGE: apply actions-disabled class to body when server wants controls disabled -->
+<body class="{{ 'actions-disabled' if disable_action_controls else '' }}">
+
+  <!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loader"></div>
+</div> 
+
+  <div class="wrap" role="main" aria-labelledby="pageTitle">
+    <header class="hdr">
+      <div>
+        <h1 id="pageTitle">Your profile — review & publish</h1>
+        <p class="small-muted">What you see here is what your connections will see. Click <strong>Save &amp; Publish</strong> to make it live.</p>
+      </div>
+      <div class="small-muted">Signed in as <strong style="color:var(--ice)">{{ user.first_name if user else session.get('user_name') }}</strong></div>
+    </header>
+
+    {% set pv = preview if (preview is defined and preview) else {} %}
+    {% set s1 = session.get('profile_step1', {}) %}
+    {% set draft_step2 = session.get('profile_step2', {}) %}
+    {# Use normalized s2 (server-side normalized session draft) for definitive draft values in template #}
+    {% set s2 = s2 if (s2 is defined) else (profile_step2 if (profile_step2 is defined) else normalize_for_template(session.get('profile_step2', {}) or {})) %}
+    {% set sources = (pv.get('other_photos') if pv and pv.get('other_photos') is not none else other_photos | default([])) %}
+
+    {# Show Save button when profile not persisted OR there are session drafts #}
+    {# show Save & Publish when:
+       - there is no persisted profile yet (profile is none), OR
+       - profile exists but is not published, OR
+       - there are session drafts present
+    #}
+    {% set profile_exists = (profile is defined and profile) %}
+    {# safe & simple: if `profile` exists use its attribute, otherwise false #}
+    {% set profile_published = profile_exists and (profile.published if profile is not none else False) %}
+ 
+    {% set show_save_btn = (not profile_exists) or (not profile_published) or (session.get('profile_step1') is not none) or (session.get('profile_step2') is not none) %}
+ 
+
+    <form id="setupForm" method="post" action="{{ url_for('profile_setup') }}" enctype="multipart/form-data" novalidate>
+
+      {# hidden tokens for specialties/services (unchanged) #}
+      {% set ds_raw = None %}
+      {% if s2 and (s2.get('specialties') is not none) %}
+        {% set ds_raw = s2.get('specialties') %}
+      {% elif pv is defined and pv and (pv.get('specialties') is not none) %}
+        {% set ds_raw = pv.get('specialties') %}
+      {% elif profile is defined and profile and (profile.specialties is not none) %}
+        {% set ds_raw = profile.specialties %}
+      {% else %}
+        {% set ds_raw = '' %}
+      {% endif %}
+
+      {% if ds_raw is sequence and ds_raw is not string %}
+        {% set ds_val = ds_raw | join(',') %}
+      {% else %}
+        {% set ds_val = ds_raw %}
+      {% endif %}
+
+      {% set sv_raw = None %}
+      {% if s2 and (s2.get('services') is not none) %}
+        {% set sv_raw = s2.get('services') %}
+      {% elif pv is defined and pv and (pv.get('services') is not none) %}
+        {% set sv_raw = pv.get('services') %}
+      {% elif profile is defined and profile and (profile.services is not none) %}
+        {% set sv_raw = profile.services %}
+      {% else %}
+        {% set sv_raw = '' %}
+      {% endif %}
+
+      {% if sv_raw is sequence and sv_raw is not string %}
+        {% set sv_val = sv_raw | join(',') %}
+      {% else %}
+        {% set sv_val = sv_raw %}
+      {% endif %}
+
+      <input type="hidden" name="specialties_other" id="ps_specialties_other"
+             value="{{ (s2.get('specialties_other') if s2 else '') or (pv.get('specialties_other') if pv else '') or (profile.specialties_other if profile else '') }}">
+
+      <input type="hidden" name="services_other" id="ps_services_other"
+             value="{{ (s2.get('services_other') if s2 else '') or (pv.get('services_other') if pv else '') or (profile.services_other if profile else '') }}">
+
+      <input type="hidden" name="specialties" id="ps_specialties" value="{{ ds_val or '' }}">
+      <input type="hidden" name="services" id="ps_services" value="{{ sv_val or '' }}">
+
+      <div class="top-box" role="region" aria-label="Profile header">
+
+        {# -----------------------
+           SAFE hero-avatar block (avoids nested {{ ... }} complexity)
+           ----------------------- #}
+        <div class="hero-avatar" id="heroAvatarWrap">
+          {# pick a filename (or None) so we can build urls cleanly #}
+          {% set hero_filename = (pv.get('profile_photo') if pv and pv.get('profile_photo')
+                                   else (s1.get('profile_photo') if s1 and s1.get('profile_photo')
+                                   else (profile.profile_photo if profile and profile.profile_photo else None))) %}
+          {% if hero_filename %}
+            {% set hero_basename = hero_filename|basename %}
+            {% set hero_url = url_for('uploaded_file', filename=hero_basename) %}
+          {% else %}
+            {% set hero_basename = None %}
+            {% set hero_url = url_for('static', filename='images/avatar cc.jfif') %}
+          {% endif %}
+
+          <img id="heroAvatar"
+               src="{{ hero_url }}"
+               alt="avatar"
+               data-orig-src="{{ hero_url }}"
+               {% if hero_basename %} data-filename="{{ hero_basename }}" {% endif %}>
+
+          <label for="profile_photo_input" class="plus" title="Change avatar">+</label>
+          <input id="profile_photo_input" name="profile_photo" type="file" accept="image/*" style="display:none;">
+        </div>
+
+        <div class="display-name">{{ user.first_name }} {{ user.last_name }}</div>
+
+        {# -----------------------
+           Controls row (disabled when actions_enabled is false)
+           ----------------------- #}
+        {% set services_href = (url_for('home') if actions_enabled else '#') %}
+ 
+ 
+        {% if user and user.role == 'caregiver' %}
+          {% set network_href = (url_for('find_family') if actions_enabled else '#') %}
+        {% else %}
+          {% set network_href = (url_for('find_caregiver') if actions_enabled else '#') %}
+        {% endif %}
+
+        <div class="controls-row">
+          <a href="{{ services_href }}"
+   class="control{% if not actions_enabled %} disabled{% endif %}"
+   title="Home"
+   {% if not actions_enabled %}aria-disabled="true" tabindex="-1" onclick="event.preventDefault();"{% endif %}>
+  <i class="fa-solid fa-house icon" aria-hidden="true"></i>
+  <div class="label">Home</div>
+</a>
+ 
+
+<a id="navMessagesLink"
+   href="{{ (url_for('chat_page', other_id=0) if actions_enabled else '#') }}"
+   class="control{% if not actions_enabled %} disabled{% endif %}"
+   title="Messages"
+   {% if not actions_enabled %}aria-disabled="true" tabindex="-1" onclick="event.preventDefault();"{% endif %}>
+  <div style="position:relative; display:inline-block; line-height:0;">
+    <i class="fa-solid fa-envelope icon" aria-hidden="true"></i>
+    <span id="messagesBadge" aria-hidden="true"
+          style="display:none; position:absolute; top:-6px; right:-10px; min-width:20px; height:20px; padding:0 6px; border-radius:10px; font-size:12px; font-weight:800; color:#fff; background:#e74c3c; display:flex; align-items:center; justify-content:center; box-shadow:0 6px 12px rgba(0,0,0,0.18);">
+      0
+    </span>
+  </div>
+  <div class="label">Messages</div>
+</a>
+ 
+        <a id="navNotificationsLink"
+   href="#"
+   class="control{% if not actions_enabled %} disabled{% endif %}"
+   title="Notifications"
+   {% if not actions_enabled %}aria-disabled="true" tabindex="-1" onclick="event.preventDefault();"{% endif %}>
+  <div style="position:relative; display:inline-block; line-height:0;">
+    <i class="fa-solid fa-bell icon" aria-hidden="true"></i>
+    <span id="notificationsBadge" aria-hidden="true"
+          style="display:none; position:absolute; top:-6px; right:-10px; min-width:20px; height:20px; padding:0 6px; border-radius:10px; font-size:12px; font-weight:800; color:#fff; background:#e74c3c; align-items:center; justify-content:center; box-shadow:0 6px 12px rgba(0,0,0,0.18);">
+      0
+    </span>
+  </div>
+  <div class="label">Notifications</div>
+</a> 
+        </div>
+      </div>
+
+
+      {# -----------------------
+         Buttons row (Edit / Find / Invite) — disabled until actions_enabled true
+         Save & Publish left unchanged (controlled by show_save_btn)
+         ----------------------- #}
+      <div class="buttons-row">
+        <div>
+          {% set edit_href = (url_for('profile_edit') if actions_enabled else '#') %}
+          <a id="editProfileBtn"
+             href="{{ edit_href }}"
+             class="btn ghost{% if not actions_enabled %} disabled{% endif %}"
+             style="text-decoration:none; display:inline-block;"
+             {% if not actions_enabled %}aria-disabled="true" tabindex="-1" onclick="event.preventDefault();"{% endif %}>
+            Edit Profile
+          </a>
+        </div>
+
+        <div style="justify-self:center;">
+          {% if user and user.role == 'caregiver' %}
+            {% set find_href = (url_for('find_family') if actions_enabled else '#') %}
+            <a class="btn ghost{% if not actions_enabled %} disabled{% endif %}"
+               href="{{ find_href }}"
+               style="text-decoration:none; display:inline-block; width:140px; text-align:center;"
+               {% if not actions_enabled %}aria-disabled="true" tabindex="-1" onclick="event.preventDefault();"{% endif %}>
+              Find families
+            </a>
+          {% else %}
+            {% set find_href = (url_for('find_caregiver') if actions_enabled else '#') %}
+            <a class="btn ghost{% if not actions_enabled %} disabled{% endif %}"
+               href="{{ find_href }}"
+               style="text-decoration:none; display:inline-block; width:140px; text-align:center;"
+               {% if not actions_enabled %}aria-disabled="true" tabindex="-1" onclick="event.preventDefault();"{% endif %}>
+              Find caregivers
+            </a>
+          {% endif %}
+        </div>
+
+        <div>
+  {% if actions_enabled %}
+    <a href="{{ url_for('create_invite_and_share') }}" class="invite-pill" title="Invite family or caregivers">
+      <i class="fa-solid fa-user-plus" aria-hidden="true"></i>
+    </a>
+  {% else %}
+    <a href="#" class="invite-pill disabled" aria-disabled="true" onclick="event.preventDefault();">
+      <i class="fa-solid fa-user-plus" aria-hidden="true"></i>
+    </a>
+  {% endif %}
+</div>
+ 
+      </div>
+
+      <div class="bio-row" id="bioPreview">
+        {{ (pv and pv.get('bio')) or (s1 and s1.get('bio')) or (profile and profile.bio) or '' }}
+      </div>
+
+      <div style="display:flex; justify-content:flex-end; margin-top:6px;">
+        <label class="btn" for="otherPhotosInput" style="background:#fff;color:var(--admiral);">Add photos</label>
+        <input id="otherPhotosInput" name="other_photos" type="file" accept="image/*" multiple style="display:none;">
+      </div>
+
+      {% set ns = namespace(count=0) %}
+      {% set sources_list = sources | default([]) %}
+      {% for p in sources_list %}
+        {% if p and ns.count < 8 %}
+          {% set ns.count = ns.count + 1 %}
+        {% endif %}
+      {% endfor %}
+      {% if s1 and s1.get('profile_photo') and (s1.get('profile_photo') not in sources_list) and ns.count < 8 %}
+        {% set ns.count = ns.count + 1 %}
+      {% endif %}
+      {% if s2 and s2.get('other_photos') %}
+        {% for p in (s2.get('other_photos')|split(',') if s2.get('other_photos') else []) %}
+          {% if p and ns.count < 8 and (p not in sources_list) %}
+            {% set ns.count = ns.count + 1 %}
+          {% endif %}
+        {% endfor %}
+      {% endif %}
+
+      <div class="photos{% if ns.count==0 %} empty{% endif %}" id="photoGrid" aria-live="polite">
+        {% set n = 0 %}
+        {% for p in sources_list %}
+          {% if p and n < 8 %}
+            {% set p_basename = p|basename %}
+            <div class="photo" data-filename="{{ p_basename }}"><img src="{{ url_for('uploaded_file', filename=p_basename) }}" alt="photo {{ loop.index }}"></div>
+            {% set n = n + 1 %}
+          {% endif %}
+        {% endfor %}
+
+        {% if s1 and s1.get('profile_photo') and n < 8 and (s1.get('profile_photo') not in sources_list) %}
+          {% set s1_basename = s1.get('profile_photo')|basename %}
+          <div class="photo" data-filename="{{ s1_basename }}"><img src="{{ url_for('uploaded_file', filename=s1_basename) }}" alt="photo"></div>
+          {% set n = n + 1 %}
+        {% endif %}
+
+        {% if s2 and s2.get('other_photos') %}
+          {% for p in (s2.get('other_photos')|split(',') if s2.get('other_photos') else []) %}
+            {% if p and n < 8 and (p not in sources_list) %}
+              {% set p_basename = p|basename %}
+              <div class="photo" data-filename="{{ p_basename }}"><img src="{{ url_for('uploaded_file', filename=p_basename) }}" alt="photo"></div>
+              {% set n = n + 1 %}
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      </div>
+
+      {% macro fmt_time(t) %}
+        {% if not t %}
+        {% else %}
+          {% set parts = t.split(':') %}
+          {% set hh = parts[0]|int %}
+          {% set mm = (parts[1] if parts|length > 1 else '00') %}
+          {% set ampm = 'am' if hh < 12 else 'pm' %}
+          {% set hhh = hh % 12 %}
+          {% if hhh == 0 %}{% set hhh = 12 %}{% endif %}
+          {{ hhh }}{% if mm and mm != '00' %}:{{ mm }}{% endif %}{{ ampm }}
+        {% endif %}
+      {% endmacro %}
+
+      {% macro fmt_years(v) %}
+        {%- set s = (v|string).strip() -%}
+        {%- if s == '' -%}
+          — 
+        {%- else -%}
+          {%- set digits = s.replace(',', '') -%}
+          {%- if digits is string and digits.isdigit() -%}
+            {%- set n = digits | int -%}
+            {%- if n == 1 -%}1 year{%- else -%}{{ n }} years{%- endif -%}
+          {%- else -%}
+            {{ s }}
+          {% endif -%}
+        {%- endif -%}
+      {% endmacro %}
+
+                                                  
+                                    {% macro fmt_list_readable(val) %}
+  {# Normalize input into a list of raw tokens #}
+  {%- if val is iterable and val is not string -%}
+    {%- set raw_str = val | join(',') -%}
+  {%- else -%}
+    {%- set raw_str = (val|string).strip() -%}
+  {%- endif -%}
+
+  {# If empty-ish, return an empty parts list #}
+  {%- if raw_str in ['', 'null', 'None', '[]', '[""]', "['']"] -%}
+    {%- set parts = [] -%}
+  {%- else -%}
+    {# Remove common JSON/array punctuation and normalize separators to commas #}
+    {%- set clean = raw_str
+         .replace('[','')
+         .replace(']','')
+         .replace('(', '')
+         .replace(')', '')
+         .replace('{','')
+         .replace('}','')
+         .replace('"','')
+         .replace("'", '')
+         .replace(';',',')
+         .replace('|',',')
+         .replace('\n',',')
+         .strip() -%}
+    {%- if clean == '' -%}
+      {%- set parts = [] -%}
+    {%- else -%}
+      {%- set parts = clean.split(',') -%}
+    {%- endif -%}
+  {%- endif -%}
+
+  {# mapping: keys are normalized (lowercase, spaces) #}
+  {%- set mapping = {
+      'personal care':'Personal care',
+      'personal_care':'Personal care',
+      'personal-care':'Personal care',
+      'medication':'Medication reminder',
+      'medication reminder':'Medication reminder',
+      'infant care':'Infant care',
+      'infant_care':'Infant care',
+      'child care':'Child care',
+      'child_care':'Child care',
+      'elderly care':'Elderly care',
+      'elderly_care':'Elderly care',
+      'Companionship':'Companionship',
+      'meal prep':'Meal prep',
+      'meal_prep':'Meal prep',
+      'all ages':'All ages',
+      'all_ages':'All ages',
+      'all-ages':'All ages',
+      'all':'All ages'
+    } -%}
+
+  {%- set seen = [] -%}
+  {%- set mapped = [] -%}
+
+  {%- for raw in parts -%}
+    {%- set item = (raw|string).strip() -%}
+    {%- if item != '' -%}
+      {# normalize key: lowercase, replace underscores/dashes with spaces, collapse spaces #}
+      {%- set key_norm = item|lower
+           |replace('_',' ')
+           |replace('-',' ')
+           |replace('  ',' ')
+           |trim -%}
+
+      {# prefer direct mapping lookup on normalized key #}
+      {%- if mapping.get(key_norm) %}
+        {%- set label = mapping.get(key_norm) -%}
+      {%- else %}
+        {# heuristics for likely tokens if not in explicit map #}
+        {%- if 'infant' in key_norm %}
+          {%- set label = 'Infant care' -%}
+        {%- elif 'personal' in key_norm %}
+          {%- set label = 'Personal care' -%}
+        {%- elif 'medicat' in key_norm or key_norm == 'medication' %}
+          {%- set label = 'Medication reminder' -%}
+        {%- elif ('meal' in key_norm) and ('prep' in key_norm) %}
+          {%- set label = 'Meal prep' -%}
+        {%- elif 'child' in key_norm %}
+          {%- set label = 'Child care' -%}
+        {%- elif 'elder' in key_norm %}
+          {%- set label = 'Elderly care' -%}
+        {%- elif 'compan' in key_norm %}
+          {%- set label = 'Companionship' -%}
+        {%- elif 'all' == key_norm or 'all ages' in key_norm %}
+          {%- set label = 'All ages' -%}
+        {%- else %}
+          {# fallback: Title-case the normalized key (turn 'personal care' -> 'Personal Care') #}
+          {%- set label = key_norm.title() -%}
+        {%- endif %}
+      {%- endif %}
+
+      {# add unique labels only #}
+      {%- if label not in seen %}
+        {%- set seen = seen + [label] -%}
+        {%- set mapped = mapped + [label] -%}
+      {%- endif %}
+    {%- endif -%}
+  {%- endfor -%}
+
+  {# format joined output with commas + 'and' before last element #}
+  {%- if mapped|length == 0 -%}
+    — 
+  {%- elif mapped|length == 1 -%}
+    {{ mapped[0] }}
+  {%- elif mapped|length == 2 -%}
+    {{ mapped[0] }} and {{ mapped[1] }}
+  {%- else -%}
+    {{ mapped[:-1] | join(', ') }}, and {{ mapped[-1] }}
+  {%- endif -%}
+{% endmacro %}
+ 
+      {% if user and user.role == 'caregiver' %}
+        <div class="meta-tiles">
+          <div class="tile">
+            <div class="label">Marital status</div>
+            <div class="value">{{ (pv and pv.get('marital_status')) or (s1 and s1.get('marital_status')) or (profile and profile.marital_status) or '—' }}</div>
+          </div>
+
+          <div class="tile">
+            <div class="label">Age</div>
+            <div class="value">{{ (pv and (pv.get('age') if pv.get('age') is not none else None)) or (s1 and s1.get('age')) or (profile and profile.age) or '—' }}</div>
+          </div>
+
+          <div class="tile">
+            <div class="label">Location</div>
+            <div class="value">{{ (pv and pv.get('location')) or (s1 and s1.get('location')) or (profile and profile.location) or '—' }}</div>
+          </div>
+
+          <div class="tile">
+            <div class="label">Languages</div>
+            <div class="value">{{ (pv and pv.get('languages')) or (s1 and s1.get('languages')) or (profile and profile.languages) or '—' }}</div>
+          </div>
+
+          <div class="tile">
+            <div class="label">Experience</div>
+            <div class="value">
+              {% if pv and (pv.get('experience_years') is not none) %}
+                {{ fmt_years(pv.get('experience_years')) }}
+              {% elif s2 and (s2.get('experience_years') is not none) %}
+                {{ fmt_years(s2.get('experience_years')) }}
+              {% elif profile and profile.experience_years is not none %}
+                {{ fmt_years(profile.experience_years) }}
+              {% else %}
+                —
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="tile">
+            <div class="label">Specialties</div>
+            <div class="value"><span id="specialtiesTile" aria-live="polite">
+              {{ fmt_list_readable(
+                   (pv.get('specialties_display') if pv else None)
+                   or (pv.get('specialties') if pv else None)
+                   or (s2 and s2.get('specialties'))
+                   or (profile and profile.specialties)
+                   or ''
+                 ) or '—' }}
+            </span></div>
+          </div>
+
+          <div class="tile">
+            <div class="label">Services</div>
+            <div class="value"><span id="servicesTile" aria-live="polite">
+              {{ fmt_list_readable(
+                   (pv.get('services_display') if pv else None)
+                   or (pv.get('services') if pv else None)
+                   or (s2 and s2.get('services'))
+                   or (profile and profile.services)
+                   or ''
+                 ) or '—' }}
+            </span></div>
+          </div>
+
+          <div class="tile">
+            <div class="label">Salary</div>
+            <div class="value" id="salaryTile">
+              {# Prefer preview, then normalized s2 (draft), then persisted profile #}
+              {{ (pv and pv.get('salary')) or (s2 and s2.get('hourly_rate')) or (profile and profile.hourly_rate) or '—' }}
+            </div>
+          </div>
+
+          <div class="tile">
+            <div class="label">Availability</div>
+            <div class="value" id="availabilityTile">
+              {# IMPORTANT: prefer preview -> normalized s2 (server-normalized draft) -> session raw -> persisted profile #}
+              {% set from_pv = pv.get('availability') if pv else None %}
+              {% if from_pv %}
+                {{ from_pv }}
+              {% else %}
+                {% set draft_text = fmt_availability_from_inputs(s2 if s2 else (draft_step2 if draft_step2 else {})) %}
+                {% if draft_text and draft_text|trim != '' %}
+                  {{ draft_text }}
+                {% else %}
+                  {% if profile and profile.availability %}
+                    {{ profile.availability }}
+                  {% else %}
+                    — 
+                  {% endif %}
+                {% endif %}
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="tile">
+            <div class="label">Disability</div>
+            <div class="value">
+              {% set dis_raw = (pv and (pv.get('disability') if (pv.get('disability') is defined) else None))
+                                or (s2 and (s2.get('disability') if s2.get('disability') is not none else None))
+                                or (profile and (profile.disability if (profile.disability is defined) else None)) %}
+              {% set dis_details = (s2 and (s2.get('disability_details') if s2.get('disability_details') is not none else None))
+                                   or (pv and (pv.get('disability_details') if (pv.get('disability_details') is defined) else None))
+                                   or (profile and (profile.disability_details if (profile.disability_details is defined) else None)) %}
+              {% if dis_raw %}
+                {% set s = (dis_raw|string).lower().strip() %}
+                {% if s in ['no','none','false','0','n','off',''] %}
+                  No
+                {% elif s in ['yes','true','1','y','on'] %}
+                  {% if dis_details and dis_details|string|trim %}
+                    Yes-{{ dis_details|string|trim }}
+                  {% else %}
+                    Yes
+                  {% endif %}
+                {% else %}
+                  {% if dis_details and dis_details|string|trim %}
+                    {{ dis_raw }}-{{ dis_details|string|trim }}
+                  {% else %}
+                    {{ dis_raw }}
+                  {% endif %}
+                {% endif %}
+              {% else %}
+                — 
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="tile">
+            <div class="label">Preferred recipient age</div>
+            <div class="value">
+              {% set age_raw = (pv and pv.get('preferred_age')) or (s2 and s2.get('preferred_age')) or (profile and profile.preferred_age) %}
+              {% if age_raw %}
+                {# normalize token to a lowercase key without underscores/dashes #}
+                {% set _age_key = (age_raw|string).replace('_',' ').replace('-', ' ').strip().lower() %}
+                {% set _age_map = {
+                  'children': 'Children (1–12)',
+                  'teenagers': 'Teenagers (13–17)',
+                  'adults': 'Adults (18–64)',
+                  'seniors': 'Seniors (65+)',
+                  'all ages': 'All ages',
+                  'all_ages': 'All ages',
+                  'all-ages': 'All ages',
+                  'other': 'Other / Mixed'
+                } %}
+                {{ _age_map.get(_age_key) or age_raw }}
+              {% else %}
+                —
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="tile">
+            <div class="label">Willing to travel</div>
+            {% set _wt = (s2 and s2.get('willing_to_travel')) or (pv and pv.get('willing_to_travel')) or (profile and profile.willing_to_travel) %}
+            <div class="value">{{ _wt|string|trim and (_wt|string|capitalize) or '—' }}</div>
+          </div>
+          </div>
+ 
+
+      {% else %}
+        <div class="meta-tiles">
+          <!-- Family tiles -->
+          <div class="tile">
+            <div class="label">Type of care needed</div>
+            <div class="value" id="careNeededTile">{{ (pv and pv.get('care_needed')) or (s2 and s2.get('care_needed')) or (profile and profile.care_needed) or '—' }}</div>
+          </div>
+
+          <div class="tile">
+            <div class="label">Number of dependents</div>
+            <div class="value" id="dependentsTile">{{ (s2 and (s2.get('number_of_dependents') if s2.get('number_of_dependents') is not none else None)) or (profile and profile.number_of_dependents) or '—' }}</div>
+          </div>
+
+          <div class="tile">
+            <div class="label">Preferred schedule</div>
+            <div class="value" id="preferredScheduleTile">
+              {% set from_pv = pv.get('preferred_schedule') if pv else None %}
+              {% if from_pv %}
+                {{ from_pv }}
+              {% else %}
+                {% set draft_text = fmt_availability_from_inputs(s2 if s2 else (draft_step2 if draft_step2 else {}), pref=True) %}
+                {% if draft_text and draft_text|trim != '' %}
+                  {{ draft_text }}
+                {% else %}
+                  {% if profile and profile.preferred_schedule %}
+                    {{ profile.preferred_schedule }}
+                  {% else %}
+                    —
+                  {% endif %}
+                {% endif %}
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="tile">
+            <div class="label">Salary budget</div>
+            <div class="value" id="hourlyBudgetTile">{{ (s2 and s2.get('hourly_budget')) or (profile and profile.hourly_budget) or '—' }}</div>
+          </div>
+
+          <div class="tile">
+            <div class="label">Preferred caregiver gender</div>
+            <div class="value" id="preferredGenderTile">
+    {%- set raw_gender = (s2 and s2.get('preferred_gender')) or (pv and pv.get('preferred_gender')) or (profile and profile.preferred_gender) -%}
+    {%- if raw_gender -%}
+      {%- set g = (raw_gender|string).strip() -%}
+      {%- set lower = g|lower -%}
+      {%- if lower in ['female','f'] -%}
+        Female
+      {%- elif lower in ['male','m'] -%}
+        Male
+      {%- elif lower in ['no_preference','no-preference','no preference','no_pref','none','no pref'] -%}
+        No preference
+      {%- else -%}
+        {{ g.replace('_',' ').replace('-',' ') | title }}
+      {%- endif -%}
+    {%- else -%}
+      — 
+    {%- endif -%}
+           </div>
+        </div>
+ 
+
+          <div class="tile">
+            <div class="label">Household notes</div>
+            <div class="value" id="householdTile">{{ (s2 and s2.get('household_info')) or (profile and profile.household_info) or '—' }}</div>
+          </div>
+
+          <div class="tile">
+            <div class="label">Medical needs</div>
+            <div class="value" id="medicalTile">{{ (s2 and s2.get('medical_needs')) or (profile and profile.medical_needs) or '—' }}</div>
+          </div>
+
+          <div class="tile">
+            <div class="label">Languages</div>
+            <div class="value" id="languagesTile">{{ (pv and pv.get('languages')) or (s2 and s2.get('languages')) or (profile and profile.languages) or '—' }}</div>
+          </div>
+
+          <div class="tile">
+            <div class="label">Location</div>
+            <div class="value" id="locationTile">{{ (pv and pv.get('location')) or (s2 and s2.get('location')) or (profile and profile.location) or '—' }}</div>
+          </div>
+        </div>
+      {% endif %}
+
+      {# ---------- Save & Publish button: render when server says to show it ---------- #}
+      {% if show_save_btn %}
+        <div style="display:flex; justify-content:center; margin-top:20px;">
+          <button type="submit" class="btn" id="savePublishBtn">Save &amp; Publish</button>
+        </div>
+      {% endif %}
+      {# ------------------------------------------------------------------------------ #}
+    </form>
+
+    <div class="more-info">Tip: Make sure you <strong>Save &amp; Publish</strong> your profile so visitors can see it.</div>
+
+    <footer style="text-align:center; margin-top:14px; color:var(--muted); font-size:13px;">You can edit this later from Edit Profile.</footer>
+  </div>
+
+
+    {# -----------------------------
+     IMPORTANT: compute published_flag while respecting suppression
+     ------------------------------ #}
+  {% set flashed = get_flashed_messages() %}
+  {% set suppress_from_request = (request.args.get('suppress_overlay') == '1') %}
+  {% set suppress_from_ctx = (suppress_publish_overlay if (suppress_publish_overlay is defined) else False) %}
+  {% set suppress_overlay = suppress_from_request or suppress_from_ctx %}
+  {% set published_flag = (('Profile saved!' in flashed) or (request.args.get('published') == '1') or (published if (published is defined) else False)) and (not suppress_overlay) %}
+
+  <div id="publishOverlay" class="publish-overlay {% if published_flag %}show{% endif %}" aria-hidden="{{ 'false' if published_flag else 'true' }}">
+    <div class="publish-card" role="dialog" aria-live="polite" aria-label="Profile published">
+      <button class="close-x" id="closeOverlayBtn" title="Close" aria-label="Close overlay">&times;</button>
+      <div class="publish-avatar" aria-hidden="true">
+        {% if pv and pv.get('profile_photo') %}
+          {% set pub_basename = pv.get('profile_photo')|basename %}
+          <img src="{{ url_for('uploaded_file', filename=pub_basename) }}" alt="avatar">
+        {% elif profile and profile.profile_photo %}
+          {% set pub_basename = profile.profile_photo|basename %}
+          <img src="{{ url_for('uploaded_file', filename=pub_basename) }}" alt="avatar">
+        {% else %}
+          <img src="{{ url_for('static', filename='images/avatar cc.jfif') }}" alt="avatar">
+        {% endif %}
+      </div>
+      <div class="publish-body">
+        <h2>{{ publish_message or "Profile published!" }}</h2>
+        <p>Your profile is live. Families and caregivers can now view and contact you.</p>
+      </div>
+      <div class="publish-actions" role="group" aria-label="Next actions">
+        <a id="publishCta" class="publish-cta" href="{{ publish_cta_url or '/connections' }}">Connect now</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- photo context menu -->
+  <div id="photoMenu" class="photo-menu" role="menu" aria-hidden="true">
+    <div class="item" data-action="view"><i class="fa-solid fa-eye"></i> View</div>
+    <div class="item" data-action="share"><i class="fa-solid fa-share-nodes"></i> Share</div>
+    <div class="item" data-action="delete"><i class="fa-solid fa-trash"></i> Delete</div>
+  </div>
+
+  <!-- modern share box (hidden by default) -->
+  <div id="shareBox" class="share-box-modern" role="dialog" aria-hidden="true" style="display:none;">
+    <div class="sb-head">
+      <strong>Share photo</strong>
+      <button id="shareBoxClose" class="sb-close" aria-label="Close share box">&times;</button>
+    </div>
+    <div class="sb-grid" role="list">
+      <!-- provider buttons -->
+      <button class="share-btn" data-provider="native" type="button" title="Share (native)" role="listitem">
+        <i class="fa-solid fa-arrow-up-from-bracket"></i><span>Share</span>
+      </button>
+      <button class="share-btn" data-provider="copy" type="button" title="Copy link" role="listitem">
+        <i class="fa-solid fa-copy"></i><span>Copy</span>
+      </button>
+      <button class="share-btn" data-provider="download" type="button" title="Download image" role="listitem">
+        <i class="fa-solid fa-download"></i><span>Download</span>
+      </button>
+      <button class="share-btn" data-provider="whatsapp" type="button" title="WhatsApp" role="listitem">
+        <i class="fa-brands fa-whatsapp"></i><span>WhatsApp</span>
+      </button>
+      <button class="share-btn" data-provider="facebook" type="button" title="Facebook" role="listitem">
+        <i class="fa-brands fa-facebook"></i><span>Facebook</span>
+      </button>
+      <button class="share-btn" data-provider="twitter" type="button" title="Twitter" role="listitem">
+        <i class="fa-brands fa-twitter"></i><span>Twitter</span>
+      </button>
+      <button class="share-btn" data-provider="linkedin" type="button" title="LinkedIn" role="listitem">
+        <i class="fa-brands fa-linkedin"></i><span>LinkedIn</span>
+      </button>
+      <button class="share-btn" data-provider="email" type="button" title="Email" role="listitem">
+        <i class="fa-solid fa-envelope"></i><span>Email</span>
+      </button>
+      <button class="share-btn" data-provider="instagram" type="button" title="Instagram (manual upload)" role="listitem">
+        <i class="fa-brands fa-instagram"></i><span>Instagram</span>
+      </button>
+      <button class="share-btn" data-provider="youtube" type="button" title="YouTube (upload)" role="listitem">
+        <i class="fa-brands fa-youtube"></i><span>YouTube</span>
+      </button>
+    </div>
+    <div class="sb-foot" aria-hidden="true">
+      <small class="sb-note">Tip: some services (Instagram / YouTube) require downloading and re-uploading in their apps — use <strong>Download</strong>.</small>
+    </div>
+  </div>
+
+  <!-- image modal -->
+  <div id="imgModal" class="img-modal" role="dialog" aria-hidden="true">
+    <div class="frame" role="document" aria-label="Photo preview">
+      <img id="imgModalImg" src="" alt="Photo preview">
+    </div>
+  </div>
+
+  <!-- polished styles for share box (with brand colors) -->
+  <style>
+    /* share box modern look */
+    .share-box-modern {
+      position: fixed;
+      z-index: 12500;
+      background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));
+      border-radius: 12px;
+      padding: 12px;
+      min-width: 320px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.45);
+      border: 1px solid rgba(255,255,255,0.04);
+      color: var(--ice);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      overflow: hidden;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+    }
+    .share-box-modern .sb-head {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:8px;
+    }
+    .share-box-modern .sb-head strong { font-size:14px; color:var(--ice); }
+    .share-box-modern .sb-close {
+      background:transparent; border:0; color:var(--ice); font-size:18px; cursor:pointer; padding:6px;
+    }
+    .share-box-modern .sb-grid {
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap:10px;
+      align-items:center;
+    }
+
+    /* base button */
+    .share-btn {
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      padding:10px 8px;
+      border-radius:10px;
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.03);
+      cursor:pointer;
+      transition: transform 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
+      outline: none;
+      color:var(--ice);
+      min-height:72px;
+      text-align:center;
+    }
+    .share-btn i { font-size:20px; display:block; }
+    .share-btn span { font-size:12px; display:block; color:var(--muted); }
+
+    .share-btn:hover, .share-btn:focus {
+      transform: translateY(-6px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    }
+
+    /* Brand colors for icons / buttons */
+    .share-btn[data-provider="whatsapp"] i { color: #25D366; }
+    .share-btn[data-provider="whatsapp"] { border-color: rgba(37,211,102,0.12); background: linear-gradient(180deg, rgba(37,211,102,0.06), rgba(37,211,102,0.02)); }
+
+    .share-btn[data-provider="facebook"] i { color: #1877F2; }
+    .share-btn[data-provider="facebook"] { border-color: rgba(24,119,242,0.12); background: linear-gradient(180deg, rgba(24,119,242,0.06), rgba(24,119,242,0.02)); }
+
+    .share-btn[data-provider="twitter"] i { color: #1DA1F2; }
+    .share-btn[data-provider="twitter"] { border-color: rgba(29,161,242,0.12); background: linear-gradient(180deg, rgba(29,161,242,0.06), rgba(29,161,242,0.02)); }
+
+    .share-btn[data-provider="linkedin"] i { color: #0A66C2; }
+    .share-btn[data-provider="linkedin"] { border-color: rgba(10,102,194,0.12); background: linear-gradient(180deg, rgba(10,102,194,0.06), rgba(10,102,194,0.02)); }
+
+    .share-btn[data-provider="email"] i { color: #D44638; }
+    .share-btn[data-provider="email"] { border-color: rgba(212,70,56,0.12); background: linear-gradient(180deg, rgba(212,70,56,0.04), rgba(212,70,56,0.01)); }
+
+    .share-btn[data-provider="instagram"] {
+      color: #fff;
+      border: none;
+      background: linear-gradient(45deg,#f58529,#dd2a7b,#8134af,#515bd4);
+      --instagram-gradient: linear-gradient(45deg,#f58529,#dd2a7b,#8134af,#515bd4);
+    }
+    .share-btn[data-provider="instagram"] i { color: #fff; filter: drop-shadow(0 6px 18px rgba(0,0,0,0.25)); }
+    .share-btn[data-provider="instagram"] span { color: rgba(255,255,255,0.9); }
+
+    .share-btn[data-provider="youtube"] i { color: #FF0000; }
+    .share-btn[data-provider="youtube"] { border-color: rgba(255,0,0,0.12); background: linear-gradient(180deg, rgba(255,0,0,0.06), rgba(255,0,0,0.02)); }
+
+    .share-btn[data-provider="copy"] i { color: #9aa4b2; }
+    .share-btn[data-provider="download"] i { color: #9aa4b2; }
+    .share-btn[data-provider="native"] i { color: #9aa4b2; }
+
+    .sb-foot { margin-top:10px; text-align:left; color:var(--muted); font-size:12px; }
+    @media (max-width:520px) {
+      .share-box-modern { min-width: 260px; padding:10px; }
+      .share-box-modern .sb-grid { grid-template-columns: repeat(3, 1fr); gap:8px; }
+    }
+
+    /* Modal zoom (keeps image centered and scales up to 2x but never overflows viewport) */
+    .img-modal { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.7); z-index: 13000; }
+    .img-modal.show { display:flex; }
+    .img-modal .frame { max-width: 94%; max-height: 88%; display:flex; align-items:center; justify-content:center; overflow: visible; }
+    .img-modal .frame img { max-width: 100%; max-height: 100%; object-fit: contain; transition: transform 220ms cubic-bezier(.2,.9,.3,1); transform-origin: center center; }
+  </style>
+
+  <!-- inline scripts that handle upload, share, menu, modal -->
+ <script>
+(function(){
+  // ---------- DOM references ----------
+  const heroAvatar = document.getElementById('heroAvatar');
+  const avatarInput = document.getElementById('profile_photo_input');
+  const otherInput = document.getElementById('otherPhotosInput');
+  const photoGrid = document.getElementById('photoGrid');
+  const savePublishBtn = document.getElementById('savePublishBtn');
+  const editProfileBtn = document.getElementById('editProfileBtn');
+
+  const photoMenu = document.getElementById('photoMenu');
+  const shareBox = document.getElementById('shareBox');
+  const shareBoxClose = document.getElementById('shareBoxClose');
+  const imgModal = document.getElementById('imgModal');
+  const imgModalImg = document.getElementById('imgModalImg');
+
+  let lastRightClickedPhoto = null;
+
+  // server flag (rendered by Jinja)
+  window.serverAllowShowSave = {{ 'true' if show_save_btn else 'false' }};
+  try { if (window.serverAllowShowSave) { localStorage.removeItem('profile_published_hidden'); } } catch(e){}
+
+  // ---------- utilities ----------
+  function positionNearRect(el, rect) {
+    try {
+      const margin = 8;
+      const elW = el.offsetWidth || 320;
+      const elH = el.offsetHeight || 200;
+      let left = Math.max(margin, rect.left || (window.innerWidth - elW) / 2);
+      let top = (rect.bottom || (window.innerHeight/2)) + margin;
+      if (left + elW + margin > window.innerWidth) left = Math.max(margin, window.innerWidth - elW - margin);
+      if (top + elH + margin > window.innerHeight) top = Math.max(margin, (rect.top || (window.innerHeight/2)) - elH - margin);
+      el.style.position = 'fixed';
+      el.style.left = left + 'px';
+      el.style.top = top + 'px';
+    } catch (e) {
+      try {
+        el.style.position = 'fixed';
+        el.style.left = Math.max(8, (window.innerWidth - el.offsetWidth) / 2) + 'px';
+        el.style.top = Math.max(8, (window.innerHeight - el.offsetHeight) / 2) + 'px';
+      } catch(_) {}
+    }
+  }
+
+  // ---------- photo menu show/hide ----------
+  function showPhotoMenu(x, y, photoEl){
+    if(!photoMenu) return;
+    lastRightClickedPhoto = photoEl || lastRightClickedPhoto;
+    hideShareBox();
+    photoMenu.style.display = 'block';
+    const pad = 8;
+    const winW = window.innerWidth || document.documentElement.clientWidth;
+    const winH = window.innerHeight || document.documentElement.clientHeight;
+    let left = (typeof x === 'number') ? (x + 6) : Math.max(pad, (winW - photoMenu.offsetWidth) / 2);
+    let top  = (typeof y === 'number') ? (y + 6) : Math.max(pad, (winH - photoMenu.offsetHeight) / 2);
+    if (left + photoMenu.offsetWidth + pad > winW) left = Math.max(pad, winW - photoMenu.offsetWidth - pad);
+    if (top + photoMenu.offsetHeight + pad > winH) top = Math.max(pad, winH - photoMenu.offsetHeight - pad);
+    photoMenu.style.left = left + 'px';
+    photoMenu.style.top = top + 'px';
+    photoMenu.setAttribute('aria-hidden','false');
+  }
+  function hidePhotoMenu(){
+    if(!photoMenu) return;
+    photoMenu.style.display = 'none';
+    photoMenu.setAttribute('aria-hidden','true');
+  }
+
+  // ---------- share box ----------
+  function showShareBoxForUrl(url, anchorRect) {
+    if(!shareBox) return;
+    shareBox.dataset.currentUrl = url || '';
+    shareBox.style.display = 'block';
+    shareBox.setAttribute('aria-hidden','false');
+    positionNearRect(shareBox, anchorRect || (photoMenu && photoMenu.getBoundingClientRect && photoMenu.getBoundingClientRect()) || { left: (window.innerWidth/2), bottom: (window.innerHeight/2) });
+    wireShareHandlers();
+  }
+  function hideShareBox(){
+    if(!shareBox) return;
+    shareBox.style.display = 'none';
+    shareBox.setAttribute('aria-hidden','true');
+    delete shareBox.dataset.currentUrl;
+  }
+  if(shareBoxClose) shareBoxClose.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); hideShareBox(); });
+
+  // ---------- photoMenu item delegation ----------
+  document.addEventListener('click', function(e){
+    const item = e.target.closest && e.target.closest('#photoMenu .item');
+    if(!item) return;
+    const action = item.dataset.action;
+    if(!lastRightClickedPhoto) lastRightClickedPhoto = document.querySelector('.photo') || null;
+
+    if(action === 'view') {
+      const img = lastRightClickedPhoto && lastRightClickedPhoto.querySelector('img');
+      if(img && img.src) { hidePhotoMenu(); showImageModal(img.src); }
+      else hidePhotoMenu();
+
+    } else if(action === 'share') {
+      const img = lastRightClickedPhoto && lastRightClickedPhoto.querySelector('img');
+      const url = img && img.src ? img.src : null;
+      hidePhotoMenu();
+      try {
+        const base = "{{ url_for('share_photo') }}";
+        if (url) {
+          const targetUrl = base + '?asset=' + encodeURIComponent(url);
+          try { window.location.assign(targetUrl); } catch (err) { window.location.href = targetUrl; }
+        } else {
+          try { window.location.assign(base); } catch (err) { window.location.href = base; }
+        }
+      } catch (err) {
+        // fallback to inline share box
+        const rect = item.getBoundingClientRect ? item.getBoundingClientRect() : null;
+        showShareBoxForUrl(url, rect);
+      }
+
+    } else if(action === 'delete') {
+      const filename = lastRightClickedPhoto && lastRightClickedPhoto.dataset && lastRightClickedPhoto.dataset.filename;
+      if(!filename) {
+        if(confirm('Remove this photo?')) { try { lastRightClickedPhoto.remove(); } catch(e){} }
+        hidePhotoMenu();
+        return;
+      }
+      if(!confirm('Delete this photo from your profile? This cannot be undone.')) { hidePhotoMenu(); return; }
+      const el = lastRightClickedPhoto;
+      try { el.style.transition = 'opacity 260ms ease, transform 260ms ease'; el.style.opacity='0.35'; el.style.pointerEvents='none'; el.style.transform='scale(0.98)'; }catch(e){}
+      deletePhotoByFilename(filename).then(ok => {
+        if(ok) {
+          try { el.remove(); } catch(e){}
+          try { localStorage.setItem('profile_photos_updated', JSON.stringify({ t: Date.now(), deleted: filename })); } catch(e){}
+        } else {
+          alert('Delete failed. Please try again.');
+          try { el.style.opacity=''; el.style.pointerEvents=''; el.style.transform=''; } catch(e){}
+        }
+      }).catch(err => {
+        console.error(err); alert('Delete failed.'); try { el.style.opacity=''; el.style.pointerEvents=''; el.style.transform=''; } catch(e){} 
+      }).finally(()=>{ hidePhotoMenu(); });
+
+    } else {
+      hidePhotoMenu();
+    }
+  });
+
+  // click outside hides both (capture true to handle before other handlers)
+  document.addEventListener('click', function(e){
+    if(photoMenu && photoMenu.style.display === 'block') {
+      if(!e.target.closest('.photo') && !e.target.closest('#photoMenu')) hidePhotoMenu();
+    }
+    if(shareBox && shareBox.style.display === 'block') {
+      if(!e.target.closest('#shareBox') && !e.target.closest('#photoMenu')) hideShareBox();
+    }
+  }, true);
+
+  // Esc closes menus & modal
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' || e.key === 'Esc') { hidePhotoMenu(); hideShareBox(); hideImageModal(); }
+  });
+
+  // ---------- image modal show/hide & zoom ----------
+  function showImageModal(src){
+    if(!imgModal || !imgModalImg) return;
+    imgModalImg.src = src || '';
+    imgModalImg.style.transform = '';
+    imgModal.classList.add('show');
+    imgModal.setAttribute('aria-hidden','false');
+
+    imgModalImg.onload = function(){
+      try {
+        // compute displayed dims and preferred scale while respecting viewport
+        const displayed = imgModalImg.getBoundingClientRect();
+        const displayedW = displayed.width || imgModalImg.naturalWidth || 1;
+        const displayedH = displayed.height || imgModalImg.naturalHeight || 1;
+
+        const preferredScale = 2;
+        const maxW = window.innerWidth * 0.94;
+        const maxH = window.innerHeight * 0.88;
+
+        const scaledW = displayedW * preferredScale;
+        const scaledH = displayedH * preferredScale;
+
+        let finalScale = preferredScale;
+        if (scaledW > maxW || scaledH > maxH) {
+          finalScale = Math.min(maxW / displayedW, maxH / displayedH);
+          finalScale = Math.min(finalScale, preferredScale);
+        }
+
+        imgModalImg.style.transform = 'scale(' + finalScale + ')';
+      } catch (e) {
+        imgModalImg.style.transform = 'scale(2)';
+      }
+    };
+  }
+  function hideImageModal(){
+    if(!imgModal || !imgModalImg) return;
+    imgModal.classList.remove('show');
+    imgModal.setAttribute('aria-hidden','true');
+    try { imgModalImg.src = ''; } catch(e){}
+    imgModalImg.style.transform = '';
+    imgModalImg.onload = null;
+  }
+
+
+ 
+  // enhanced modal click: close when clicking overlay, frame background or image itself
+  if (imgModal) {
+    imgModal.addEventListener('click', function (e) {
+      try {
+        if (e.target === imgModal) { hideImageModal(); return; }
+        if (e.target === imgModalImg) { hideImageModal(); return; }
+        const frame = imgModal.querySelector('.frame');
+        if (frame && frame.contains(e.target) && e.target !== imgModalImg) { hideImageModal(); return; }
+      } catch (err) {
+        console.debug('imgModal click handler error', err);
+      }
+    }, false);
+  }
+
+  // ---------- clipboard/download helpers ----------
+  function copyTextToClipboard(txt){
+    if(!txt) return Promise.reject('no text');
+    if(navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(txt);
+    return new Promise((resolve, reject)=>{
+      try{
+        const ta = document.createElement('textarea'); ta.value = txt; ta.style.position='fixed'; ta.style.left='-9999px';
+        document.body.appendChild(ta); ta.select();
+        document.execCommand('copy'); ta.remove(); resolve();
+      }catch(e){ reject(e); }
+    });
+  }
+
+  async function downloadImageUrl(url) {
+    try {
+      if (!url) return false;
+      if (url.startsWith('data:') || url.startsWith('blob:')) {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'photo';
+        document.body.appendChild(a); a.click(); a.remove();
+        return true;
+      }
+      const res = await fetch(url, { credentials: 'same-origin' });
+      const blob = await res.blob();
+      const ext = (blob.type && blob.type.split('/')[1]) || 'jpg';
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `photo.${ext}`;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=> URL.revokeObjectURL(blobUrl), 2000);
+      return true;
+    } catch (e) {
+      try { window.open(url, '_blank', 'noopener'); return true; } catch (ee) { return false; }
+    }
+  }
+
+  // ---------- wire share box provider handlers ----------
+  function wireShareHandlers(){
+    if(!shareBox) return;
+    const buttons = Array.from(shareBox.querySelectorAll('.share-btn'));
+    buttons.forEach(btn => {
+      if(btn._h) btn.removeEventListener('click', btn._h);
+      btn._h = async function(ev){
+        ev.preventDefault(); ev.stopPropagation();
+        const provider = (btn.dataset.provider || '').toLowerCase();
+        const url = shareBox.dataset.currentUrl || '';
+        const title = 'Profile photo';
+        const text = 'Check out this photo';
+
+        if(!url && provider !== 'download' && provider !== 'instagram' && provider !== 'youtube') {
+          alert('No shareable image available.');
+          hideShareBox();
+          return;
+        }
+
+        // Native share attempt
+        if(provider === 'native' && navigator.share) {
+          try {
+            if(url.startsWith('blob:') || url.startsWith('data:')) {
+              try {
+                const blob = await (await fetch(url)).blob();
+                const ext = (blob.type && blob.type.split('/')[1]) || 'jpg';
+                const file = new File([blob], `photo.${ext}`, { type: blob.type });
+                if(navigator.canShare && navigator.canShare({ files: [file] })) {
+                  await navigator.share({ files: [file], title, text });
+                  hideShareBox(); return;
+                }
+              } catch(e){}
+            }
+            await navigator.share({ title, text, url });
+            hideShareBox(); return;
+          } catch(e){
+            // fall through to web flows
+          }
+        }
+
+        const encUrl = encodeURIComponent(url || '');
+        const encText = encodeURIComponent(text);
+        let openUrl = '';
+
+        switch(provider) {
+          case 'copy':
+            try { await copyTextToClipboard(url); alert('Image link copied to clipboard.'); hideShareBox(); return; } catch(e){ prompt('Copy this link', url); hideShareBox(); return; }
+          case 'download':
+            await downloadImageUrl(url || (lastRightClickedPhoto && lastRightClickedPhoto.querySelector('img') && lastRightClickedPhoto.querySelector('img').src) || '');
+            hideShareBox(); return;
+          case 'whatsapp':
+            openUrl = `https://api.whatsapp.com/send?text=${encText}%20${encUrl}`; break;
+          case 'facebook':
+            openUrl = `https://www.facebook.com/sharer/sharer.php?u=${encUrl}`; break;
+          case 'twitter':
+            openUrl = `https://twitter.com/intent/tweet?text=${encText}&url=${encUrl}`; break;
+          case 'linkedin':
+            openUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encUrl}`; break;
+          case 'email':
+            openUrl = `mailto:?subject=${encodeURIComponent(title)}&body=${encText}%0A%0A${encUrl}`; break;
+          case 'instagram':
+            try { window.open('https://www.instagram.com/', '_blank', 'noopener'); } catch(e) { window.location.href = 'https://www.instagram.com/'; }
+            setTimeout(()=> alert('Instagram requires uploading from the app/website. Use the Download button to save the image then upload.'), 250);
+            hideShareBox(); return;
+          case 'youtube':
+            try { window.open('https://www.youtube.com/upload', '_blank', 'noopener'); } catch(e) { window.location.href = 'https://www.youtube.com/'; }
+            setTimeout(()=> alert('YouTube is for videos — use the image in a video or as a thumbnail after uploading a video.'), 250);
+            hideShareBox(); return;
+          default:
+            try { window.open(url, '_blank', 'noopener'); } catch(e) { window.location.href = url; }
+            hideShareBox(); return;
+        }
+
+        try { window.open(openUrl, '_blank', 'noopener'); } catch(e) { window.location.href = openUrl; }
+        hideShareBox();
+      };
+      btn.addEventListener('click', btn._h);
+    });
+  }
+
+  // ---------- upload other photos (calls server) ----------
+  async function uploadOtherPhoto(file, photoElement, imgEl){
+    const uploadUrl = "{{ url_for('profile_upload_photos') }}";
+    const fd = new FormData();
+    fd.append('other_photos', file, file.name);
+
+    photoElement.dataset.uploading = '1';
+    try {
+      const res = await fetch(uploadUrl, {
+        method: 'POST',
+        body: fd,
+        credentials: 'same-origin'
+      });
+
+      if (res.redirected) {
+        window.location.href = res.url;
+        return;
+      }
+
+      const data = await res.json().catch(()=>null);
+      if (!res.ok || !data) {
+        const msg = (data && data.message) ? data.message : (res.statusText || "Upload failed");
+        alert('Photo upload failed: ' + msg);
+        throw new Error(msg);
+      }
+
+      if (data.status === 'ok' && Array.isArray(data.files) && data.files.length > 0) {
+        const f = data.files[0];
+        if (f && f.url) {
+          const serverUrl = f.url + '?t=' + Date.now();
+          if (imgEl) imgEl.src = serverUrl;
+          if (f.filename) photoElement.setAttribute('data-filename', f.filename);
+          attachPhotoHandlers(photoElement);
+          try { localStorage.setItem('profile_photos_updated', JSON.stringify({ t: Date.now(), added: f.filename || f.url })); } catch(e){}
+          return { filename: f.filename, url: f.url };
+        }
+      }
+
+      // fallback older responses
+      if (data.status === 'ok' && (data.url || data.filename)) {
+        const serverUrl = (data.url || '') + '?t=' + Date.now();
+        if (imgEl && data.url) imgEl.src = serverUrl;
+        if (data.filename) photoElement.setAttribute('data-filename', data.filename);
+        attachPhotoHandlers(photoElement);
+        try { localStorage.setItem('profile_photos_updated', JSON.stringify({ t: Date.now(), added: data.filename || data.url })); } catch(e){}
+        return { filename: data.filename, url: data.url };
+      }
+
+      const msg = (data && data.message) || 'unexpected upload response';
+      alert('Photo upload failed: ' + msg);
+      throw new Error(msg);
+
+    } catch (err) {
+      throw err;
+    } finally {
+      delete photoElement.dataset.uploading;
+    }
+  }
+
+   
+/* Replace the existing otherInput 'change' handler with this block */
+if (otherInput){
+  otherInput.addEventListener('change', function(e){
+    const files = Array.from(e.target.files || []);
+    const existing = (photoGrid && photoGrid.querySelectorAll) ? photoGrid.querySelectorAll('.photo').length : 0;
+    const slotsLeft = Math.max(0, 8 - existing);
+    const toUpload = files.slice(0, slotsLeft);
+    toUpload.forEach(file => {
+      try {
+        if(!file.type || !file.type.startsWith('image/')) return;
+        const previewUrl = URL.createObjectURL(file);
+
+        // create preview tile immediately
+        const d = document.createElement('div');
+        d.className = 'photo';
+        // set uploading marker so CSS / other code can show spinner if needed
+        d.dataset.uploading = '1';
+
+        // create img element for preview
+        const img = document.createElement('img');
+        img.src = previewUrl;
+        img.alt = 'photo preview';
+
+        d.appendChild(img);
+
+        // append to grid and ensure it's wired right away so a single click works
+        if(photoGrid) {
+          photoGrid.appendChild(d);
+          photoGrid.classList.remove('empty');
+        }
+
+        // Attach handlers immediately so user can tap once to open the preview even while uploading
+        try { attachPhotoHandlers(d); } catch(e){ console.warn('attachPhotoHandlers immediate failed', e); }
+
+        // start uploading in background
+        uploadOtherPhoto(file, d, img).catch(err => {
+          console.error('uploadOtherPhoto error', err);
+          alert('Upload failed: ' + (err && err.message ? err.message : err));
+          try { d.remove(); } catch(e){}
+        }).finally(() => {
+          try { URL.revokeObjectURL(previewUrl); } catch(e){}
+        });
+      } catch(err) {
+        console.error('error handling file', err);
+      }
+    });
+    if(files.length > slotsLeft) alert('Only 8 photos are allowed. Extra photos were ignored.');
+    try { otherInput.value = ''; } catch(e) {}
+  });
+}
+ 
+  // ---------- avatar upload handler ----------
+  (function wireAvatarUpload(){
+    if(!avatarInput || !heroAvatar) return;
+    avatarInput.addEventListener('change', async function(e){
+      const file = (e.target && e.target.files && e.target.files[0]) || null;
+      if(!file) return;
+      if(!file.type || !file.type.startsWith('image/')) {
+        alert('Please choose an image file for your avatar.');
+        try { avatarInput.value = ''; } catch(_) {}
+        return;
+      }
+
+      const origSrc = heroAvatar.getAttribute('data-orig-src') || heroAvatar.dataset.origSrc || heroAvatar.src;
+      let previewUrl = null;
+      try { previewUrl = URL.createObjectURL(file); heroAvatar.src = previewUrl; } catch(e){ console.warn('preview failed', e); }
+
+      try {
+        const uploadUrl = "{{ url_for('profile_update_photo') }}";
+        const fd = new FormData();
+        fd.append('profile_photo', file, file.name);
+
+        const res = await fetch(uploadUrl, {
+          method: 'POST',
+          body: fd,
+          credentials: 'same-origin'
+        });
+
+        if (res.redirected) {
+          window.location.href = res.url;
+          return;
+        }
+
+        const data = await res.json().catch(()=>null);
+        if(!res.ok || !data) {
+          const msg = (data && data.message) ? data.message : (res.statusText || "Upload failed");
+          throw new Error(msg);
+        }
+
+        if (data.status === 'ok' && (data.url || data.filename)) {
+          if (data.url) heroAvatar.src = data.url + '?t=' + Date.now();
+          if (data.filename) heroAvatar.setAttribute('data-filename', data.filename);
+          try { heroAvatar.setAttribute('data-orig-src', heroAvatar.src); } catch(e){}
+          try { localStorage.setItem('profile_photos_updated', JSON.stringify({ t: Date.now(), avatar: data.filename || data.url })); } catch(e){}
+          return;
+        }
+
+        throw new Error('unexpected upload response');
+
+      } catch (err) {
+        console.error('avatar upload failed', err);
+        alert('Avatar upload failed: ' + (err && err.message ? err.message : 'unknown error') + '. Your preview was local only.');
+        try { if(origSrc) heroAvatar.src = origSrc; } catch(e){}
+      } finally {
+        try { if(previewUrl) URL.revokeObjectURL(previewUrl); } catch(e){}
+        try { avatarInput.value = ''; } catch(e){}
+      }
+    });
+  })();
+
+  // ---------- delete photo by filename (POST) ----------
+  async function deletePhotoByFilename(filename) {
+    if(!filename) return false;
+    const url = "{{ url_for('profile_delete_photo') }}";
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ filename: filename })
+      });
+      if (res.redirected) { window.location.href = res.url; return false; }
+      const data = await res.json().catch(()=>null);
+      if (res.ok && data) {
+        if (data.status === 'ok' || data.success === true) return true;
+        if (data.status && String(data.status).toLowerCase() === 'ok') return true;
+      }
+      return false;
+    } catch (e) {
+      console.error('delete request failed', e);
+      return false;
+    }
+  }
+
+  // ---------- attach photo handlers ----------
+  function attachPhotoHandlers(photoEl) {
+    if(!photoEl) return;
+    if(photoEl.dataset.wired === '1') return;
+    photoEl.dataset.wired = '1';
+
+    photoEl.addEventListener('click', function(ev){
+      const img = photoEl.querySelector('img');
+      if(img && img.src) { showImageModal(img.src); }
+    });
+
+    photoEl.addEventListener('contextmenu', function(ev){
+      ev.preventDefault();
+      ev.stopPropagation();
+      const rect = photoEl.getBoundingClientRect();
+      showPhotoMenu(ev.clientX, ev.clientY, photoEl);
+    });
+  }
+
+  // wire existing .photo items
+  (function wireInitialPhotos(){
+    try{ if(photoGrid) photoGrid.querySelectorAll('.photo').forEach(p => attachPhotoHandlers(p)); } catch(e){ console.error('wireInitialPhotos', e); }
+  })();
+
+  // lightweight refresh placeholder; kept for compatibility but no-op if no endpoint
+  async function refreshPhotoGridFromServer(){
+    try {
+      const listUrl = ""; // set to an endpoint that returns JSON { photos: [{filename,url}, ...] } if you add one
+      if(listUrl) {
+        const r = await fetch(listUrl, { credentials:'same-origin' });
+        if(r.ok) {
+          const data = await r.json().catch(()=>null);
+          if(data && Array.isArray(data.photos)) {
+            const frag = document.createDocumentFragment();
+            let count = 0;
+            data.photos.forEach(p=>{
+              if(!p || count >= 8) return;
+              const d = document.createElement('div'); d.className = 'photo';
+              if(p.filename) d.setAttribute('data-filename', p.filename);
+              const img = document.createElement('img'); img.src = p.url;
+              d.appendChild(img);
+              attachPhotoHandlers(d);
+              frag.appendChild(d);
+              count++;
+            });
+            photoGrid.innerHTML = '';
+            photoGrid.appendChild(frag);
+            if(count === 0) photoGrid.classList.add('empty'); else photoGrid.classList.remove('empty');
+            return;
+          }
+        }
+      }
+    } catch(e){}
+  }
+
+  // DOM ready - nothing else required (handlers above wired)
+  document.addEventListener('DOMContentLoaded', function(){ /* placeholder */ });
+
+  // ---------- pageshow handler to avoid stale bfcache DOM for photos ----------
+  (function(){
+    const KEY = 'profile_photos_updated';
+    const SESSION_KEY = '__seen_' + KEY;
+
+    function handlePageshow(e){
+      try {
+        const raw = localStorage.getItem(KEY);
+        if(!raw) return;
+        let info = null;
+        try { info = JSON.parse(raw); } catch(_) { info = { t: Date.now() }; }
+
+        const seenRaw = sessionStorage.getItem(SESSION_KEY);
+        let seen = null;
+        try { seen = seenRaw ? JSON.parse(seenRaw) : null; } catch(_) { seen = null; }
+
+        if(!seen || !seen.t || (info.t && info.t > seen.t)) {
+          try { sessionStorage.setItem(SESSION_KEY, JSON.stringify(info)); } catch(e){}
+          // if an upload is still in progress, delay slightly
+          const pg = document.getElementById('photoGrid');
+          if(pg && pg.querySelector('[data-uploading="1"]')) {
+            setTimeout(()=> { try { window.location.reload(); } catch(e){}; }, 600);
+          } else {
+            // quick defer to allow other page handlers to run
+            setTimeout(()=> { try { window.location.reload(); } catch(e){}; }, 30);
+          }
+        }
+      } catch (err) {
+        console.debug('pageshow handler error', err);
+      }
+    }
+
+    window.addEventListener('pageshow', handlePageshow, false);
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+      setTimeout(() => handlePageshow({ persisted: false }), 50);
+    }
+  })();
+
+  // expose a debug helper (optional)
+  window.__cc_profile_helpers = {
+    attachPhotoHandlers: attachPhotoHandlers,
+    showImageModal: showImageModal,
+    hideImageModal: hideImageModal
+  };
+
+})();
+</script>
+ 
+
+  
+<script>
+(function(){
+  // treat dash-like server placeholders as "empty"
+  function _isDashLike(s){
+    if(!s && s !== 0) return true;
+    var t = String(s).trim();
+    if(t === '') return true;
+    // hyphen-minus, en-dash, em-dash, minus sign, whitespace-only
+    if(/^[\-\u2012\u2013\u2014\u2212\s]+$/.test(t)) return true;
+    return false;
+  }
+
+  // expose override on window so console testing is easy
+  window.applyLSValueToTile = function(lsKey, tileElId){
+    try{
+      var el = document.getElementById(tileElId);
+      if(!el) return false;
+      var serverText = (el.textContent || '').trim();
+
+      var raw = null;
+      try{ raw = localStorage.getItem(lsKey); }catch(e){ raw = null; }
+      if(!raw || raw === 'null' || raw === 'undefined') return false;
+
+      var parsed;
+      try{ parsed = JSON.parse(raw); } catch (e){ parsed = raw; }
+
+      var serverEmpty = (!serverText || serverText === '' || _isDashLike(serverText));
+
+      // availability special-casing expects helper formatTimeHHMM/stringifyForDisplay to exist
+      if(lsKey === 'profile_availability'){
+        var availabilityText = '';
+        if(parsed && typeof parsed === 'object' && !Array.isArray(parsed)){
+            
+          if(parsed.availability && String(parsed.availability).trim()){
+            availabilityText = String(parsed.availability).trim();
+          } else {
+            var days = parsed.availability_days || parsed.days || parsed.days_raw || [];
+            if(typeof days === 'string'){
+              days = days.replace(/[\[\]\"]+/g,'').replace(/[;|]/g,',').split(',').map(function(d){ return String(d).trim(); }).filter(Boolean);
+            }
+            if(!Array.isArray(days)) days = [];
+
+            days = days.map(function(d){ return String(d).trim(); }).filter(Boolean);
+            days = days.filter(function(v,i,a){ return a.indexOf(v) === i; });
+
+            var hasRange = days.some(function(d){ return /(mon|tue|wed|thu|fri|sat|sun)\s*[-–—]\s*(mon|tue|wed|thu|fri|sat|sun)/i.test(d); });
+
+            var dayLabel = '';
+            if(hasRange){
+              var r = days.find(function(d){ return /(mon|tue|wed|thu|fri|sat|sun)\s*[-–—]\s*(mon|tue|wed|thu|fri|sat|sun)/i.test(d); });
+              dayLabel = r.replace(/[-–—]/, '-').split('-').map(function(p){ return p.charAt(0).toUpperCase() + p.slice(1).toLowerCase(); }).join('-');
+            } else if(days.length > 0){
+              var shortDays = days.map(function(d){
+                var token = d.split(/\s|_|-/)[0].slice(0,3);
+                return token.charAt(0).toUpperCase() + token.slice(1).toLowerCase();
+              });
+              shortDays = shortDays.filter(function(v,i,a){ return a.indexOf(v) === i; });
+              dayLabel = shortDays.join(', ');
+            }
+
+            var start = parsed.availability_start || parsed.start || parsed.from || parsed.availability_from || '';
+            var end = parsed.availability_end || parsed.end || parsed.to || parsed.availability_to || '';
+
+            var fmt = (typeof window.formatTimeHHMM === 'function') ? window.formatTimeHHMM : function(x){ return String(x||'').trim(); };
+
+            if(dayLabel && start && end){
+              availabilityText = dayLabel + ', ' + fmt(start) + '–' + fmt(end);
+            } else if(dayLabel){
+              availabilityText = dayLabel;
+            } else if(start && end){
+              availabilityText = fmt(start) + '–' + fmt(end);
+            } else {
+              availabilityText = '';
+            }
+          }
+        } else {
+          var sfd = (typeof window.stringifyForDisplay === 'function') ? window.stringifyForDisplay : function(v){ try{ return JSON.parse(String(v)); }catch(e){ return String(v||''); } };
+          availabilityText = String(sfd(parsed) || '').trim();
+        }
+
+        if(serverEmpty && availabilityText && availabilityText !== ''){
+          el.textContent = availabilityText;
+          el.dispatchEvent(new Event('change',{bubbles:true}));
+          return true;
+        }
+        return false;
+      }
+
+      var sfd = (typeof window.stringifyForDisplay === 'function') ? window.stringifyForDisplay : function(v){ try{ return JSON.parse(String(v)); }catch(e){ return String(v||''); } };
+      var display = String(sfd(parsed) || '').trim();
+
+      if(serverEmpty && display && display !== ''){
+        el.textContent = display;
+        el.dispatchEvent(new Event('change',{bubbles:true}));
+        return true;
+      }
+      return false;
+    }catch(err){
+      console.warn('applyLSValueToTile override failed for', lsKey, err);
+      return false;
+    }
+  };
+
+  function _initialApply(){
+    try{
+      applyLSValueToTile('profile_specialties', 'specialtiesTile');
+      applyLSValueToTile('profile_services', 'servicesTile');
+      applyLSValueToTile('profile_availability', 'availabilityTile');
+      try{ applyLSValueToTile('profile_salary', 'salaryTile'); }catch(e){}
+    }catch(e){ /* ignore */ }
+  }
+
+  // run after DOM ready (if happened already, run immediately)
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', _initialApply);
+  } else {
+    _initialApply();
+  }
+
+  // listen for storage events and re-apply
+  window.addEventListener('storage', function(e){
+    try{
+      if(e.key === 'profile_specialties') applyLSValueToTile('profile_specialties','specialtiesTile');
+      else if(e.key === 'profile_services') applyLSValueToTile('profile_services','servicesTile');
+      else if(e.key === 'profile_availability') applyLSValueToTile('profile_availability','availabilityTile');
+      else if(e.key === 'profile_salary') applyLSValueToTile('profile_salary','salaryTile');
+    }catch(err){}
+  });
+})();
+</script>
+
+
+<script>
+(function(){
+  const keys = [
+    { key: 'profile_specialties', elId: 'specialtiesTile' },
+    { key: 'profile_services', elId: 'servicesTile' }
+  ];
+
+  // mapping for tokens to display labels (expand if you have more tokens)
+  const mapping = {
+    'personal_care': 'Personal care',
+    'personal care': 'Personal care',
+    'personal-care': 'Personal care',
+    'companionship': 'Companionship',
+    'companion': 'Companionship',
+    'medication': 'Medication reminder',
+    'medication_reminder': 'Medication reminder',
+    'medication reminder': 'Medication reminder',
+    'infant_care': 'Infant care',
+    'infant care': 'Infant care',
+    'child_care': 'Child care',
+    'child care': 'Child care',
+    'elderly_care': 'Elderly care',
+    'elderly care': 'Elderly care',
+    'meal_prep': 'Meal prep',
+    'meal prep': 'Meal prep',
+    'all_ages': 'All ages',
+    'all ages': 'All ages',
+    'all': 'All ages'
+  };
+
+  function humanizeToken(raw) {
+    if (raw === null || raw === undefined) return null;
+    let s = String(raw).trim();
+    if (s === '') return null;
+    // if user typed "Other: x" or "other=x" prefer the typed part
+    const low = s.toLowerCase();
+    if (low.startsWith('other:') || low.startsWith('other=')) {
+      const part = s.split(/[:=]/,2)[1] || '';
+      return part.trim() ? (part.trim()[0].toUpperCase() + part.trim().slice(1)) : 'Other';
+    }
+    // direct mapping
+    if (mapping.hasOwnProperty(s)) return mapping[s];
+    if (mapping.hasOwnProperty(low)) return mapping[low];
+    // normalize underscores/hyphens -> spaces
+    const norm = low.replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim();
+    if (mapping.hasOwnProperty(norm)) return mapping[norm];
+    // heuristics
+    if (norm.indexOf('personal') !== -1) return 'Personal care';
+    if (norm.indexOf('compan') !== -1) return 'Companionship';
+    if (norm.indexOf('medicat') !== -1) return 'Medication reminder';
+    if (norm.indexOf('infant') !== -1) return 'Infant care';
+    if (norm.indexOf('child') !== -1) return 'Child care';
+    if (norm.indexOf('elder') !== -1) return 'Elderly care';
+    if (norm.indexOf('meal') !== -1 && norm.indexOf('prep') !== -1) return 'Meal prep';
+    if (norm.indexOf('all') !== -1) return 'All ages';
+
+    // fallback: title-case words
+    return norm.split(' ').map(w => w ? (w[0].toUpperCase() + w.slice(1)) : '').join(' ');
+  }
+
+  function parseStoredValue(raw) {
+    if (!raw && raw !== '') return [];
+    // try JSON parse first
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed.map(String).filter(Boolean);
+      if (parsed && typeof parsed === 'string') return parsed.split(',').map(s=>s.trim()).filter(Boolean);
+    } catch (e) {
+      // not JSON
+    }
+    // fallback: comma-separated or single token
+    return String(raw).split(',').map(s => s.trim()).filter(Boolean);
+  }
+
+  function writeNormalizedToLS(key, arr) {
+    try {
+      localStorage.setItem(key, JSON.stringify(arr));
+      console.log('[profile-normalize] wrote', key, '=>', JSON.stringify(arr));
+    } catch (e) {
+      console.warn('[profile-normalize] could not write to localStorage for', key, e);
+    }
+  }
+
+  function updateTile(elId, arr) {
+    try {
+      const el = document.getElementById(elId);
+      if (!el) return false;
+      el.textContent = arr.join(', ');
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function normalizeKeyEntry(key, elId) {
+    const raw = localStorage.getItem(key);
+    if (!raw) return false;
+    const tokens = parseStoredValue(raw);
+    if (!tokens || !tokens.length) return false;
+
+    const mapped = tokens.map(t => humanizeToken(t)).filter(Boolean);
+    // dedupe while preserving order (case-insensitive)
+    const seen = new Set();
+    const dedup = [];
+    for (const v of mapped) {
+      const k = String(v).toLowerCase();
+      if (!seen.has(k)) { seen.add(k); dedup.push(v); }
+    }
+    if (!dedup.length) return false;
+
+    // write normalized back as JSON array
+    writeNormalizedToLS(key, dedup);
+    // update DOM tile if present
+    updateTile(elId, dedup);
+    return true;
+  }
+
+  // Run on DOM ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => keys.forEach(k => normalizeKeyEntry(k.key, k.elId)));
+  } else {
+    keys.forEach(k => normalizeKeyEntry(k.key, k.elId));
+  }
+
+  // Also normalize when storage changes (other tabs)
+  window.addEventListener('storage', (ev) => {
+    if (!ev.key) return;
+    keys.forEach(k => { if (ev.key === k.key) normalizeKeyEntry(k.key, k.elId); });
+  });
+})();
+</script>
+
+
+<script>
+(function(){
+  // Use server-provided window.__USER_ID__ if present (your template already sets this).
+  const rawUserId = (typeof window.__USER_ID__ !== 'undefined') ? window.__USER_ID__ : null;
+  const currentUserId = (rawUserId && String(rawUserId).match(/\d+/)) ? Number(String(rawUserId).match(/\d+/)[0]) : null;
+
+  const badge = document.getElementById('messagesBadge');
+  const link  = document.getElementById('navMessagesLink');
+
+  // Helper: show/hide badge
+  function showBadge(n){
+    if(!badge) return;
+    if(!n || Number(n) <= 0){
+      badge.style.display = 'none';
+      return;
+    }
+    const display = (Number(n) > 99) ? '99+' : String(n);
+    badge.textContent = display;
+    badge.style.display = 'flex';
+  }
+
+  // Fetch /api/contacts and compute number of distinct senders with unread > 0
+  async function fetchUnreadSenderCount(){
+    try {
+      const res = await fetch('/api/contacts', { credentials: 'same-origin' });
+      if(!res.ok){
+        // no fallback UI change
+        return 0;
+      }
+      const data = await res.json().catch(()=>null);
+      if(!data) return 0;
+
+      // server may return an array of contacts or an object { contacts: [...] }
+      let contacts = [];
+      if(Array.isArray(data)) contacts = data;
+      else if(Array.isArray(data.contacts)) contacts = data.contacts;
+      else if(Array.isArray(data.results)) contacts = data.results;
+      else {
+        // try to coerce other shapes
+        for(const k of Object.keys(data)){
+          if(Array.isArray(data[k])) { contacts = data[k]; break; }
+        }
+      }
+
+      // count contacts with unread > 0
+      const count = Array.isArray(contacts) ? contacts.filter(c => {
+        try { return Number((c && (c.unread ?? c.unread_count ?? c.unreadMessages ?? 0))) > 0; } catch(e){ return false; }
+      }).length : 0;
+
+      showBadge(count);
+      return count;
+    } catch(err) {
+      console.debug('fetchUnreadSenderCount failed', err);
+      return 0;
+    }
+  }
+
+  // Throttled refresh to avoid excessive network calls
+  let refreshTimer = null;
+  function scheduleRefresh(delay = 300){
+    if(refreshTimer) clearTimeout(refreshTimer);
+    refreshTimer = setTimeout(()=> { refreshTimer = null; fetchUnreadSenderCount(); }, delay);
+  }
+
+  // Real-time via Socket.IO if available (defensive)
+  function tryWireSocket(){
+    try {
+      // reuse existing socket if available on window to avoid duplicate connections
+      const socket = (window.socket && typeof window.socket.on === 'function') ? window.socket
+                   : (typeof io !== 'undefined' ? io() : null);
+
+      if(!socket) return false;
+
+      // keep a reference on window to reuse later
+      if(!window.socket) window.socket = socket;
+
+      const events = ['message_created','new_message','message','message_received','message_new','private_message'];
+
+      // refresh when any of these events are received
+      events.forEach(ev => {
+        try {
+          socket.on(ev, function(payload){
+            // optionally inspect payload to avoid unnecessary refreshes:
+            // if payload has recipient_id or user_id matching currentUserId, refresh.
+            // But to keep it robust, just schedule a refresh.
+            scheduleRefresh(100);
+          });
+        } catch(e){ /* ignore per-event wiring errors */ }
+      });
+
+      // also respond on some generic 'contacts_updated' or 'unread_counts_updated' events if your server emits them
+      ['contacts_updated','unread_counts_updated'].forEach(ev => {
+        try { socket.on(ev, () => scheduleRefresh(50)); } catch(e) {}
+      });
+
+      return true;
+    } catch(e){
+      console.debug('tryWireSocket err', e);
+      return false;
+    }
+  }
+
+  // Fallback: poll occasionally while page is open
+  let pollInterval = null;
+  function startPolling(){
+    if(pollInterval) return;
+    pollInterval = setInterval(() => fetchUnreadSenderCount(), 60 * 1000); // every 60s
+  }
+  function stopPolling(){
+    if(!pollInterval) return;
+    clearInterval(pollInterval);
+    pollInterval = null;
+  }
+
+  // Update on visibility change (helpful when switching tabs)
+  document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState === 'visible') fetchUnreadSenderCount();
+  });
+
+  // Initial boot
+  (function init(){
+    // initial fetch
+    fetchUnreadSenderCount();
+
+    // try to wire socket; if fails, start polling
+    const wired = tryWireSocket();
+    if(!wired) startPolling();
+
+    // also refresh occasionally anyway
+    scheduleRefresh(5000);
+  })();
+
+  // Expose a manual updater in console for ease of debugging
+  window.refreshMessageBadge = fetchUnreadSenderCount;
+
+})();
+</script>
+
+
+
+<script>
+/* Combined notifications: position badge + unread fetcher
+   Paste this before </body> in profile_setup.html (no CSS edits required) */
+(function(){
+  const APPLY_KEY = '__page_notif_v1';
+  if(window[APPLY_KEY]) return; // idempotent guard
+  window[APPLY_KEY] = true;
+
+  // --- helpers to ensure DOM wrapper + badge are present and positioned like messagesBadge ---
+  function ensureBadgeWrapper() {
+    const anchor = document.getElementById('navNotificationsLink') || document.querySelector('a[title="Notifications"]');
+    if(!anchor) return null;
+
+    // find bell icon inside anchor
+    const icon = anchor.querySelector('.icon') || anchor.querySelector('i.fa-bell') || anchor.querySelector('i.fas.fa-bell') || anchor.querySelector('i.far.fa-bell');
+    if(!icon) return null;
+
+    // find or create badge element
+    let badge = document.getElementById('notificationsBadge') || anchor.querySelector('.notif-badge');
+    if(!badge){
+      badge = document.createElement('span');
+      badge.id = 'notificationsBadge';
+      badge.className = 'notif-badge';
+      badge.setAttribute('aria-hidden','true');
+      badge.textContent = '';
+    }
+
+    // create or reuse wrapper similar to messages wrapper, but inline styles to avoid cascade issues
+    let wrap = anchor.querySelector('.notif-wrap');
+    if(!wrap){
+      wrap = document.createElement('div');
+      wrap.className = 'notif-wrap';
+      wrap.style.position = 'relative';
+      wrap.style.display = 'inline-block';
+      wrap.style.lineHeight = '0';
+      // insert wrapper before icon and move icon inside it
+      icon.parentNode.insertBefore(wrap, icon);
+      wrap.appendChild(icon);
+    } else {
+      // ensure icon is child of wrapper
+      if(icon.parentNode !== wrap) wrap.appendChild(icon);
+    }
+
+    // ensure badge is a child of wrapper
+    if(badge.parentNode !== wrap) wrap.appendChild(badge);
+
+    // ensure icon displays as block for consistent layout
+    if(!icon.style.display) icon.style.display = 'block';
+
+    // set stable inline styles for the badge so layout doesn't rely on external CSS
+    Object.assign(badge.style, {
+      display: badge.textContent && String(badge.textContent).trim() ? 'flex' : 'none',
+      position: 'absolute',
+      top: '-6px',    // tweak with window.__notif_nudge if needed
+      right: '-10px',
+      minWidth: '20px',
+      height: '20px',
+      padding: '0 6px',
+      borderRadius: '10px',
+      fontSize: '12px',
+      fontWeight: '800',
+      lineHeight: '20px',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: '#fff',
+      background: '#e74c3c',
+      boxShadow: '0 6px 12px rgba(0,0,0,0.18)',
+      pointerEvents: 'none',
+      transformOrigin: 'center',
+      transition: 'transform 140ms ease, opacity 140ms ease'
+    });
+
+    return { anchor, badge };
+  }
+
+  // Expose small nudge helper to console if you want to tweak position
+  window.__notif_nudge = function(top = -6, right = -10) {
+    const el = document.getElementById('notificationsBadge');
+    if(!el) return false;
+    el.style.top = (top + 'px');
+    el.style.right = (right + 'px');
+    return { top: el.style.top, right: el.style.right };
+  };
+
+  // Ensure wrapper exists now or soon (handles late-rendered templates)
+  function bootEnsure() {
+    if(ensureBadgeWrapper()) return;
+    // try again a few times
+    let attempts = 0;
+    const t = setInterval(() => {
+      if(ensureBadgeWrapper() || ++attempts > 12) clearInterval(t);
+    }, 250);
+  }
+
+  // --- unread counter fetching logic (defensive, uses /api/notifications/unread_count then fallbacks) ---
+  async function getUnreadCount() {
+    // try compact unread endpoint first
+    try {
+      const res = await fetch('/api/notifications/unread_count', { credentials: 'same-origin' });
+      if(res.ok){
+        const j = await res.json().catch(()=>null);
+        if(j && (typeof j.unread !== 'undefined' || typeof j.count !== 'undefined')) {
+          return Number(typeof j.unread !== 'undefined' ? j.unread : j.count) || 0;
+        }
+      }
+    } catch(e){ /* ignore */ }
+
+    // fallback: fetch list and count unread
+    try {
+      const r = await fetch('/api/notifications', { credentials: 'same-origin' });
+      if(r.ok){
+        const j2 = await r.json().catch(()=>null);
+        const arr = Array.isArray(j2) ? j2 : (j2 && Array.isArray(j2.notifications) ? j2.notifications : []);
+        return Array.isArray(arr) ? arr.filter(n => !n.is_read).length : 0;
+      }
+    } catch(e){ /* ignore */ }
+
+    return 0;
+  }
+
+  // Apply count to badge element (creates wrapper if missing)
+  async function refreshBadge() {
+    const res = ensureBadgeWrapper();
+    if(!res) return; // nothing to update now
+    const badge = res.badge;
+
+    let n = 0;
+    try { n = await getUnreadCount(); } catch(e){ n = 0; }
+
+    if(!n || n <= 0) {
+      badge.style.display = 'none';
+      badge.textContent = '';
+      badge.style.opacity = '0';
+      badge.style.transform = 'scale(.9)';
+    } else {
+      badge.textContent = (n > 99) ? '99+' : String(n);
+      badge.style.display = 'flex';
+      badge.style.opacity = '1';
+      badge.style.transform = 'scale(1)';
+    }
+  }
+
+// --- click behavior: if anchor href is '#' make it navigate to /notifications ---
+function ensureClickNav() {
+  const res = ensureBadgeWrapper();
+  if(!res) return;
+  const anchor = res.anchor;
+  if(!anchor) return;
+
+  anchor.addEventListener('click', function(e){
+    const href = anchor.getAttribute('href') || '#';
+    if(href === '#' || href === '') {
+      e.preventDefault();
+      window.location.href = '/notifications';
+    }
+  }, { passive: false }); // explicit non-passive so preventDefault() is allowed
+} // <-- close ensureClickNav()
+
+// --- setup polling / visibility / socket hook ---
+                  
+
+  // --- setup polling / visibility / socket hook ---
+  let pollTimer = null;
+  function startPolling() {
+    if(pollTimer) return;
+    pollTimer = setInterval(()=>refreshBadge().catch(()=>{}), 60_000);
+  }
+  function stopPolling() {
+    if(!pollTimer) return;
+    clearInterval(pollTimer);
+    pollTimer = null;
+  }
+
+  function tryWireSocket() {
+    try {
+      if(typeof io !== 'undefined' && typeof io === 'function') {
+        const s = io();
+        // listen a few common event names servers might emit
+        ['notification_sent','notification_created','notifications:created','new_notification'].forEach(ev => {
+          try { s.on(ev, () => refreshBadge().catch(()=>{})); } catch(e){/*ignore*/ }
+        });
+        return true;
+      }
+    } catch(e){ /* ignore */ }
+    return false;
+  }
+
+  // Expose manual refresh for debugging / console
+  window.refreshNotificationBadge = function(){ return refreshBadge(); };
+
+  // Boot sequence
+  function boot() {
+    bootEnsure();
+    ensureClickNav();
+    refreshBadge().catch(()=>{});
+    const wired = tryWireSocket();
+    if(!wired) startPolling();
+    document.addEventListener('visibilitychange', () => { if(document.visibilityState === 'visible') refreshBadge().catch(()=>{}); });
+    // safe periodic refresh even if socket available
+    setInterval(()=>refreshBadge().catch(()=>{}), 120_000);
+  }
+
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+</script>
+
+<script>
+// lightweight handler for server "notification_sent" events
+// Paste this just after your combined notifications script (before </body>).
+(function(){
+  // current user id (your template sets window.__USER_ID__)
+  const raw = (typeof window.__USER_ID__ !== 'undefined') ? window.__USER_ID__ : null;
+  const CURRENT_USER_ID = (raw && String(raw).match(/\d+/)) ? Number(String(raw).match(/\d+/)[0]) : null;
+
+  // safe toast (non-blocking). If you already have a toast system, remove this and call that instead.
+  function showTinyToast(title, msg) {
+    try {
+      const id = 'cc-toast';
+      let el = document.getElementById(id);
+      if(!el) {
+        el = document.createElement('div');
+        el.id = id;
+        Object.assign(el.style, {
+          position: 'fixed', right: '18px', top: '18px', zIndex: 14000,
+          background: 'rgba(6,43,76,0.92)', color: '#fff', padding: '12px 14px',
+          borderRadius: '10px', boxShadow: '0 8px 30px rgba(0,0,0,0.35)', maxWidth: '320px',
+          fontSize: '13px', lineHeight: '1.2'
+        });
+        document.body.appendChild(el);
+      }
+      el.textContent = title + (msg ? (' — ' + msg) : '');
+      el.style.opacity = '1';
+      setTimeout(()=>{ try{ el.style.transition='opacity 400ms'; el.style.opacity='0'; }catch(e){} }, 4200);
+    }catch(e){ /* ignore */ }
+  }
+
+  function attachHandler(socket) {
+    if(!socket || typeof socket.on !== 'function') return false;
+    // avoid duplicate handlers
+    if(socket.__notif_handler_attached) return true;
+    socket.__notif_handler_attached = true;
+
+    socket.on('notification_sent', function(payload){
+      try {
+        // payload may be { user_id: <id>, title, message } or generic
+        if(!payload) {
+          // still refresh badge if we don't have payload info
+          if(typeof window.refreshNotificationBadge === 'function') window.refreshNotificationBadge();
+          return;
+        }
+
+        // If payload contains a user_id, only react when it matches the signed-in user
+        if(payload.user_id && CURRENT_USER_ID && Number(payload.user_id) !== Number(CURRENT_USER_ID)) {
+          return;
+        }
+
+        // refresh server-side authoritative unread count / badge
+        if(typeof window.refreshNotificationBadge === 'function') {
+          try { window.refreshNotificationBadge(); } catch(e){ /* ignore */ }
+        } else if(typeof window.refreshNotificationBadge === 'undefined' && typeof window.refreshNotificationBadge !== 'function') {
+          // fallback call used elsewhere: refreshNotificationBadge / refreshNotificationBadge
+          try { if(typeof window.refreshNotificationBadge === 'function') window.refreshNotificationBadge(); } catch(e) {}
+        }
+
+        // optional small toast
+        const title = payload.title || payload.title_text || 'New notification';
+        const msg = payload.message || payload.body || payload.text || '';
+        showTinyToast(title, msg);
+
+      } catch (e) {
+        console.debug('notification_sent handler error', e);
+      }
+    });
+
+    return true;
+  }
+
+  // wire to existing socket if one exists, otherwise create a new one if socket.io is available
+  (function boot() {
+    try {
+      const sock = (window.socket && typeof window.socket.on === 'function') ? window.socket
+                 : (typeof io !== 'undefined' ? io() : null);
+      if(sock) {
+        // keep on window for reuse
+        if(!window.socket) window.socket = sock;
+        attachHandler(sock);
+        return;
+      }
+      // if socket.io client not yet loaded, poll a few times to wait for it
+      let attempts = 0;
+      const t = setInterval(() => {
+        attempts++;
+        const s = (window.socket && typeof window.socket.on === 'function') ? window.socket
+                  : (typeof io !== 'undefined' ? io() : null);
+        if(s) {
+          if(!window.socket) window.socket = s;
+          attachHandler(s);
+          clearInterval(t);
+        } else if(attempts > 10) {
+          clearInterval(t);
+        }
+      }, 300);
+    } catch(e){ /* ignore */ }
+  })();
+})();
+</script>
+
+
+<script>
+(function(){
+  try {
+    if (typeof io === 'undefined') return;
+    // create or reuse a socket
+    const sock = (window.socket && typeof window.socket.on === 'function') ? window.socket : io();
+    if (!window.socket) window.socket = sock;
+
+    // when connected, send identify with the logged-in user id
+    sock.on('connect', function(){
+      try {
+        if (typeof window.__USER_ID__ !== 'undefined' && window.__USER_ID__) {
+          sock.emit('identify', { user_id: window.__USER_ID__ });
+        }
+      } catch(e){ console.warn('identify emit failed', e); }
+    });
+  } catch(e){ console.warn('socket room join snippet error', e); }
+})();
+</script>
+
+
+<script>
+(function(){
+  function moveInviteToBioLevel(){
+    try {
+      if (window.innerWidth > 520) return; // only on mobile
+
+      var invite = document.querySelector('.invite-pill');
+      if (!invite) return;
+
+      // don't run twice
+      if (invite.dataset.__moved_mobile === '1') return;
+
+      // find the Add photos wrapper: label[for="otherPhotosInput"] is inside that div
+      var addLabel = document.querySelector('label[for="otherPhotosInput"]');
+      var addDiv = addLabel ? addLabel.parentElement : null;
+      var bio = document.getElementById('bioPreview');
+
+      if (!addDiv || !bio) {
+        // fallback: do nothing if DOM shape unexpected
+        return;
+      }
+
+      // create wrapper to hold invite (left) and add-photos (right)
+      var wrapper = document.createElement('div');
+      wrapper.className = 'mobile-invite-row';
+
+      // detach invite (if it was inside buttons-row, it will be removed)
+      var origParent = invite.parentElement;
+      if (origParent) origParent.removeChild(invite);
+
+      // replace the existing addDiv with wrapper (so wrapper occupies same place)
+      var parent = addDiv.parentElement;
+      parent.replaceChild(wrapper, addDiv);
+
+      // ensure addDiv has class for styling
+      addDiv.classList.add('add-photos-wrap');
+      addDiv.style.margin = '0';
+
+      // append invite (left) and addDiv (right)
+      wrapper.appendChild(invite);
+      wrapper.appendChild(addDiv);
+
+      // mark moved
+      invite.dataset.__moved_mobile = '1';
+    } catch (e) {
+      // fail silently to avoid breaking page
+      console.warn('moveInviteToBioLevel error', e);
+    }
+  }
+
+  // run on DOM ready and on resize (only activates for small screens)
+  document.addEventListener('DOMContentLoaded', moveInviteToBioLevel);
+  window.addEventListener('resize', function(){ if(window.innerWidth <= 520) moveInviteToBioLevel(); });
+})();
+</script>
+
+
+
+
+<script>
+(function(){
+  if (window.innerWidth > 520) return; // only on mobile
+
+  // IDs of the .value elements that should be placed in the bottom group
+  const bottomIds = ['dependentsTile','preferredScheduleTile','preferredGenderTile','locationTile'];
+
+  function pushLongTilesToBottom() {
+    try {
+      const container = document.querySelector('.meta-tiles');
+      if(!container) return;
+
+      bottomIds.forEach(id => {
+        const valueEl = document.getElementById(id);
+        if(!valueEl) return;
+        // the flex item is the nearest ancestor with class "tile"
+        let tile = valueEl;
+        while(tile && !tile.classList.contains('tile')) tile = tile.parentElement;
+        if(!tile) return;
+        // mark tile to appear after others
+        tile.style.order = '2';
+      });
+
+      // ensure other tiles appear first (safety)
+      Array.from(container.children).forEach(child => {
+        if(!child.style.order) child.style.order = '1';
+      });
+
+      // force a reflow so browser lays out in new order immediately
+      container.style.display = 'none';
+      // small timeout to avoid flicker on very slow devices
+      setTimeout(()=> { container.style.display = ''; }, 8);
+    } catch (e) {
+      console.warn('reorder tiles error', e);
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', pushLongTilesToBottom);
+  window.addEventListener('resize', function(){ if(window.innerWidth <= 520) pushLongTilesToBottom(); }, { passive: true });
+})();
+</script>
+
+
+
+
+
+
+
+
+<script>
+(function(){
+  function applyMobilePatches() {
+    if (!window.matchMedia) return;
+    if (!window.matchMedia('(max-width:520px)').matches) return;
+
+    // 1) Shorten the button labels on mobile
+    try {
+      var edit = document.getElementById('editProfileBtn');
+      if (edit && !edit.dataset._mobileShort) {
+        edit.dataset._mobileShort = edit.textContent.trim();
+        edit.textContent = 'Edit';
+      }
+
+      var centerBtn = document.querySelector('.buttons-row > div:nth-child(2) .btn');
+      if (centerBtn && !centerBtn.dataset._mobileShort) {
+        centerBtn.dataset._mobileShort = centerBtn.textContent.trim();
+        // choose short label based on original wording
+        var orig = centerBtn.dataset._mobileShort.toLowerCase();
+        if (orig.indexOf('caregiver') !== -1 || orig.indexOf('caregivers') !== -1) centerBtn.textContent = 'Find';
+        else if (orig.indexOf('family') !== -1 || orig.indexOf('families') !== -1) centerBtn.textContent = 'Find';
+        else centerBtn.textContent = 'Find';
+      }
+    } catch (e) { console.warn('mobile button label patch failed', e); }
+
+    // 2) Move invite-pill into .top-box (so absolute positioning is relative to header)
+    try {
+      var invite = document.querySelector('.invite-pill');
+      var topBox = document.querySelector('.top-box');
+      if (invite && topBox && invite.parentElement !== topBox) {
+        topBox.appendChild(invite);
+        invite.dataset._moved = '1';
+      }
+    } catch (e) { console.warn('mobile invite move failed', e); }
+
+    // 3) Insert floating "Add photos" text (top-right) which triggers the hidden file input
+    try {
+      if (!document.querySelector('.mobile-add-photos')) {
+        var topBox = document.querySelector('.top-box');
+        var otherInput = document.getElementById('otherPhotosInput');
+        if (topBox && otherInput) {
+          var a = document.createElement('a');
+          a.className = 'mobile-add-photos';
+          a.href = '#';
+          a.textContent = 'Add photos';
+          a.setAttribute('role','button');
+          a.addEventListener('click', function(e){
+            e.preventDefault();
+            try { otherInput.click(); } catch(err){ console.warn('open file input failed', err); }
+          }, { passive:false });
+          topBox.appendChild(a);
+        }
+      }
+    } catch (e) { console.warn('mobile add-photos injection failed', e); }
+  }
+
+  // Run on DOM ready and on resize/orientation change (idempotent)
+  function init() {
+    try { applyMobilePatches(); } catch(e){}
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+
+  window.addEventListener('resize', function(){ try { applyMobilePatches(); } catch(e){} });
+  window.addEventListener('orientationchange', function(){ try { applyMobilePatches(); } catch(e){} });
+
+})();
+</script>
+<script>
+/*
+ Restore full button labels on mobile (if a previous mobile script shortened them),
+ while keeping the smaller sizing applied by the CSS above.
+
+ Paste this after other inline scripts so it can see dataset attributes earlier code set.
+*/
+(function(){
+  function restoreMobileButtonLabels() {
+    if (!window.matchMedia || !window.matchMedia('(max-width:520px)').matches) return;
+
+    try {
+      // Edit Profile button: if earlier code saved the original into dataset._mobileShort, restore it
+      var edit = document.getElementById('editProfileBtn');
+      if (edit) {
+        // if _mobileShort was used to store the original label previously, use it
+        if (edit.dataset && edit.dataset._mobileShort) {
+          edit.textContent = edit.dataset._mobileShort;
+        } else {
+          // fallback: typical original label
+          if ((edit.textContent || '').trim().toLowerCase() === 'edit') {
+            edit.textContent = 'Edit Profile';
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('restoreMobileButtonLabels (edit) error', e);
+    }
+
+    try {
+      // Center button (Find caregivers / Find families) — restore from stored dataset if present
+      var centerBtn = document.querySelector('.buttons-row > div:nth-child(2) .btn');
+      if (centerBtn) {
+        if (centerBtn.dataset && centerBtn.dataset._mobileShort) {
+          // earlier script stored the original in _mobileShort; restore it
+          centerBtn.textContent = centerBtn.dataset._mobileShort;
+        } else {
+          // infer from original href/title if needed
+          var orig = (centerBtn.getAttribute('data-orig') || centerBtn.getAttribute('title') || '').trim();
+          if (orig) centerBtn.textContent = orig;
+          else {
+            // final safe fallback: prefer the longer form
+            if ((centerBtn.textContent || '').trim().toLowerCase() === 'find') {
+              // attempt to detect context: if caregiver link is present
+              var href = centerBtn.getAttribute('href') || '';
+              if (href.indexOf('find_family') !== -1 || href.indexOf('find_family') !== -1) centerBtn.textContent = 'Find families';
+              else centerBtn.textContent = 'Find caregivers';
+            }
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('restoreMobileButtonLabels (center) error', e);
+    }
+  }
+
+  // run on load and on resize so labels remain full on orientation change
+  function init() {
+    restoreMobileButtonLabels();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+  window.addEventListener('resize', function(){ try { restoreMobileButtonLabels(); }catch(e){} });
+  window.addEventListener('orientationchange', function(){ try { restoreMobileButtonLabels(); }catch(e){} });
+})();
+</script>
+
+
+<script>
+(function(){
+  const MOBILE_QUERY = '(max-width:520px)';
+  const SWAPPED_FLAG = 'data-care-swapped';
+  const ORIG_IDX = 'data-care-orig-idx';
+
+  function findTileIndexByLabel(container, labelText) {
+    const labels = Array.from(container.querySelectorAll('.tile .label'));
+    const lc = labelText.trim().toLowerCase();
+    for (let i = 0; i < labels.length; i++) {
+      try {
+        if ((labels[i].textContent || '').trim().toLowerCase() === lc) return i;
+      } catch(e){}
+    }
+    return -1;
+  }
+
+  function ensureOrigIndices(container) {
+    const children = Array.from(container.children);
+    children.forEach((child, i) => {
+      if (!child.hasAttribute(ORIG_IDX)) child.setAttribute(ORIG_IDX, i);
+    });
+  }
+
+  function swapTilesInContainer(container, idxA, idxB) {
+    const tiles = Array.from(container.children);
+    if (idxA < 0 || idxB < 0 || idxA >= tiles.length || idxB >= tiles.length) return false;
+    // create new order array and append originals in the new order
+    const newOrder = tiles.slice();
+    newOrder[idxA] = tiles[idxB];
+    newOrder[idxB] = tiles[idxA];
+
+    // append in the new order (appending existing nodes moves them)
+    newOrder.forEach(t => container.appendChild(t));
+    container.setAttribute(SWAPPED_FLAG, '1');
+    return true;
+  }
+
+  function restoreOriginalOrder(container) {
+    // only restore if we previously set orig idx attributes
+    const tiles = Array.from(container.children);
+    if (!tiles.length || !tiles[0].hasAttribute(ORIG_IDX)) return;
+    tiles.sort((a,b) => {
+      const ai = parseInt(a.getAttribute(ORIG_IDX) || '0', 10);
+      const bi = parseInt(b.getAttribute(ORIG_IDX) || '0', 10);
+      return ai - bi;
+    });
+    tiles.forEach(t => container.appendChild(t));
+    container.removeAttribute(SWAPPED_FLAG);
+  }
+
+  function processContainers() {
+    try {
+      const mm = window.matchMedia(MOBILE_QUERY);
+      const containers = document.querySelectorAll('.meta-tiles');
+      containers.forEach(container => {
+        // Only act on caregiver block: look for the 'Preferred recipient age' label inside this .meta-tiles
+        const hasPref = Array.from(container.querySelectorAll('.tile .label'))
+                             .some(l => (l.textContent||'').trim().toLowerCase() === 'preferred recipient age');
+        if (!hasPref) return; // skip family block
+
+        // compute indexes
+        const idxPref = findTileIndexByLabel(container, 'Preferred recipient age');
+        const idxLoc  = findTileIndexByLabel(container, 'Location');
+
+        // ensure original indices are stored once
+        ensureOrigIndices(container);
+
+        if (mm.matches) {
+          // on mobile: swap if not already swapped
+          if (container.getAttribute(SWAPPED_FLAG) !== '1') {
+            swapTilesInContainer(container, idxPref, idxLoc);
+          }
+        } else {
+          // on larger screens: if swapped, restore original order
+          if (container.getAttribute(SWAPPED_FLAG) === '1') {
+            restoreOriginalOrder(container);
+          }
+        }
+      });
+    } catch (err) {
+      console.warn('caregiver tile swap error', err);
+    }
+  }
+
+  // initial run + responsive hooks
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', processContainers);
+  } else {
+    processContainers();
+  }
+  window.addEventListener('resize', function(){ processContainers(); }, { passive: true });
+  window.addEventListener('orientationchange', function(){ processContainers(); });
+})();
+</script>
+
+
+
+
+<script>
+(function(){
+  // Only activate mobile UX tweaks when on small screens
+  function isMobile() {
+    return window.matchMedia && window.matchMedia('(max-width:520px)').matches;
+  }
+
+  // 1) Inject a close (X) button into the image modal (if not present).
+  function ensureModalCloseButton() {
+    try {
+      const imgModal = document.getElementById('imgModal');
+      if (!imgModal) return;
+      if (imgModal.querySelector('.modal-close-btn')) return;
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'modal-close-btn';
+      btn.setAttribute('aria-label','Close image');
+      btn.textContent = '×';
+
+      btn.addEventListener('click', function(e){
+        e.preventDefault(); e.stopPropagation();
+        try {
+          // prefer exposed helper if available
+          if (window.__cc_profile_helpers && typeof window.__cc_profile_helpers.hideImageModal === 'function') {
+            window.__cc_profile_helpers.hideImageModal();
+          } else {
+            // fallback: hide by removing show class
+            imgModal.classList.remove('show'); imgModal.setAttribute('aria-hidden','true');
+            const img = document.getElementById('imgModalImg'); if(img) img.src = '';
+          }
+        } catch(err){
+          try { imgModal.classList.remove('show'); } catch(e) {}
+        }
+      }, { passive:false });
+
+      // append into modal (top-level, so it sits above the image frame)
+      imgModal.appendChild(btn);
+    } catch (err) {
+      console.warn('ensureModalCloseButton error', err);
+    }
+  }
+
+  // 2) Track the last photo the user invoked the context menu on (desktop) or tapped (mobile)
+  //    so the delete handler below knows which .photo to act on.
+  window.__cc_last_right_photo = window.__cc_last_right_photo || null;
+  document.addEventListener('contextmenu', function(e){
+    try {
+      const p = e.target.closest && e.target.closest('.photo');
+      if (p) window.__cc_last_right_photo = p;
+    } catch (err) {}
+  }, true);
+
+  // Also track left taps on .photo (useful for touch flows where user may long-press then tap delete)
+  document.addEventListener('click', function(e){
+    try {
+      const p = e.target.closest && e.target.closest('.photo');
+      if (p) window.__cc_last_right_photo = p;
+    } catch (err) {}
+  }, true);
+
+  // 3) Attach a custom delete handler to the photo-menu Delete item to show spinner + delay on mobile
+  function wirePhotoMenuDelete() {
+    try {
+      const photoMenu = document.getElementById('photoMenu');
+      if (!photoMenu) return;
+      const deleteItem = photoMenu.querySelector('.item[data-action="delete"]');
+      if (!deleteItem) return;
+
+      // Avoid wiring twice
+      if (deleteItem.__cc_wired_delete) return;
+      deleteItem.__cc_wired_delete = true;
+
+      deleteItem.addEventListener('click', async function(ev){
+        // stop the older delegated handler from firing
+        ev.preventDefault(); ev.stopPropagation(); ev.stopImmediatePropagation && ev.stopImmediatePropagation();
+
+        // decide target .photo element
+        let photoEl = window.__cc_last_right_photo || null;
+        // fallback: if none set, try to find a selected/hovered photo near the menu
+        if (!photoEl) {
+          // approximate by proximity: find .photo whose rect is closest to the menu
+          try {
+            const photos = Array.from(document.querySelectorAll('.photo'));
+            const menuRect = photoMenu.getBoundingClientRect();
+            let best = null, bestDist = Infinity;
+            photos.forEach(p => {
+              const r = p.getBoundingClientRect();
+              // distance to menu center
+              const dx = (r.left + r.right)/2 - (menuRect.left + menuRect.right)/2;
+              const dy = (r.top + r.bottom)/2 - (menuRect.top + menuRect.bottom)/2;
+              const d = Math.hypot(dx, dy);
+              if (d < bestDist) { bestDist = d; best = p; }
+            });
+            if (best) photoEl = best;
+          } catch(e){}
+        }
+
+        if (!photoEl) {
+          // last fallback: remove nothing and hide menu
+          if (photoMenu) { photoMenu.style.display = 'none'; photoMenu.setAttribute('aria-hidden','true'); }
+          alert('Could not determine which photo to delete.');
+          return;
+        }
+
+        // find filename attribute if present
+        const filename = (photoEl.dataset && photoEl.dataset.filename) ? photoEl.dataset.filename : null;
+
+        // Mobile: show spinner for a minimum amount of time before removing (3s)
+        const MIN_DELAY_MS = 3000;
+
+        // show a spinner overlay on the photo
+        function showSpinner(el) {
+          try {
+            if (el.querySelector('.photo-spinner')) return;
+            const s = document.createElement('div');
+            s.className = 'photo-spinner';
+            s.innerHTML = '<div class="dot" aria-hidden="true"></div>';
+            el.appendChild(s);
+            return s;
+          } catch (e){ return null; }
+        }
+        function hideSpinner(el) {
+          try { const s = el.querySelector('.photo-spinner'); if (s) s.remove(); } catch(e){}
+        }
+
+        // Hide menu immediately
+        try { photoMenu.style.display = 'none'; photoMenu.setAttribute('aria-hidden','true'); } catch(e){}
+
+        // If not mobile, perform deletion without enforced delay (keep old fast behaviour)
+        if (!isMobile()) {
+          // do the standard delete fetch quickly
+          try {
+            if (!filename) {
+              if (confirm('Remove this photo?')) { photoEl.remove(); try { localStorage.setItem('profile_photos_updated', JSON.stringify({ t: Date.now(), deleted: null })); } catch(e){} }
+              return;
+            }
+            const res = await fetch("{{ url_for('profile_delete_photo') }}", {
+              method: 'POST',
+              credentials: 'same-origin',
+              headers: {'Content-Type':'application/json'},
+              body: JSON.stringify({ filename: filename })
+            });
+            const data = await res.json().catch(()=>null);
+            if (res.ok && data && (data.status === 'ok' || data.success === true || String(data.status).toLowerCase() === 'ok')) {
+              try { photoEl.remove(); } catch(e){}
+              try { localStorage.setItem('profile_photos_updated', JSON.stringify({ t: Date.now(), deleted: filename })); } catch(e){}
+            } else {
+              alert('Delete failed. Please try again.');
+            }
+          } catch(err) {
+            console.error('delete error', err); alert('Delete failed.'); 
+          }
+          return;
+        }
+
+        // On mobile: show spinner and enforce minimum display time
+        const spinner = showSpinner(photoEl);
+        const start = Date.now();
+
+        // perform deletion request in parallel
+        let ok = false;
+        let serverErr = null;
+        try {
+          if (!filename) {
+            // no filename: remove after delay
+            ok = true;
+          } else {
+            const res = await fetch("{{ url_for('profile_delete_photo') }}", {
+              method: 'POST',
+              credentials: 'same-origin',
+              headers: {'Content-Type':'application/json'},
+              body: JSON.stringify({ filename: filename })
+            });
+            const data = await res.json().catch(()=>null);
+            if (res.ok && data && (data.status === 'ok' || data.success === true || String(data.status).toLowerCase() === 'ok')) ok = true;
+            else serverErr = (data && data.message) ? data.message : (res.statusText || 'delete failed');
+          }
+        } catch (err) {
+          serverErr = (err && err.message) ? err.message : String(err);
+          console.error('delete request error', err);
+        }
+
+        // ensure min delay (at least MIN_DELAY_MS visible)
+        const elapsed = Date.now() - start;
+        const wait = Math.max(0, MIN_DELAY_MS - elapsed);
+        setTimeout(function(){
+          try {
+            hideSpinner(photoEl);
+            if (ok) {
+              try { photoEl.remove(); } catch(e){}
+              try { localStorage.setItem('profile_photos_updated', JSON.stringify({ t: Date.now(), deleted: filename })); } catch(e){}
+            } else {
+              // revert UI and notify user
+              alert('Delete failed. ' + (serverErr || 'Please try again.'));
+            }
+          } catch(e) { console.warn('finalize delete error', e); }
+        }, wait);
+
+      }, { passive:false });
+    } catch (err) {
+      console.warn('wirePhotoMenuDelete error', err);
+    }
+  }
+
+  // run on DOMContentLoaded to ensure elements exist
+  function init() {
+    try { ensureModalCloseButton(); } catch(e){}
+    try { wirePhotoMenuDelete(); } catch(e){}
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+
+  // also re-run if photo menu is added/changed later (defensive)
+  // small observer to catch dynamic menu re-renders
+  try {
+    const pm = document.getElementById('photoMenu');
+    if (pm) {
+      const obs = new MutationObserver(function(){ wirePhotoMenuDelete(); ensureModalCloseButton(); });
+      obs.observe(pm, { childList: true, subtree: true });
+    }
+  } catch (e) {}
+})();
+</script>
+
+
+
+
+
+<script src="/socket.io/socket.io.js"></script>
+
+<script>
+(function () {
+  if (window.__cc_profile_badges_v6) return;
+  window.__cc_profile_badges_v6 = true;
+
+  window.socket = window.socket || (typeof io === 'function'
+    ? io({ transports: ['websocket', 'polling'], upgrade: true })
+    : null);
+
+  const socket = window.socket;
+
+  const rawUserId = (typeof window.__USER_ID__ !== 'undefined') ? window.__USER_ID__ : null;
+  const CURRENT_USER_ID = (rawUserId && String(rawUserId).match(/\d+/))
+    ? Number(String(rawUserId).match(/\d+/)[0])
+    : null;
+
+  const msgBadge = document.getElementById('messagesBadge');
+  const notifBadge = document.getElementById('notificationsBadge');
+  const bellBtn = document.getElementById('navNotificationsLink');
+  const msgBtn = document.getElementById('navMessagesLink');
+
+  function showBadge(el, n) {
+    if (!el) return;
+    const num = Number(n) || 0;
+    if (num <= 0) {
+      el.style.display = 'none';
+      el.textContent = '';
+      return;
+    }
+    el.textContent = num > 99 ? '99+' : String(num);
+    el.style.display = 'flex';
+  }
+
+  async function fetchUnreadNotifications() {
+    try {
+      const res = await fetch('/api/notifications/unread_count', { credentials: 'same-origin' });
+      if (!res.ok) return 0;
+      const data = await res.json().catch(() => ({ unread: 0 }));
+      return Number(data.unread || 0);
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  async function fetchUnreadMessages() {
+    try {
+      const res = await fetch('/api/contacts', { credentials: 'same-origin' });
+      if (!res.ok) return 0;
+
+      const data = await res.json().catch(() => null);
+      if (!data) return 0;
+
+      const contacts = Array.isArray(data)
+        ? data
+        : (Array.isArray(data.contacts) ? data.contacts : []);
+
+      return contacts.filter(c => {
+        try {
+          return Number(c && (c.unread ?? c.unread_count ?? c.unreadMessages ?? 0)) > 0;
+        } catch (e) {
+          return false;
+        }
+      }).length;
+    } catch (e) {
+      return 0;
+    }
+  }
+
+  async function refreshBadges() {
+    const [notifCount, msgCount] = await Promise.all([
+      fetchUnreadNotifications(),
+      fetchUnreadMessages()
+    ]);
+
+    showBadge(notifBadge, notifCount);
+    showBadge(msgBadge, msgCount);
+  }
+
+  async function refreshNotificationBadge() {
+    const n = await fetchUnreadNotifications();
+    showBadge(notifBadge, n);
+    return n;
+  }
+
+  async function refreshMessageBadge() {
+    const n = await fetchUnreadMessages();
+    showBadge(msgBadge, n);
+    return n;
+  }
+
+  function openTarget(url) {
+    try {
+      if (url) window.location.href = url;
+    } catch (e) {}
+  }
+
+  function showPopup(title, body, url) {
+    try {
+      if ('Notification' in window && Notification.permission === 'granted') {
+        const n = new Notification(title || 'New message', {
+          body: body || '',
+          tag: 'cc_' + Date.now(),
+          renotify: true,
+          requireInteraction: true,
+          data: { url: url || '/notifications' }
+        });
+
+        n.onclick = function () {
+          try { window.focus(); } catch (e) {}
+          openTarget(url || '/notifications');
+        };
+
+        return;
+      }
+    } catch (e) {}
+
+    let toast = document.getElementById('cc-global-message-toast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'cc-global-message-toast';
+      Object.assign(toast.style, {
+        position: 'fixed',
+        top: '18px',
+        right: '18px',
+        zIndex: 200000,
+        background: 'rgba(6, 43, 76, 0.96)',
+        color: '#fff',
+        padding: '12px 14px',
+        borderRadius: '12px',
+        maxWidth: '320px',
+        boxShadow: '0 12px 30px rgba(0,0,0,0.35)',
+        fontSize: '13px',
+        lineHeight: '1.35',
+        cursor: 'pointer'
+      });
+      toast.addEventListener('click', () => openTarget(url || '/notifications'));
+      document.body.appendChild(toast);
+    }
+
+    toast.textContent = (title || 'New message') + (body ? (' — ' + body) : '');
+    toast.style.opacity = '1';
+    clearTimeout(window.__cc_global_message_toast_timer);
+    window.__cc_global_message_toast_timer = setTimeout(() => {
+      try { toast.style.opacity = '0'; } catch (e) {}
+    }, 4500);
+  }
+
+  function bindSocket(sock) {
+    if (!sock || sock.__cc_profile_badges_bound_v6) return;
+    sock.__cc_profile_badges_bound_v6 = true;
+
+    sock.on('connect', function () {
+      try {
+        if (CURRENT_USER_ID) {
+          sock.emit('identify', { user_id: CURRENT_USER_ID });
+        }
+      } catch (e) {}
+    });
+
+    sock.on('message_received', function (payload) {
+      try {
+        if (payload && payload.user_id && CURRENT_USER_ID && Number(payload.user_id) !== Number(CURRENT_USER_ID)) return;
+
+        const title = (payload && payload.title) || 'New message';
+        const body = (payload && (payload.message || payload.body)) || '';
+        const url = (payload && payload.url)
+          ? payload.url
+          : (payload && payload.sender_id ? '/chat/' + encodeURIComponent(payload.sender_id) : '/notifications');
+
+        showPopup(title, body, url);
+        refreshMessageBadge().catch(() => {});
+      } catch (e) {}
+    });
+
+    sock.on('notification_sent', function (payload) {
+      try {
+        if (payload && payload.user_id && CURRENT_USER_ID && Number(payload.user_id) !== Number(CURRENT_USER_ID)) return;
+
+        const title = (payload && payload.title) || 'New notification';
+        const body = (payload && (payload.message || payload.body)) || '';
+        showPopup(title, body, '/notifications');
+        refreshNotificationBadge().catch(() => {});
+      } catch (e) {}
+    });
+  }
+
+  function setupClicks() {
+    if (bellBtn) {
+      bellBtn.addEventListener('click', function (e) {
+        e.preventDefault();
+        window.location.href = '/notifications';
+      });
+    }
+
+    if (msgBtn) {
+      msgBtn.addEventListener('click', function () {
+        window.location.href = msgBtn.getAttribute('href') || '#';
+      });
+    }
+  }
+
+  function boot() {
+    setupClicks();
+    refreshBadges().catch(() => {});
+
+    if (socket) bindSocket(socket);
+
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'visible') {
+        refreshBadges().catch(() => {});
+      }
+    });
+
+    setInterval(() => refreshBadges().catch(() => {}), 60000);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+
+  window.refreshProfileBadges = refreshBadges;
+  window.refreshMessageBadge = refreshMessageBadge;
+  window.refreshNotificationBadge = refreshNotificationBadge;
+})();
+</script>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function(){
+
+    const loadingOverlay = document.getElementById("loadingOverlay");
+
+    const saveBtn = document.getElementById("savePublishBtn");
+    const connectBtn = document.getElementById("publishCta");
+
+
+    function showLoading(button, text){
+
+        if(loadingOverlay){
+            loadingOverlay.classList.add("show");
+        }
+
+        if(button){
+
+            button.style.pointerEvents = "none";
+            button.style.opacity = "0.7";
+
+            if(button.tagName === "BUTTON"){
+                button.innerHTML = text;
+            }
+
+            if(button.tagName === "A"){
+                button.innerHTML = text;
+            }
+
+        }
+
+    }
+
+
+    // Save & Publish button
+    if(saveBtn){
+
+        const form = saveBtn.closest("form");
+
+        if(form){
+
+            form.addEventListener("submit", function(){
+
+                showLoading(
+                    saveBtn,
+                    "Saving..."
+                );
+
+            });
+
+        }
+
+    }
+
+
+
+    // Connect Now link
+    if(connectBtn){
+
+        connectBtn.addEventListener("click", function(){
+
+            showLoading(
+                connectBtn,
+                "Connecting..."
+            );
+
+        });
+
+    }
+
+
+});
+
+</script>
+
+</body>
+</html>
+ 
+
+ 
+
+ 
+
+ 
+

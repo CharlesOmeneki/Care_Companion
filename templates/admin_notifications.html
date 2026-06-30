@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin — Send Notification</title>
+  <style>
+    :root{
+      --bg:#f3f7fb;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --line:#e6edf0;
+      --primary:#0ea5a4;
+      --ghost:#e2e8f0;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      font-family:Inter,system-ui,Segoe UI,Roboto,Arial,sans-serif;
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+    }
+
+    .wrap{
+      max-width:920px;
+      margin:28px auto;
+      padding:18px;
+    }
+
+    h2{
+      margin:0 0 14px;
+      font-size:28px;
+      line-height:1.2;
+    }
+
+    .card{
+      background:var(--card);
+      border-radius:12px;
+      padding:18px;
+      box-shadow:0 8px 24px rgba(2,6,23,0.06);
+    }
+
+    label{
+      display:block;
+      margin-top:12px;
+      margin-bottom:6px;
+      font-weight:600;
+    }
+
+    input[type="text"],
+    textarea,
+    select{
+      width:100%;
+      padding:10px 12px;
+      border-radius:8px;
+      border:1px solid var(--line);
+      font-size:14px;
+      background:#fff;
+      color:var(--text);
+      outline:none;
+    }
+
+    input[type="text"]:focus,
+    textarea:focus,
+    select:focus{
+      border-color:#99e7e4;
+      box-shadow:0 0 0 3px rgba(14,165,164,0.10);
+    }
+
+    textarea{
+      min-height:120px;
+      resize:vertical;
+    }
+
+    .row{
+      display:flex;
+      gap:12px;
+    }
+
+    .col{
+      flex:1;
+      min-width:0;
+    }
+
+    .actions{
+      margin-top:14px;
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+
+    .btn{
+      padding:10px 14px;
+      border-radius:10px;
+      border:none;
+      cursor:pointer;
+      text-decoration:none;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      font-weight:600;
+      line-height:1;
+    }
+
+    .btn-primary{
+      background:var(--primary);
+      color:#fff;
+    }
+
+    .btn-ghost{
+      background:var(--ghost);
+      color:#0f172a;
+    }
+
+    .note{
+      color:var(--muted);
+      margin-top:8px;
+      font-size:13px;
+    }
+
+    @media (max-width: 900px){
+      .wrap{
+        margin:16px auto;
+        padding:14px;
+      }
+
+      h2{
+        font-size:24px;
+      }
+
+      .card{
+        padding:16px;
+      }
+
+      .row{
+        flex-direction:column;
+      }
+
+      .actions{
+        flex-direction:column;
+      }
+
+      .actions .btn{
+        width:100%;
+      }
+    }
+
+    @media (max-width: 600px){
+      .wrap{
+        margin:10px auto;
+        padding:10px;
+      }
+
+      h2{
+        font-size:22px;
+        margin-bottom:12px;
+      }
+
+      .card{
+        padding:14px;
+        border-radius:10px;
+      }
+
+      label{
+        margin-top:10px;
+        font-size:14px;
+      }
+
+      input[type="text"],
+      textarea,
+      select{
+        font-size:16px;
+        padding:11px 12px;
+      }
+
+      textarea{
+        min-height:140px;
+      }
+
+      .note{
+        font-size:12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h2>Send Notification</h2>
+    <div class="card">
+      <form method="post" action="/admin/notifications">
+        <label>Title</label>
+        <input type="text" name="title" required placeholder="e.g. New Safety Policy" />
+
+        <label>Message</label>
+        <textarea name="message" required placeholder="Write your message here..."></textarea>
+
+        <div class="row" style="margin-top:12px;">
+          <div class="col">
+            <label>Target audience</label>
+            <select name="target" id="targetSelect">
+              <option value="all">All users</option>
+              <option value="caregiver">Caregivers</option>
+              <option value="family">Family</option>
+              <option value="single">Single user</option>
+            </select>
+            <div class="note">If "Single user", provide ID or email in the field below.</div>
+          </div>
+
+          <div class="col">
+            <label>Delivery method</label>
+            <select name="delivery">
+              <option value="inapp">In app (default)</option>
+              <option value="email">Email only</option>
+              <option value="both">Both (Email + In-app)</option>
+            </select>
+          </div>
+        </div>
+
+        <label style="margin-top:12px">Single user (id or email)</label>
+        <input type="text" name="single_user" placeholder="123 or user@example.com" />
+
+        <div class="actions">
+          <button type="submit" class="btn btn-primary">Send notification</button>
+          <a class="btn btn-ghost" href="/admin">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const targetSelect = document.getElementById('targetSelect');
+      const singleUserInput = document.querySelector('input[name="single_user"]');
+
+      function syncSingleUserState(){
+        const isSingle = targetSelect && targetSelect.value === 'single';
+        if (singleUserInput) {
+          singleUserInput.disabled = !isSingle;
+          singleUserInput.required = isSingle;
+          if (!isSingle) singleUserInput.value = '';
+        }
+      }
+
+      if (targetSelect) {
+        targetSelect.addEventListener('change', syncSingleUserState);
+        syncSingleUserState();
+      }
+    })();
+  </script>
+</body>
+</html>

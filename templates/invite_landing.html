@@ -1,0 +1,131 @@
+<!-- templates/invite_landing.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Care Companion — You're invited</title>
+
+  <!-- IMPORTANT: OpenGraph / Twitter meta — social platforms read these to build preview cards -->
+  <meta property="og:title" content="Care Companion" />
+  <meta property="og:description" content="Concerned about your senior loved one living alone? You're currently at the right place." />
+  <meta property="og:type" content="website" />
+  <!-- change this image to a real hosted image on your domain (1200x630 recommended) -->
+  <meta property="og:image" content="{{ url_for('static', filename='images/invite_og.png', _external=True) }}" />
+  <meta property="og:url" content="{{ request.url }}" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Care Companion" />
+  <meta name="twitter:description" content="Concerned about your senior loved one living alone? You're currently at the right place." />
+  <meta name="twitter:image" content="{{ url_for('static', filename='images/invite_og.png', _external=True) }}" />
+
+  <style>
+    :root{
+      --bg: linear-gradient(180deg,#071027,#082a3e);
+      --card: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      --accent: #6C63FF;
+      --muted: #9fb0c8;
+    }
+    html,body{height:100%;margin:0}
+    body{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:100vh;
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+      background: var(--bg);
+      color: #eaf3ff;
+      padding:20px;
+    }
+    .card{
+      width:100%;
+      max-width:860px;
+      border-radius:14px;
+      padding:28px;
+      background: var(--card);
+      box-shadow: 0 24px 80px rgba(2,8,20,0.6);
+    }
+    .row{display:flex;gap:20px;align-items:center}
+    .left { flex:1 }
+    .badge {
+      width:84px;height:84px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#4fb0ff);display:flex;align-items:center;justify-content:center;font-weight:800;color:#022;font-size:20px;flex-shrink:0;
+    }
+    h1{margin:0;font-size:22px;letter-spacing:0.2px}
+    p.lead{margin:12px 0 0;color:var(--muted);font-size:16px;line-height:1.45}
+    .inviter { margin-top:12px; background: rgba(255,255,255,0.02); padding:12px; border-radius:10px; color: #eaf3ff; font-size:14px; display:flex; gap:10px; align-items:center; }
+    .inviter img{ width:52px; height:52px; border-radius:10px; object-fit:cover; }
+    .actions { margin-top:18px; display:flex; gap:12px; align-items:center }
+    .btn-proceed{ background: linear-gradient(90deg,var(--accent),#4fb0ff); border:0; color:#022; padding:12px 16px; border-radius:10px; font-weight:800; cursor:pointer; text-decoration:none; display:inline-block; }
+    .btn-secondary{ background: transparent; border:1px solid rgba(255,255,255,0.06); color:var(--muted); padding:10px 12px; border-radius:8px; cursor:pointer; text-decoration:none; }
+    .foot { margin-top:14px; color:var(--muted); font-size:13px; }
+    @media(max-width:720px){ .row{flex-direction:column;align-items:flex-start} .badge{width:64px;height:64px} .inviter{width:100%} }
+  </style>
+</head>
+<body>
+  <main class="card" role="main" aria-labelledby="brandTitle">
+    <div class="row">
+      <div class="left">
+        <div class="row" style="align-items:center;">
+          <div class="badge" aria-hidden="true">CC</div>
+          <div style="min-width:0">
+            <h1 id="brandTitle">Care Companion</h1>
+            <p class="lead">Concerned about your senior loved one living alone? You're currently at the right place.</p>
+          </div>
+        </div>
+
+        {% if inviter %}
+          <div class="inviter" aria-label="Invited by">
+            {% set inviter_photo = None %}
+            {% if inviter.profile and inviter.profile.profile_photo %}
+              {% set inviter_photo = inviter.profile.profile_photo %}
+            {% elif inviter.profile_photo %}
+              {% set inviter_photo = inviter.profile_photo %}
+            {% elif inviter.photo %}
+              {% set inviter_photo = inviter.photo %}
+            {% endif %}
+
+            {% if inviter_photo %}
+              <img src="{{ url_for('uploaded_file', filename=inviter_photo|basename) }}" alt="Inviter photo">
+            {% else %}
+              <img src="{{ url_for('static', filename='images/default_user.png') }}" alt="Default inviter photo">
+            {% endif %}
+
+            <div>
+              <div style="font-weight:800">{{ inviter.first_name }} {{ inviter.last_name }}</div>
+              <div style="color:var(--muted);font-size:13px">
+                Invited you via Care Companion
+              </div>
+            </div>
+          </div>
+        {% endif %}
+
+        <div class="actions">
+          <a id="proceedBtn" class="btn-proceed" href="{{ site_home }}">Proceed</a>
+          <a class="btn-secondary" href="{{ url_for('home') }}">Visit homepage</a>
+        </div>
+
+        <div class="foot">
+          Clicking <strong>Proceed</strong> will open Care Companion's homepage.
+        </div>
+      </div>
+
+      <aside style="width:280px;flex-shrink:0">
+        <div style="background:rgba(255,255,255,0.02);padding:14px;border-radius:10px">
+          <div style="font-weight:800">What to expect</div>
+          <div style="color:var(--muted);margin-top:8px;font-size:14px">
+            When you click Proceed you'll go to the Care Companion homepage where you can learn more or sign up.
+          </div>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <script>
+    (function(){
+      // defensive: if site_home missing, fallback
+      const p = document.getElementById('proceedBtn');
+      if (!p) return;
+    })();
+  </script>
+</body>
+</html>

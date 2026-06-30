@@ -1,0 +1,3266 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Help & Support — Care Companion</title>
+  <meta name="description" content="Support options — help centre, FAQs and contact details for Care Companion." />
+
+  <!-- Fonts (matching About page) -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --berry:     #6A5CFA;
+      --cobalt:    #2153FF;
+      --airforce:  #4f7ef7;
+      --navy:      #041B3B;
+      --panel:     #0f2a66;
+      --ice:       #e6f4ff;
+      --muted:     #cfe7ff;
+      --bg:        #07183a;
+      --maxw:      1180px;
+      --radius:    14px;
+      --transition:220ms cubic-bezier(.2,.9,.3,1);
+      --glass:     rgba(255,255,255,0.04);
+      font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+    }
+
+    html,body{height:100%; margin:0; background: linear-gradient(180deg,var(--bg), #05102a); color: #eaf4ff; -webkit-font-smoothing:antialiased;}
+    a{color:inherit; text-decoration:none}
+    .container{max-width:var(--maxw); margin:32px auto; padding:18px;}
+
+    /* Card shell */
+    .panel {
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:18px;
+      padding:22px;
+      border:1px solid rgba(255,255,255,0.04);
+      box-shadow: 0 30px 80px rgba(2,8,20,0.6);
+      backdrop-filter: blur(6px);
+    }
+
+    header.top { display:flex; gap:14px; align-items:center; justify-content:space-between; margin-bottom:12px; }
+    .brand { display:flex; gap:12px; align-items:center; }
+    .brand .logo { width:88px; height:56px; object-fit:contain; display:block; border-radius:10px; }
+    .brand h1 { margin:0; font-size:20px; font-family:"Playfair Display", serif; }
+    .brand .lead { color:var(--muted); font-size:13px; margin-top:6px; }
+
+    /* top nav (consistent with other pages) */
+    nav.main-nav { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+    nav.main-nav a { padding:8px 10px; border-radius:10px; font-weight:700; color: rgba(235,246,255,0.95); }
+    nav.main-nav a[aria-current="page"] { background: linear-gradient(90deg,var(--cobalt),var(--airforce)); color:#fff; box-shadow: 0 10px 30px rgba(33,83,255,0.12); }
+
+    /* layout */
+    .cols { display:grid; grid-template-columns: 2fr 1fr; gap:18px; margin-top:12px; align-items:start; }
+    .card { padding:18px; border-radius:12px; background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); border:1px solid rgba(255,255,255,0.03); color: #eaf6ff; }
+    .help-steps { display:flex; flex-direction:column; gap:12px; margin-top:8px; }
+    .step { display:flex; gap:12px; align-items:flex-start; }
+    .step .num { width:40px; height:40px; border-radius:10px; background:linear-gradient(90deg,var(--cobalt),var(--airforce)); display:flex; align-items:center; justify-content:center; font-weight:800; color:#07102a; }
+    .muted { color: var(--muted); }
+
+    .faq { margin-top:12px; }
+    .faq h3 { margin:0 0 8px 0; color:#fff; font-size:16px; font-weight:800; }
+
+    /* clickable FAQ styles (hand cursor & hover) */
+    details { margin-bottom:10px; border-radius:10px; overflow:hidden; }
+    summary {
+      padding:12px; display:block; cursor:pointer; border-radius:8px;
+      background: rgba(255,255,255,0.01); transition: background 160ms ease, transform 120ms ease;
+      font-weight:700;
+      user-select:none;
+      outline: none;
+    }
+    summary:hover { background: rgba(255,255,255,0.02); transform: translateY(-2px); }
+    details[open] > summary { background: linear-gradient(90deg,var(--cobalt),var(--airforce)); color:#07102A; }
+    details p { margin:8px 0 0 0; color:var(--muted); padding:0 6px 8px 6px; }
+
+    .contact-box { display:flex; flex-direction:column; gap:8px; margin-top:6px; }
+    .btn { display:inline-block; padding:10px 14px; border-radius:10px; background: linear-gradient(90deg,var(--cobalt),var(--airforce)); color:#fff; font-weight:800; text-decoration:none; border:0; }
+
+    .tutorials { margin-top:14px; margin-bottom:24px; } /* increased bottom margin to create space before footer */
+    .tutorials ul { margin-left:18px; margin-top:8px; }
+    .tutorials li { margin-bottom:8px; color:var(--muted); }
+
+    /* removed duplicate small footer from this page (site footer holds the canonical copy) */
+    footer.small { display:none; }
+
+    /* toast (copy fallback) */
+    #cc-toast {
+      position: fixed;
+      right: 20px;
+      bottom: 22px;
+      background: linear-gradient(180deg,#eaf8ff,#d9f3ff);
+      color: #07102a;
+      border: 1px solid rgba(30,95,191,0.12);
+      padding: 12px 14px;
+      border-radius: 10px;
+      box-shadow: 0 12px 36px rgba(2,8,40,0.18);
+      z-index: 40000;
+      display: none;
+      min-width: 260px;
+    }
+    #cc-toast .t-head { font-weight:800; font-size:14px; margin-bottom:6px; color:#07243f }
+    #cc-toast .t-body { font-size:13px; color:#07243f; margin-bottom:8px }
+    #cc-toast .t-actions { display:flex; gap:8px; justify-content:flex-end }
+    .cc-copy-btn { background: linear-gradient(90deg,var(--cobalt),var(--airforce)); color:#fff; padding:8px 10px; border-radius:8px; border:0; font-weight:800; cursor:pointer; }
+    .cc-close-btn { background: transparent; border: 1px solid rgba(7,36,80,0.06); padding:8px 10px; border-radius:8px; cursor:pointer; }
+
+    @media (max-width:980px) {
+      .cols { grid-template-columns: 1fr; }
+      nav.main-nav { display:flex; gap:8px; overflow:auto; padding-bottom:6px; }
+    }
+
+    a:focus, button:focus, input:focus, textarea:focus { outline: 3px solid rgba(33,83,255,0.14); outline-offset: 3px; border-radius:8px; }
+
+
+
+
+@media (max-width: 760px){
+  .panel > header.top{
+    display:none !important;
+  }
+
+  .cc-mobile-strip{
+    display:block;
+    margin: -28px -28px 16px -28px;
+  }
+
+  .off-white-section{
+    display:flex;
+    align-items:center;
+    gap:18px;
+    padding:12px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.98), rgba(244,251,255,0.98));
+    border-radius:12px;
+    border: 1px solid rgba(33,83,255,0.06);
+    color: #0b3250;
+    position: relative;
+    overflow: visible;
+  }
+
+  .off-white-section .brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    min-width: 0;
+  }
+
+  .off-white-section .brand img{
+    width:88px;
+    height:56px;
+    object-fit:contain;
+    filter: drop-shadow(0 6px 18px rgba(0,0,0,0.06));
+    flex: 0 0 auto;
+  }
+
+  .off-white-section .brand > div{
+    display:none !important;
+  }
+
+  .mobile-hamburger{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:0;
+    background:transparent !important;
+    border:0 !important;
+    padding:8px;
+    margin-left:6px;
+    cursor:pointer;
+    color:#062c55 !important;
+    height:56px;
+    width:56px;
+    box-sizing:border-box;
+    font-size:0 !important;
+    line-height:0 !important;
+    flex: 0 0 auto;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .mobile-hamburger svg{
+    fill:#062c55 !important;
+    display:block;
+  }
+
+  .top-right-controls{
+    position:absolute;
+    right:12px;
+    top:50%;
+    transform:translateY(-50%);
+    z-index:9999;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    pointer-events:auto;
+  }
+
+  .top-right-controls .call-btn{
+    display:inline-flex !important;
+    align-items:center;
+    justify-content:center;
+    width:40px;
+    height:40px;
+    padding:0 !important;
+    border-radius:10px;
+    background: linear-gradient(180deg,#ffffff,#f2f8ff) !important;
+    border:1px solid rgba(6,20,50,0.06);
+    box-shadow:0 6px 18px rgba(6,20,50,0.06);
+    color:#062c55 !important;
+    font-size:0 !important;
+    line-height:0 !important;
+    overflow:hidden;
+  }
+
+  .top-right-controls .call-btn svg{
+    width:18px;
+    height:18px;
+    display:block;
+    fill:currentColor;
+  }
+
+  .top-right-controls .profile-btn{
+    position: relative;
+    z-index: 10000;
+    pointer-events:auto;
+  }
+
+  .top-right-controls .profile-btn .avatar{
+    width:40px;
+    height:40px;
+    border-radius:999px;
+    object-fit:cover;
+    display:block;
+  }
+
+  .dropdown-menu{
+    position:absolute;
+    right:0;
+    top:calc(100% + 8px);
+    min-width:160px;
+    background:#fff;
+    color:#0b2a66;
+    border-radius:10px;
+    box-shadow:0 14px 34px rgba(6,27,60,0.12);
+    padding:6px;
+    display:none;
+    flex-direction:column;
+    gap:4px;
+    overflow:hidden;
+    z-index:99999;
+  }
+
+  .dropdown-menu.show{
+    display:flex;
+  }
+
+  .mobile-nav-panel{
+    position:fixed;
+    left:0;
+    top:0;
+    height:100dvh;
+    width:var(--nav-width, 270px);
+    max-width:92vw;
+    background:#ffffff;
+    transform:translateX(calc(-1 * var(--nav-width, 270px)));
+    transition:transform 420ms cubic-bezier(.22,.61,.36,1);
+    z-index:10100;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
+    box-shadow:10px 0 36px rgba(6,20,50,0.12);
+    display:block;
+  }
+
+  .mobile-nav-panel.open{
+    transform:translateX(0);
+  }
+
+  .mobile-nav-panel .mobile-nav-inner{
+    padding:20px 8px;
+  }
+
+  .mobile-nav-panel .mobile-nav-inner a{
+    display:block;
+    padding:16px 20px;
+    color:#072049 !important;
+    text-decoration:none;
+    font-weight:700;
+    font-size:16px;
+    background:transparent;
+    position:relative;
+  }
+
+  .mobile-nav-panel .mobile-nav-inner a:not(:last-child)::after{
+    content:"";
+    position:absolute;
+    left:20px;
+    right:20px;
+    bottom:0;
+    height:1px;
+    border-radius:1px;
+    background:linear-gradient(90deg, rgba(6,20,50,0.06), rgba(6,20,50,0.03));
+  }
+
+  .mobile-nav-panel .mobile-nav-inner a:hover,
+  .mobile-nav-panel .mobile-nav-inner a:focus{
+    background:rgba(33,83,255,0.06);
+    outline:none;
+  }
+
+  @media (max-width: 420px){
+    .cc-mobile-strip{
+      margin:-28px -28px 12px -28px;
+    }
+
+    .mobile-hamburger{
+      padding:6px;
+      margin-left:4px;
+      height:52px;
+      width:52px;
+    }
+
+    .off-white-section{
+      padding:0 12px;
+    }
+  }
+}
+
+@media (max-width: 760px) {
+  .off-white-section .brand {
+    gap: 4px !important;
+  }
+
+  .mobile-hamburger {
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .top-right-controls {
+    right: 10px !important;
+    gap: 4px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+    flex-wrap: nowrap !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+  }
+
+  .top-right-controls .call-btn {
+    margin-right: 0 !important;
+    flex: 0 0 auto !important;
+  }
+
+  .top-right-controls .profile-dropdown {
+    display: flex !important;
+    align-items: center !important;
+    margin-top: 0 !important;
+    position: relative !important;
+    top: 0 !important;
+  }
+
+  .top-right-controls .profile-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin-top: 0 !important;
+    padding: 0 !important;
+    transform: none !important;
+    vertical-align: middle !important;
+  }
+
+  .top-right-controls .profile-btn .avatar {
+    display: block !important;
+    margin: 0 !important;
+    vertical-align: middle !important;
+  }
+
+  .top-right-controls .chev {
+    line-height: 1 !important;
+    margin-left: 2px !important;
+  }
+}
+
+
+@media (max-width: 760px) {
+  /* push the logo closer to the left edge */
+  .off-white-section {
+    padding-left: 0px !important;
+    padding-right: 10px !important;
+  }
+
+  .off-white-section .brand {
+    gap: 2px !important;
+  }
+
+  /* shift hamburger a little left, but keep a tiny gap after logo */
+  .mobile-hamburger {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 6px !important;
+  }
+
+  /* remove the square box around the profile icon */
+  .top-right-controls .profile-btn {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    padding: 0 !important;
+    width: auto !important;
+    height: auto !important;
+  }
+
+  .top-right-controls .profile-btn .avatar {
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+  }
+
+  .top-right-controls .profile-btn .chev {
+    font-weight: 700 !important;
+  }
+
+  /* make dropdown text thicker */
+  .dropdown-menu .menu-item {
+    font-weight: 800 !important;
+    color: #0b2a66 !important;
+  }
+}
+
+/* ===== Desktop reset: keep mobile header hidden on desktop ===== */
+@media (min-width: 761px) {
+  .cc-mobile-strip,
+  .mobile-hamburger,
+  .mobile-nav-panel,
+  #mobileNav,
+  #mobileNavOverlay {
+    display: none !important;
+  }
+
+  .panel > header.top {
+    display: flex !important;
+  }
+
+  .top-right-controls {
+    display: none !important;
+  }
+
+  .nav-main,
+  .main-nav {
+    display: flex !important;
+  }
+}
+
+/* ===== Mobile only ===== */
+@media (max-width: 760px) {
+  .panel > header.top {
+    display: none !important;
+  }
+
+  .cc-mobile-strip {
+    display: block !important;
+  }
+
+  .mobile-hamburger {
+    display: inline-flex !important;
+  }
+
+  .mobile-nav-panel {
+    display: block !important;
+  }
+}
+
+@media (max-width: 760px) {
+  /* hide the old desktop header on mobile */
+  .terms-header {
+    display: none !important;
+  }
+
+  /* show the mobile strip only on phones */
+  .cc-mobile-strip {
+    display: block !important;
+    margin: -28px -28px 16px -28px;
+  }
+
+  /* make sure the slide menu is readable */
+  .mobile-nav-panel {
+    background: #ffffff !important;
+  }
+
+  .mobile-nav-panel .mobile-nav-inner {
+    display: block !important;
+    padding: 18px 10px !important;
+  }
+
+  .mobile-nav-panel .mobile-nav-inner a {
+    display: block !important;
+    color: #072049 !important;
+    font-weight: 700 !important;
+    padding: 16px 20px !important;
+    text-decoration: none !important;
+  }
+
+  .mobile-nav-panel .mobile-nav-inner a:not(:last-child) {
+    border-bottom: 1px solid rgba(6,20,50,0.06);
+  }
+}
+
+
+
+@media (max-width: 760px) {
+  body {
+    padding: 0 !important;
+  }
+
+  .container {
+    padding: 0 10px !important;
+    margin: 0 auto !important;
+  }
+
+  .panel {
+    margin: 12px 0 !important;
+    padding: 14px !important;
+    border-radius: 14px !important;
+  }
+
+  .cc-mobile-strip {
+    margin: -14px -14px 16px -14px !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .panel {
+    padding: 12px !important;
+  }
+
+  .cc-mobile-strip {
+    margin: -12px -12px 12px -12px !important;
+  }
+}
+
+
+@media (max-width: 760px) {
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .container {
+    margin: 0 auto !important;
+    padding: 0 !important;
+  }
+
+  .panel {
+    margin: 0 !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  .cc-mobile-strip {
+    margin: 0 -12px 16px -12px !important;
+    display: block !important;
+  }
+
+  .off-white-section {
+    margin: 0 !important;
+    border-radius: 0 !important;
+    width: 100% !important;
+  }
+
+  .off-white-section .brand {
+    margin-left: 0 !important;
+  }
+
+  .top-right-controls {
+    right: 12px !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .cc-mobile-strip {
+    margin: 0 -10px 12px -10px !important;
+  }
+}
+  </style>
+</head>
+<body
+  data-logged-in="{{ 1 if session.get('user_id') else 0 }}"
+  data-user-role="{{ user.role if user else '' }}"
+  data-profile-published="{{ 1 if (user and user.profile and user.profile.published) else 0 }}"
+>
+
+
+
+  <div class="container">
+    <div class="panel">
+
+
+             
+                      <!-- MOBILE-ONLY HEADER (matches contact page style on phones) -->
+<div class="cc-mobile-strip">
+  <div class="off-white-section" role="navigation" aria-label="Primary navigation">
+    <div class="brand">
+      <img src="{{ url_for('static', filename='images/caregiver_logo.png') }}" alt="Care Companion logo">
+      <div>
+        <div style="font-weight:800; color:var(--ice); font-size:18px;">Care Companion</div>
+        <div style="font-size:12px; color:rgba(230,245,255,0.75)">Privacy &amp; data protection</div>
+      </div>
+    </div>
+
+    <button id="mobileHamburger" class="mobile-hamburger" aria-controls="mobileNav" aria-expanded="false" aria-label="Open menu">
+      <svg width="22" height="16" viewBox="0 0 22 16" aria-hidden="true" focusable="false">
+        <rect width="22" height="2" rx="1"></rect>
+        <rect y="7" width="22" height="2" rx="1" opacity="0.95"></rect>
+        <rect y="14" width="22" height="2" rx="1" opacity="0.85"></rect>
+      </svg>
+    </button>
+
+    <div class="top-right-controls">
+      <button class="call-btn"
+        type="button"
+        aria-label="Call Care Companion +234 913 227 2022"
+        onclick="window.location.href='tel:+2349132272022'">
+        <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.02-.24c1.12.37 2.33.57 3.59.57a1 1 0 011 1V20a1 1 0 01-1 1C10.07 21 3 13.93 3 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.26.2 2.47.57 3.59a1 1 0 01-.24 1.02l-2.21 2.18z" />
+        </svg>
+      </button>
+
+      <div class="profile-dropdown" id="profileDropdown">
+        <button id="profileBtn" class="profile-btn" aria-haspopup="true" aria-expanded="false" title="Open profile menu">
+          <img
+            class="avatar"
+            src="{{ url_for('uploaded_file', filename=(user.profile.profile_photo|basename)) if (user and user.profile and user.profile.profile_photo) else ( url_for('uploaded_file', filename=(user.profile_photo|basename)) if (user and user.profile_photo) else url_for('static', filename='images/avatar cc.jfif') ) }}"
+            alt="Profile"
+          >
+          <span class="chev" aria-hidden="true">▾</span>
+        </button>
+
+        <div class="dropdown-menu" id="profileMenu" role="menu" aria-hidden="true">
+          <a class="menu-item" href="{{ url_for('profile_setup') }}?suppress_overlay=1" role="menuitem">My profile</a>
+          <a class="menu-item" href="{{ url_for('contact') }}" role="menuitem">Contact Us</a>
+          <a id="logoutLink" class="menu-item" href="{{ url_for('logout') }}" role="menuitem" data-method="get">Log out</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div> 
+ 
+
+
+      <!-- Header + Nav (Jinja url_for used so routes match your Flask app) -->
+      <header class="top" role="banner" aria-label="Site header">
+        <div class="brand" aria-hidden="false">
+          <!-- replaced CC mark with your site logo (same approach as privacy/terms) -->
+          <img class="logo" src="{{ url_for('static', filename='images/caregiver_logo.png') }}" alt="Care Companion logo">
+          <div>
+            <h1>Help & support</h1>
+            <div class="lead">Guides, frequently asked questions and ways to reach our support team.</div>
+          </div>
+        </div>
+
+        <nav class="main-nav" aria-label="Top navigation">
+          <a href="{{ url_for('home') }}">Home</a>
+          <a href="{{ url_for('services') }}">Services</a>
+          <a href="{{ url_for('about') }}">About</a>
+          <a href="{{ url_for('support') }}" aria-current="page">Support</a>
+          <a href="{{ url_for('privacy') }}">Privacy</a>
+          <a href="{{ url_for('terms') }}">Terms</a>
+        </nav>
+      </header>
+
+      <div class="cols" role="main">
+
+        <!-- MAIN CONTENT -->
+        <section class="card" aria-labelledby="help-how">
+          <h2 id="help-how">Get help — fast</h2>
+
+          <div class="help-steps">
+            <div class="step">
+              <div class="num">1</div>
+              <div>
+                <strong>Search the Help Centre</strong>
+                <p class="muted">Use the FAQ below or search the knowledge base for quick answers on profiles, bookings and payments.</p>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="num">2</div>
+              <div>
+                <strong>Contact support</strong>
+                <p class="muted">If the Help Centre doesn't solve it, reach out by email or phone — we reply quickly during business hours.</p>
+              </div>
+            </div>
+
+            <div class="step">
+              <div class="num">3</div>
+              <div>
+                <strong>Escalate urgent issues</strong>
+                <p class="muted">For safety or abuse reports, call +2349132272022 and send an email to <a href="mailto:carecompanion@zohomail.com" style="color:var(--muted)">carecompanion@zohomail.com</a> with details.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="faq" aria-labelledby="top-faqs">
+            <h3 id="top-faqs">Top FAQs</h3>
+
+            <details>
+              <summary>How do I edit my profile?</summary>
+              <p class="muted">Sign in, go to your profile (top-right) and choose Edit profile. Update fields and save; changes appear immediately.</p>
+            </details>
+
+            <details>
+              <summary>How do I cancel a booking?</summary>
+              <p class="muted">Open the booking, click Cancel and follow the prompts. Cancellation fees may apply depending on provider policy.</p>
+            </details>
+
+            <details>
+              <summary>I forgot my password — what now?</summary>
+              <p class="muted">Use the 'Forgot password' link on the sign-in page to receive a reset email. If you don't receive it, check your spam or contact support using the button on the right.</p>
+            </details>
+
+            <details>
+              <summary>How do I report a concern about a caregiver?</summary>
+              <p class="muted">If it's urgent, call our safety line at +2349132272022. Otherwise file a report via your dashboard or email support with reference numbers and details.</p>
+            </details>
+          </div>
+
+          <div style="margin-top:14px">
+            <a class="btn" href="{{ url_for('support') }}">Full Support Centre</a>
+          </div>
+        </section>
+
+        <!-- SIDEBAR -->
+        <aside class="card" aria-labelledby="contact-header">
+          <h2 id="contact-header">Contact support</h2>
+
+          <div class="contact-box" role="group" aria-label="Contact options">
+            <div><strong>Email</strong>: <a id="supportEmail" href="mailto:carecompanion@zohomail.com" style="color:var(--muted)">carecompanion@zohomail.com</a></div>
+            <div><strong>Phone</strong>: <a id="supportPhone" href="tel:+2349132272022" style="color:var(--muted)">+234 913 227 2022</a></div>
+            <div><strong>Hours</strong>: Mon–Fri, 08:00–18:00 (local)</div>
+          </div>
+
+          <div style="margin-top:12px">
+            <!-- Email support button: uses mailto but we also intercept to show fallback if nothing opens -->
+            <a id="emailSupportBtn" class="btn" href="mailto:carecompanion@zohomail.com">Email support</a>
+          </div>
+
+          <div style="margin-top:14px">
+            <h3>Report abuse</h3>
+            <p class="muted">If someone's safety is at risk, call local emergency services first. Then contact us — include any chat transcripts, profile names and timestamps.</p>
+          </div>
+        </aside>
+      </div>
+
+      <section class="card tutorials" aria-labelledby="tutorials">
+        <h2 id="tutorials">Tutorials & guides</h2>
+        <p class="muted">We've collected practical guides for common tasks — profile setup, running a successful short trial shift, and onboarding families/caregivers.</p>
+        <ul>
+          <li><a href="{{ url_for('how_it_works') }}" style="color:var(--muted)">How matching works</a></li>
+          <li><a href="{{ url_for('services') }}" style="color:var(--muted)">Services & pricing guidance</a></li>
+          <li><a href="{{ url_for('about') }}" style="color:var(--muted)">About us</a></li> <!-- replaced safety checklist with About us -->
+        </ul>
+      </section>
+
+      <!-- small spacer so this page content breathes above the site footer (adjust height if you want more/less gap) -->
+      <div style="height:6px" aria-hidden="true"></div>
+
+      <!-- NOTE: removed the per-page copyright/writeup here. The canonical footer (site-wide) displays © info. -->
+    </div>
+  </div>
+
+  <!-- fallback toast for email / phone if system doesn't open mail/phone app -->
+  <div id="cc-toast" role="status" aria-live="polite">
+    <div class="t-head" id="cc-toast-head">Contact</div>
+    <div class="t-body" id="cc-toast-body">If your device didn't open an email app, copy this address:</div>
+    <div class="t-actions">
+      <button class="cc-copy-btn" id="cc-copy-btn">Copy</button>
+      <button class="cc-close-btn" id="cc-close-btn">Close</button>
+    </div>
+  </div>
+
+  <script>
+    // small utilities for toast/copy fallback (same behaviour as privacy/terms)
+    function showToast(title, body, copyText) {
+      const toast = document.getElementById('cc-toast');
+      document.getElementById('cc-toast-head').textContent = title || 'Contact';
+      document.getElementById('cc-toast-body').textContent = body || '';
+      toast.dataset.copy = copyText || '';
+      toast.style.display = 'block';
+    }
+    function hideToast() {
+      const toast = document.getElementById('cc-toast');
+      toast.style.display = 'none';
+      toast.dataset.copy = '';
+    }
+    document.getElementById('cc-copy-btn').addEventListener('click', function(){
+      const txt = document.getElementById('cc-toast').dataset.copy || '';
+      if (!txt) return;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt).then(()=> {
+          this.textContent = 'Copied';
+          setTimeout(()=> { this.textContent = 'Copy'; hideToast(); }, 1400);
+        }).catch(()=> { alert('Copy: ' + txt); hideToast(); });
+      } else { alert('Copy: ' + txt); hideToast(); }
+    });
+    document.getElementById('cc-close-btn').addEventListener('click', hideToast);
+
+    // Try to open mailto/tel. If nothing happens on desktop, show fallback toast with copy option.
+    function tryOpenLink(href, fallbackTitle, fallbackBody, fallbackCopy) {
+      try {
+        // best-effort — most browsers will hand off to the mail/phone app
+        window.location.href = href;
+      } catch (e) {
+        try { window.open(href); } catch (e2) {}
+      }
+      // Show toast guidance after short delay: helpful for desktop without default mail app
+      setTimeout(function(){
+        showToast(fallbackTitle, fallbackBody, fallbackCopy);
+      }, 650);
+    }
+
+    (function wireContacts(){
+      const emailAnchor = document.getElementById('supportEmail');
+      const phoneAnchor = document.getElementById('supportPhone');
+      const emailBtn = document.getElementById('emailSupportBtn');
+
+      const email = (emailAnchor && emailAnchor.getAttribute('href')) ? emailAnchor.getAttribute('href').replace(/^mailto:/i,'') : 'carecompanion@zohomail.com';
+      const phone = (phoneAnchor && phoneAnchor.getAttribute('href')) ? phoneAnchor.getAttribute('href').replace(/^tel:/i,'') : '+2349132272022';
+
+      if (emailAnchor) emailAnchor.addEventListener('click', function(ev){
+        ev.preventDefault && ev.preventDefault();
+        tryOpenLink('mailto:' + email,
+                    'Send email',
+                    "If your mail app didn't open, copy this email address and paste it into your email client:",
+                    email);
+      });
+
+      if (phoneAnchor) phoneAnchor.addEventListener('click', function(ev){
+        ev.preventDefault && ev.preventDefault();
+        tryOpenLink('tel:' + phone,
+                    'Call support',
+                    "If your device didn't open a phone app, copy this number to dial manually:",
+                    phone);
+      });
+
+      if (emailBtn) emailBtn.addEventListener('click', function(ev){
+        ev.preventDefault && ev.preventDefault();
+        tryOpenLink('mailto:' + email,
+                    'Email support',
+                    "If your mail app didn't open, copy this email address to contact support:",
+                    email);
+      });
+    })();
+
+    // (removed per-page year script because the canonical footer shows © info)
+  </script>
+
+
+
+    
+
+
+
+   <!-- ========================= 
+       Site Footer — Modern, accessible, feature-rich
+       Copy & paste this whole block right before </body>
+       ========================= -->
+  <footer id="site-footer" role="contentinfo" aria-label="Site footer — Care Companion" style="--fc-bg:#071234; --panel:#0f2a66; --muted:#bcd7ff; --accent:#2153ff; --accent-2:#4f7ef7; --surface:#07183a;">
+    <style>
+      /* Scoped footer styles: #site-footer { ... } so it won't leak */
+      #site-footer { box-sizing: border-box; width:100%; background: linear-gradient(180deg,var(--surface), #05102a); color: #eaf4ff; font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; padding: 48px 20px 18px; }
+      #site-footer .footer-inner { max-width:1200px; margin:0 auto; display:grid; grid-template-columns: 1.4fr 1fr 1fr 1fr; gap:28px; align-items:start; box-sizing: border-box; }
+
+      /* Vertical separators between columns (like Right At Home) */
+      #site-footer .footer-inner > * { padding: 0 16px; }
+      #site-footer .footer-inner > * + * { border-left: 1px solid rgba(255,255,255,0.04); padding-left: 24px; }
+
+      /* Brand area */
+      #site-footer .brand {
+        display:flex; gap:12px; align-items:flex-start;
+      }
+      #site-footer .brand .logo {
+        width:76px; height:76px; border-radius:12px; background:linear-gradient(180deg,var(--panel), #143b7a); display:flex; align-items:center; justify-content:center; box-shadow: 0 8px 30px rgba(3,12,30,0.45);
+        flex-shrink:0;
+      }
+      #site-footer .brand .logo img { width:62px; height:62px; object-fit:cover; display:block; border-radius:8px; }
+      #site-footer .brand .blurb { font-size:15px; color:rgba(234,244,255,0.95); line-height:1.5; }
+      #site-footer .brand .blurb p { margin:6px 0 0; max-width:420px; }
+
+      /* Column titles */
+      #site-footer h4 { margin:0 0 10px 0; font-size:16px; font-weight:800; color:#fff; letter-spacing:0.2px; }
+
+      /* Link lists */
+      #site-footer .links { display:flex; flex-direction:column; gap:8px; }
+      #site-footer a.footer-link { color: var(--muted); text-decoration:none; font-weight:600; font-size:14px; }
+      #site-footer a.footer-link:hover, #site-footer a.footer-link:focus { color: #fff; text-decoration:underline; outline: none; }
+
+      /* Make the non-clickable services items look like links but not interactive */
+      #site-footer .services-item { color: var(--muted); font-weight:600; font-size:14px; cursor:default; text-decoration:none; display:block; }
+      #site-footer .services-item[aria-hidden="true"] { opacity:0.95; }
+
+      /* Newsletter */
+      #site-footer .newsletter { display:flex; flex-direction:column; gap:10px; }
+      #site-footer .newsletter form { display:flex; gap:8px; align-items:center; }
+      #site-footer .nl-input { flex:1; min-width:0; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02); color:#eaf4ff; font-size:14px; }
+      #site-footer .nl-btn { padding:10px 14px; border-radius:10px; border:0; background: linear-gradient(90deg,var(--accent),var(--accent-2)); color:#fff; font-weight:800; cursor:pointer; }
+      #site-footer .nl-note { font-size:13px; color:rgba(234,244,255,0.75); }
+
+      /* Contact block */
+      #site-footer .contact { display:flex; flex-direction:column; gap:8px; font-size:14px; color:var(--muted); }
+      #site-footer .contact a { color:var(--muted); text-decoration:none; font-weight:700; }
+      #site-footer .contact a:hover { color:#fff; text-decoration:underline; }
+
+      /* Social row - now uses image placeholders you will add to static/images */
+      /* UPDATED: slightly larger icons as requested */
+      #site-footer .social { display:flex; gap:12px; align-items:center; margin-top:8px; }
+      #site-footer .social a { width:48px; height:48px; display:inline-flex; align-items:center; justify-content:center; border-radius:10px; background: rgba(255,255,255,0.03); color:#fff; text-decoration:none; overflow:hidden; }
+      #site-footer .social a img { width:26px; height:26px; display:block; object-fit:contain; }
+
+              /* Ensure the Services heading anchor looks identical to other h4 headings */
+    #site-footer h4 a.footer-link {
+      font-weight: 800 !important;
+      color: #ffffff !important;
+      text-decoration: none !important;
+    }
+     
+
+      /* helper classes used for the Contact / Request Matching visual toggle */
+      .footer-btn-primary { background: linear-gradient(90deg,var(--accent),var(--accent-2)) !important; color:#fff !important; border:0 !important; }
+      .footer-btn-ghost { background: transparent !important; color:#eaf4ff !important; border:1px solid rgba(255,255,255,0.06) !important; }
+
+      /* Utilities row at bottom */
+      #site-footer .legal { margin-top:20px; border-top:1px dashed rgba(255,255,255,0.03); padding-top:16px; display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap; color:var(--muted); font-size:13px; padding-right: 16px; }
+      #site-footer .legal .left { display:flex; gap:12px; align-items:center; }
+      #site-footer .legal small { opacity:0.9; }
+
+      /* Shift the right utilities left a bit to avoid overlap with the chat fab */
+      #site-footer .legal .right-utilities { display:flex; gap:12px; align-items:center; margin-right:72px; }
+
+      /* Live chat floating button + panel */
+      #site-footer .chat-fab {
+        position: fixed;
+        right: 18px;
+        bottom: 18px;
+        z-index: 20000;
+        display:flex;
+        flex-direction:column;
+        align-items:flex-end;
+        gap:8px;
+      }
+      #site-footer .chat-btn {
+        width:56px; height:56px; border-radius:14px; display:inline-flex; align-items:center; justify-content:center;
+        background: linear-gradient(90deg,var(--accent),var(--accent-2)); color:#fff; border:0; cursor:pointer; box-shadow: 0 12px 36px rgba(33,100,255,0.18); font-weight:800;
+        position:relative;
+      }
+      /* unread badge on the fab for staff / awareness */
+      #site-footer .chat-badge {
+        position:absolute; top:-6px; right:-6px; min-width:18px; height:18px; padding:0 5px; border-radius:999px; background:#ff3b30; color:white; font-size:12px; font-weight:800; display:none; align-items:center; justify-content:center; box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+      }
+
+      #site-footer .chat-panel {
+        width: 360px; max-width: calc(100vw - 36px); height: 480px; border-radius:12px; background: linear-gradient(180deg,#05102a,#071830);
+        box-shadow: 0 28px 80px rgba(2,8,40,0.6); position: fixed; right: 18px; bottom: 86px; z-index: 20000; display:none; flex-direction:column; overflow:hidden;
+        border: 1px solid rgba(127,196,255,0.06);
+      }
+      #site-footer .chat-panel.show { display:flex; animation: chat-open 220ms cubic-bezier(.2,.9,.2,1); }
+      @keyframes chat-open { from { transform: translateY(6px) scale(.995); opacity:0 } to { transform: translateY(0) scale(1); opacity:1 } }
+
+      .chat-header { padding:12px 14px; display:flex; align-items:center; gap:10px; border-bottom:1px solid rgba(255,255,255,0.03); background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent); }
+      .chat-header .title { font-weight:800; font-size:15px; color:#fff; }
+      .chat-messages { padding:12px; display:flex; flex-direction:column; gap:10px; flex:1; overflow:auto; background: linear-gradient(180deg, rgba(255,255,255,0.002), transparent); }
+      .chat-input { display:flex; gap:8px; padding:12px; border-top:1px solid rgba(255,255,255,0.02); background: linear-gradient(180deg, transparent, rgba(0,0,0,0.02)); }
+      .chat-input input { flex:1; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.04); background: rgba(255,255,255,0.02); color:#eaf4ff; }
+      .chat-input button { padding:10px 12px; border-radius:10px; border:0; background:var(--accent); color:#fff; font-weight:800; cursor:pointer; }
+
+      .msg { max-width: 82%; padding:10px 12px; border-radius:10px; font-size:14px; line-height:1.3; word-break:break-word; }
+      .msg.user { align-self:flex-end; background: linear-gradient(90deg,var(--accent),var(--accent-2)); color:#07102a; border-bottom-right-radius:4px; }
+      .msg.bot  { align-self:flex-start; background: rgba(255,255,255,0.03); color:var(--muted); border-bottom-left-radius:4px; }
+
+      /* small screens */
+      @media (max-width:980px) {
+        #site-footer .footer-inner { grid-template-columns: 1fr 1fr; gap:16px; }
+        #site-footer .brand .blurb p { max-width: none; }
+        #site-footer .chat-panel { right: 12px; bottom: 86px; width: 92vw; max-width:420px; }
+        /* remove vertical separators on smaller widths for readability */
+        #site-footer .footer-inner > * + * { border-left: none; padding-left: 16px; }
+      }
+      @media (max-width:560px) {
+        #site-footer .footer-inner { grid-template-columns: 1fr; gap:14px; }
+        #site-footer .brand { align-items:flex-start; }
+        #site-footer .brand .logo { width:60px;height:60px; }
+        #site-footer .chat-panel { bottom: 72px; right: 10px; left: 10px; width:auto; max-width:none; }
+        #site-footer .footer-inner > * + * { border-left: none; padding-left: 12px; }
+        #site-footer .legal .right-utilities { margin-right: 12px; } /* reduce the offset on tiny screens */
+      }
+    </style>
+
+    <div class="footer-inner">
+      <!-- BRAND / MISSION -->
+      <div class="brand" aria-label="About Care Companion">
+        <div class="logo" aria-hidden="true">
+          <!-- simple SVG mark, replace with <img src="..."> if desired -->
+          <svg width="62" height="62" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <rect x="2" y="2" width="60" height="60" rx="10" fill="url(#g)"></rect>
+            <defs>
+              <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+                <stop offset="0" stop-color="#2153ff"/>
+                <stop offset="1" stop-color="#4f7ef7"/>
+              </linearGradient>
+            </defs>
+            <path d="M20 36c0-6 8-11 12-12 4 1 12 6 12 12 0 8-10 14-12 14s-12-6-12-14z" fill="#fff" opacity="0.92"></path>
+          </svg>
+        </div>
+
+        <div class="blurb">
+          <strong style="display:block; font-size:18px; letter-spacing:0.2px;">Care Companion</strong>
+          <p>We connect families with compassionate, verified caregivers — quick, trusted and human-centred. Need help right now? Use live chat or request matching.</p>
+
+          <div style="margin-top:12px; display:flex; gap:8px; align-items:center;">
+            <!-- Footer Request Matching now triggers the site's request modal (no navigation) -->
+            <button id="footerRequestMatching" class="nl-btn" type="button" aria-label="Request Matching (open dialog)" style="padding:10px 12px; border-radius:10px; font-size:14px;">Request Matching</button>
+
+            <a class="nl-btn" href="/contact" style="padding:10px 12px; border-radius:10px; background:transparent; color:#eaf4ff; border:1px solid rgba(255,255,255,0.06); text-decoration:none; font-weight:800; font-size:14px;">Contact Us</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUICK LINKS -->
+      <div>
+        <h4>Quick Links</h4>
+        <nav class="links" aria-label="Quick links">
+          <a class="footer-link" href="/">Home</a>
+          <a class="footer-link" href="/find-caregiver">Find Caregiver</a>
+          <a class="footer-link" href="/find-family">Find Family</a>
+          <a class="footer-link" href="/how-it-works">How it works</a>
+          <a class="footer-link" href="/about">About us</a>
+        </nav>
+      </div>
+
+      <!-- SERVICES (heading clickable; items not clickable) -->
+      <div>
+        <h4><a class="footer-link" href="/services" aria-label="All services">Services</a></h4>
+        <div class="links" aria-label="Services overview">
+          <div class="services-item" aria-hidden="true">Personal Care</div>
+          <div class="services-item" aria-hidden="true">Medication reminders</div>
+          <div class="services-item" aria-hidden="true">Infant &amp; child care</div>
+          <div class="services-item" aria-hidden="true">Meal prep &amp; errands</div>
+          <div class="services-item" aria-hidden="true">Specialist care</div>
+        </div>
+      </div>
+
+      <!-- NEWSLETTER + CONTACT -->
+      <div>
+        <h4>Stay in touch</h4>
+        <div class="newsletter" aria-label="Subscribe to newsletter">
+          <form id="footerNewsletter" aria-label="Subscribe form">
+            <input class="nl-input" id="nlEmail" name="email" type="email" inputmode="email" placeholder="Your email address" aria-label="Email address" required>
+            <button class="nl-btn" id="nlSubmit" type="button" aria-label="Subscribe">Subscribe</button>
+          </form>
+          <div class="nl-note" id="footerNlNote">Get timely updates, tips and safety notices. Unsubscribe anytime.</div>
+
+          <h4 style="margin-top:14px;">Contact</h4>
+          <div class="contact" aria-label="Contact details">
+            <div><strong>Phone</strong>: <a href="tel:+2349132272022">+2349132272022</a></div>
+            <div><strong>Email</strong>: <a href="mailto:carecompanion@zohomail.com">carecompanion@zohomail.com</a></div>
+
+            <div class="social" aria-label="Social links">
+              <!-- X (Care Companion) -->
+              <a href="https://x.com/carecompanion_" target="_blank" rel="noopener noreferrer" title="Follow us on X (Care Companion)" aria-label="Follow us on X">
+                <img src="static/images/x.logo.png" alt="X / Care Companion" />
+              </a>
+
+              <!-- TikTok (replaced LinkedIn) -->
+              <a href="https://www.tiktok.com/@care.companion6?lang=en" target="_blank" rel="noopener noreferrer" title="Follow us on TikTok (Care Companion)" aria-label="Follow us on TikTok">
+                <img src="static/images/tiktok_photo.png" alt="TikTok / Care Companion" />
+              </a> 
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- bottom legal row -->
+    <div class="legal" role="navigation" aria-label="Footer utilities">
+      <div class="left">
+        <small>© <span id="footerYear"></span> Care Companion — All rights reserved.</small>
+        <a class="footer-link" href="/privacy.html" style="margin-left:12px;">Privacy</a>
+        <a class="footer-link" href="/terms.html" style="margin-left:8px;">Terms</a> 
+        <!-- Sitemap link removed as requested -->
+      </div>
+
+      <div class="right-utilities">
+        <a class="footer-link" href="/support.html">Help & support</a>
+
+        <button id="backToTop" class="footer-link" style="background:transparent; border:0; cursor:pointer;">Back to top ↑</button>
+      </div>
+    </div>
+
+    <!-- Live chat UI (floating) -->
+    <div class="chat-fab" aria-hidden="false" id="chatFabWrap">
+      <button id="openChat" class="chat-btn" aria-expanded="false" aria-controls="liveChatPanel" title="Open live chat">
+        <!-- chat icon -->
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" style="fill:currentColor;">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        <span class="chat-badge" id="chatBadge" aria-hidden="true">0</span>
+      </button>
+
+     <div id="liveChatPanel" class="chat-panel" role="dialog" aria-label="Live chat" aria-hidden="true">
+    <div class="chat-header">
+      <div style="width:42px; height:42px; border-radius:10px; background:linear-gradient(90deg,var(--accent),var(--accent-2)); display:flex; align-items:center; justify-content:center; font-weight:800;">CC</div>
+      <div>
+        <div class="title">Live chat</div>
+        <div style="font-size:12px; color:var(--muted); margin-top:2px;">We're here to help — usually replies in a few minutes</div>
+      </div>
+      <div style="margin-left:auto; display:flex; gap:8px; align-items:center;">
+        <button id="chatClear" aria-label="Clear chat" title="Clear chat" style="background:transparent; border:0; color:var(--muted); font-weight:700; cursor:pointer;">Clear</button>
+        <button id="closeChat" aria-label="Close chat" title="Close chat" style="background:transparent; border:0; color:var(--muted); font-weight:700; cursor:pointer;">✕</button>
+      </div>
+    </div>
+
+    <!-- MAIN PANEL CONTENT -->
+    <div style="display:flex; flex-direction:column; height:100%; overflow:hidden;">
+      <!-- Messages area (starts with the welcome message) -->
+      <div id="chatMessages" class="chat-messages" aria-live="polite" aria-atomic="false" tabindex="0" style="flex:1; padding:12px;">
+        <div class="msg bot" data-bot-initial="true">Hi — welcome to Care Companion. How can we help you today?</div>
+      </div>
+
+      <!-- Composer -->
+      <div class="chat-input" role="form" aria-label="Chat input" style="display:flex; gap:8px; padding:12px;">
+        <input id="chatInput" type="text" placeholder="Type a message (e.g. 'I need a caregiver tomorrow')" aria-label="Type a message">
+        <button id="chatSendInline" type="button" aria-label="Send message">Send</button>
+      </div>
+
+      <!-- SECOND SYSTEM MESSAGE + BUTTONS (hidden until visitor replies) -->
+      <div id="postReplyPanel" style="display:none; padding:12px 14px; border-top:1px solid rgba(255,255,255,0.02);">
+        <div id="postReplyText" style="font-size:13px; color:var(--muted); margin-bottom:10px;">
+          <!-- populated after user's first reply -->
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <button id="panelChatAgentBtn" class="nl-btn" type="button" style="padding:10px 12px; border-radius:10px; font-size:14px;">Chat with an agent</button>
+          <button id="panelContactBtn" class="nl-btn" type="button" style="padding:10px 12px; border-radius:10px; background:transparent; color:#eaf4ff; border:1px solid rgba(255,255,255,0.06); font-weight:800; font-size:14px;">Contact Us</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+    
+
+
+
+  <script>
+  (function(){
+    // Lightweight UUID (short) for chat refs
+    function shortRef(){ return Math.random().toString(36).slice(2,10) + '-' + Date.now().toString(36).slice(-5); }
+
+    // DOM
+    const panel = document.getElementById('liveChatPanel');
+    const messages = document.getElementById('chatMessages');
+    const input = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('chatSendInline');
+    const clearBtn = document.getElementById('chatClear');
+    const closeBtn = document.getElementById('closeChat');
+
+    const postReplyPanel = document.getElementById('postReplyPanel');
+    const postReplyText = document.getElementById('postReplyText');
+    const agentBtn = document.getElementById('panelChatAgentBtn');
+    const contactBtn = document.getElementById('panelContactBtn');
+
+    // state
+    let hasVisitorReplied = false;
+    let firstVisitorMessage = '';
+
+    // helper: append message
+    function appendMessage(kind, text, opts){
+      const el = document.createElement('div');
+      el.className = 'msg ' + (kind === 'user' ? 'user' : (kind === 'bot' || kind === 'system' ? 'bot' : 'bot'));
+      el.textContent = text;
+      if(opts && opts.ts) el.dataset.ts = opts.ts;
+      messages.appendChild(el);
+      messages.scrollTop = messages.scrollHeight;
+    }
+
+    // clear chat
+    clearBtn && clearBtn.addEventListener('click', function(){
+      messages.innerHTML = '';
+      appendMessage('bot', 'Hi — welcome to Care Companion. How can we help you today?');
+      postReplyPanel.style.display = 'none';
+      hasVisitorReplied = false;
+      firstVisitorMessage = '';
+    }, { passive: true });
+
+    // close panel
+    closeBtn && closeBtn.addEventListener('click', function(){
+      panel.classList.remove('show');
+      panel.setAttribute('aria-hidden','true');
+      try{ document.getElementById('openChat').setAttribute('aria-expanded','false'); }catch(e){}
+    }, { passive: true });
+
+    // visitor sends inline message
+    async function visitorSend(text){
+      if(!text || !text.trim()) return;
+      const trimmed = text.trim();
+      appendMessage('user', trimmed, { ts: new Date().toISOString() });
+
+      // if first reply, show second message + buttons
+      if(!hasVisitorReplied){
+        hasVisitorReplied = true;
+        firstVisitorMessage = trimmed;
+        // second message
+        appendMessage('bot', "Please if you would like to chat with an agent click the button below, or contact us via the contact page");
+        // show buttons
+        postReplyText.textContent = ""; // optional extra text area if needed
+        postReplyPanel.style.display = 'block';
+        // default visual state: make agentBtn blue, contactBtn ghost
+        setTimeout(restoreDefault, 20);
+      }
+
+      // send to server (POST fallback) - best-effort
+      try {
+        await fetch('/api/chat_message', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_ref: '', text: trimmed, who: 'user' })
+        });
+      } catch (e) { console.warn('chat_message post failed', e); }
+    }
+
+    sendBtn && sendBtn.addEventListener('click', function(){
+      const v = (input.value || '').trim();
+      if(!v) { input.focus(); return; }
+      visitorSend(v);
+      input.value = '';
+      input.focus();
+    });
+
+    input && input.addEventListener('keydown', function(e){
+      if(e.key === 'Enter'){ e.preventDefault(); sendBtn.click(); }
+    });
+
+    // Build agent link for email
+    function buildAgentLink(chatRef){
+      try {
+        const origin = window.location.origin || (window.location.protocol + '//' + window.location.host);
+        return origin + '/live-chat?chat_ref=' + encodeURIComponent(chatRef) + '&agent=1';
+      } catch(e){
+        return '/live-chat?chat_ref=' + encodeURIComponent(chatRef) + '&agent=1';
+      }
+    }
+
+    // Notify staff (calls your existing endpoint)
+    async function notifyStaffImmediate(chatRef, visitorMsg){
+      const payload = {
+        chat_ref: chatRef,
+        visitor_message: visitorMsg || '(visitor clicked chat from panel)',
+        visitor_agent_hint: 'visitor clicked Chat with an agent in footer panel',
+        timestamp: new Date().toISOString(),
+        link: buildAgentLink(chatRef)
+      };
+      try {
+        const res = await fetch('/api/notify_staff', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        return await res.json().catch(()=>({ ok: res.ok }));
+      } catch (err) {
+        console.warn('notify_staff failed', err);
+        return { ok: false };
+      }
+    }
+
+    // Agent button click: notify staff and then redirect visitor to dedicated live chat page
+    agentBtn && agentBtn.addEventListener('click', async function(){
+      try {
+        agentBtn.disabled = true;
+        agentBtn.textContent = 'Notifying agent…';
+
+        // create chat_ref
+        const chatRef = shortRef();
+        const preview = firstVisitorMessage || '(visitor clicked Chat with an agent)';
+        const result = await notifyStaffImmediate(chatRef, preview);
+
+        // redirect visitor to full live chat page (visitor view)
+        // we redirect regardless of email result to keep UX smooth
+        window.location.href = '/live-chat?chat_ref=' + encodeURIComponent(chatRef);
+      } catch (e) {
+        console.error('agentBtn handler failed', e);
+        agentBtn.disabled = false;
+        agentBtn.textContent = 'Chat with an agent';
+        alert('Could not notify agent — please try Contact Us meanwhile.');
+      }
+    });
+
+    // Contact button click: go to contact page
+    contactBtn && contactBtn.addEventListener('click', function(){
+      window.location.href = '/contact';
+    });
+
+    // --- Hover behaviour: when pointer enters a button make it blue and remove blue from the other.
+    // Default state: agentBtn blue, contactBtn ghost.
+    function restoreDefault(){
+      // agentBtn primary style
+      agentBtn.style.background = '';
+      agentBtn.style.color = '';
+      agentBtn.style.fontWeight = '800';
+      // use nl-btn background (gradient) by toggling class if you prefer css classes.
+      // ensure agentBtn visually primary: apply inline gradient if needed
+      agentBtn.classList.add('nl-btn'); // ensure baseline
+      agentBtn.style.background = 'linear-gradient(90deg,var(--accent),var(--accent-2))';
+      agentBtn.style.color = '#fff';
+      // contact ghost
+      contactBtn.classList.add('nl-btn');
+      contactBtn.style.background = 'transparent';
+      contactBtn.style.color = '#eaf4ff';
+      contactBtn.style.border = '1px solid rgba(255,255,255,0.06)';
+    }
+
+    function makePrimary(targetBtn){
+      if(targetBtn === agentBtn){
+        agentBtn.style.background = 'linear-gradient(90deg,var(--accent),var(--accent-2))';
+        agentBtn.style.color = '#fff';
+        contactBtn.style.background = 'transparent';
+        contactBtn.style.color = '#eaf4ff';
+      } else {
+        contactBtn.style.background = 'linear-gradient(90deg,var(--accent),var(--accent-2))';
+        contactBtn.style.color = '#fff';
+        agentBtn.style.background = 'transparent';
+        agentBtn.style.color = '#eaf4ff';
+      }
+    }
+
+    // Hook hover events
+    [agentBtn, contactBtn].forEach(function(btn){
+      if(!btn) return;
+      btn.addEventListener('mouseenter', function(){ makePrimary(btn); });
+      btn.addEventListener('mouseleave', function(){
+        // small delay to detect if pointer entered the other button
+        setTimeout(function(){
+          const overAgent = agentBtn.matches(':hover');
+          const overContact = contactBtn.matches(':hover');
+          if(overAgent) makePrimary(agentBtn);
+          else if(overContact) makePrimary(contactBtn);
+          else restoreDefault();
+        }, 60);
+      });
+    });
+
+    // Initialize default look
+    restoreDefault();
+
+    // Ensure initial focus (improve UX)
+    try { input && input.focus(); } catch(e){}
+
+  })();
+  </script>
+
+    <!-- small inline script to wire footer newsletter, request matching & chat utilities -->
+    <script>
+      (function(){
+        /* Utilities & UI wiring */
+        try { document.getElementById('footerYear').textContent = (new Date()).getFullYear(); } catch(e){}
+
+        // --- Footer newsletter: mirror Newsletter CTA behaviour ---
+        const nlBtn = document.getElementById('nlSubmit');
+        const nlInput = document.getElementById('nlEmail');
+        const nlNote = document.getElementById('footerNlNote');
+
+        function validEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((v||'').trim()); }
+
+        async function postSubscribeFooter(addr) {
+          try {
+            const res = await fetch('/api/subscribe', {
+              method: 'POST',
+              credentials: 'same-origin',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email: addr })
+            });
+            return await res.json().catch(()=>({ ok:false, error: 'Invalid server response' }));
+          } catch (err) {
+            throw err;
+          }
+        }
+
+        if(nlBtn && nlInput && nlNote){
+          nlBtn.addEventListener('click', async function(){
+            nlNote.style.color = 'rgba(234,244,255,0.75)';
+            nlNote.textContent = '';
+            const v = (nlInput.value || '').trim().toLowerCase();
+            if(!v) { nlNote.style.color = '#ffb3b3'; nlNote.textContent = 'Please provide an email address.'; nlInput.focus(); return; }
+            if(!validEmail(v)) { nlNote.style.color = '#ffb3b3'; nlNote.textContent = 'Please enter a valid email address.'; nlInput.focus(); return; }
+
+            nlBtn.disabled = true;
+            const orig = nlBtn.textContent;
+            nlBtn.textContent = 'Subscribing…';
+
+            try {
+              const result = await postSubscribeFooter(v);
+              if (result && result.redirect) {
+                nlNote.style.color = 'rgba(234,244,255,0.96)';
+                nlNote.textContent = result.message || 'Please create an account to subscribe — redirecting…';
+                setTimeout(()=> { window.location.href = result.redirect; }, 700);
+                return;
+              }
+              if (result && (result.ok || result.success)) {
+                nlNote.style.color = 'rgba(234,244,255,0.96)';
+                nlNote.textContent = result.message || 'Thanks — check your email for confirmation.';
+                nlBtn.textContent = 'Subscribed';
+                nlInput.value = '';
+              } else {
+                nlNote.style.color = '#ffb3b3';
+                nlNote.textContent = (result && (result.error || result.message)) ? (result.error || result.message) : 'Could not subscribe. Please try again later.';
+              }
+            } catch (err) {
+              // local fallback (mirrors newsletter behavior)
+              try {
+                const k = 'cc2_local_subs';
+                const arr = JSON.parse(localStorage.getItem(k) || '[]');
+                if (!arr.includes(v)) arr.push(v);
+                localStorage.setItem(k, JSON.stringify(arr));
+              } catch (e){}
+              nlNote.style.color = 'rgba(234,244,255,0.96)';
+              nlNote.textContent = 'Subscription saved locally — please register or try again later.';
+              console.error('subscribe error', err);
+            } finally {
+              nlBtn.disabled = false;
+              setTimeout(()=> { nlBtn.textContent = orig; if(nlBtn.textContent === 'Subscribed') nlBtn.textContent = 'Subscribe'; }, 1400);
+            }
+          }, { passive: true });
+        }
+
+        // Back to top
+        const back = document.getElementById('backToTop');
+        if(back) back.addEventListener('click', function(){ window.scrollTo({top:0, behavior:'smooth'}); });
+
+        /* ----------------------------
+           Footer Request Matching wiring:
+           open the same modal used by the founder section (fallbacks included)
+           ---------------------------- */
+        function dispatchClick(el){
+          if(!el) return false;
+          try {
+            const ev = new MouseEvent('click', { view: window, bubbles: true, cancelable: true });
+            return el.dispatchEvent(ev);
+          } catch (e) {
+            try { el.click(); return true; } catch (e2) { return false; }
+          }
+        }
+
+        function openRequestModalFromFooter(){
+          // prefer central openers if present (keeps behaviour identical to founder)
+          const centralBtn = document.getElementById('openRequestBtn') || document.getElementById('openRequestBtn2');
+          const modalEl = document.getElementById('modalBackdrop') || document.getElementById('modalBackdrop'); // same id used by founder script
+          if (centralBtn) {
+            const dispatched = dispatchClick(centralBtn);
+            setTimeout(()=> {
+              const modal = modalEl;
+              const opened = modal && (modal.style.display === 'flex' || modal.getAttribute('aria-hidden') === 'false' || modal.classList.contains('show'));
+              if (opened) {
+                // keep parity: emit the same custom event founder uses
+                try { document.dispatchEvent(new CustomEvent('requestModalOpened', { bubbles: true })); } catch(e){}
+              } else {
+                // fallback to showing ensured modal
+                if (modal) {
+                  modal.style.display = 'flex';
+                  modal.setAttribute('aria-hidden','false');
+                  const name = modal.querySelector('#name');
+                  if (name) setTimeout(()=> name.focus(), 80);
+                  try { document.dispatchEvent(new CustomEvent('requestModalOpened', { bubbles: true })); } catch(e){}
+                } else {
+                  console.warn('footer: request modal not present');
+                  // as last resort navigate to /request-matching
+                  window.location.href = '/request-matching';
+                }
+              }
+            }, 120);
+            return;
+          }
+
+          // no central opener -> open modal directly if available
+          if (modalEl) {
+            modalEl.style.display = 'flex';
+            modalEl.setAttribute('aria-hidden','false');
+            const name = modalEl.querySelector('#name');
+            if (name) setTimeout(()=> name.focus(), 80);
+            try { document.dispatchEvent(new CustomEvent('requestModalOpened', { bubbles: true })); } catch(e){}
+          } else {
+            // last resort: navigate to a request page
+            window.location.href = '/request-matching';
+          }
+        }
+
+        const footerReq = document.getElementById('footerRequestMatching');
+        if (footerReq) {
+          footerReq.addEventListener('click', function(ev){
+            try { ev.preventDefault && ev.preventDefault(); } catch(e){}
+            openRequestModalFromFooter();
+          }, { passive: false });
+        }
+
+        /* ----------------------------
+           Live chat: improved logic & updated phone number
+           (preserves your original bot messages and behavior)
+           ---------------------------- */
+        const panel = document.getElementById('liveChatPanel');
+        const openBtn = document.getElementById('openChat');
+        const closeBtn = document.getElementById('closeChat');
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        let chatSend = document.getElementById('chatSend'); // will be reassigned if needed
+        const chatClear = document.getElementById('chatClear');
+        const badge = document.getElementById('chatBadge');
+
+        // internal state
+        let unreadCount = 0;
+        let lastBotWasWaiting = false; // tracks whether last bot reply was the "member will respond" message
+        const WAITING_REPLY = "Thanks — a member of our team will respond shortly. Meanwhile, you can try 'Find caregiver near me' or click Request Matching from the site.";
+
+        // staff recipients (edit if you want)
+        const STAFF_EMAILS = ['charleyomeneki@gmail.com', 'carecompanion@zohomail.com'];
+
+        function notifyStaff(messageText) {
+          unreadCount = Math.min(999, unreadCount + 1);
+          updateBadge();
+          flashTitle("(New) " + document.title, 4000);
+          console.log("chat:new-message ->", messageText);
+          try {
+            const ev = new CustomEvent('chat:new-message', { detail: { text: messageText, time: Date.now() }}); document.dispatchEvent(ev);
+          } catch(e){}
+        }
+
+        function updateBadge(){
+          if(!badge) return;
+          if(unreadCount > 0) { badge.style.display = 'inline-flex'; badge.textContent = unreadCount > 99 ? '99+' : String(unreadCount); }
+          else { badge.style.display = 'none'; badge.textContent = '0'; }
+        }
+
+        let _flashTimer = null;
+        function flashTitle(tempTitle, duration){
+          try {
+            const orig = document.title;
+            if(_flashTimer) clearTimeout(_flashTimer);
+            document.title = tempTitle;
+            _flashTimer = setTimeout(()=> { document.title = orig; _flashTimer = null; }, duration || 3000);
+          } catch (e) {}
+        }
+
+        function openChat(){ panel.classList.add('show'); panel.setAttribute('aria-hidden','false'); openBtn.setAttribute('aria-expanded','true'); unreadCount = 0; updateBadge(); try{ chatInput.focus(); }catch(e){} }
+        function closeChat(){ panel.classList.remove('show'); panel.setAttribute('aria-hidden','true'); openBtn.setAttribute('aria-expanded','false'); openBtn.focus(); }
+
+        openBtn && openBtn.addEventListener('click', function(){
+          if(panel.classList.contains('show')) closeChat(); else openChat();
+        }, { passive: true });
+        closeBtn && closeBtn.addEventListener('click', closeChat, { passive: true });
+
+        document.addEventListener('keydown', function(e){
+          if(e.key === 'Escape' && panel && panel.classList.contains('show')) closeChat();
+        });
+
+        function appendMessage(text, who, opts){
+          const el = document.createElement('div');
+          el.className = 'msg ' + (who === 'user' ? 'user' : 'bot');
+          el.textContent = text;
+          if(opts && opts.timestamp) el.dataset.ts = opts.timestamp;
+          chatMessages.appendChild(el);
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function analyzeFollowUp(userText) {
+          const t = (userText||'').toLowerCase();
+          if (t.includes('are you') || t.includes('are you there') || t.includes('still there') || t.includes('waiting') || t.includes('how long')) {
+            return "I understand you're waiting. A member of our team is notified and will reply as soon as possible. If this is urgent, please call +2349132272022.";
+          }
+          if (t.includes('urgent') || t.includes('now') || t.includes('today') || t.includes('asap')) {
+            return "If this is urgent, please call +2349132272022 — otherwise tell us preferred start time and we'll prioritise your request.";
+          }
+          if (t.includes('price') || t.includes('cost') || t.includes('how much')) {
+            return "Our pricing depends on the service and hours. Tell us the service, hours per week and your location and we will suggest options.";
+          }
+          if (t.includes('hello') || t.includes('hi')) {
+            return "Hi there 👋 — would you like to find a caregiver or request matching? Try 'Find caregiver near me' or 'Request matching'.";
+          }
+          return "Thanks — we've alerted our team. Could you please let us know whether you're waiting for a reply, or need help requesting a match or finding a caregiver now?";
+        }
+
+        function simulatedReply(userText) {
+          const txt = (userText||'').toLowerCase();
+          if(txt.includes('price') || txt.includes('cost')) return "Our pricing depends on service & hours. Tell us your location and needs and we'll suggest options.";
+          if(txt.includes('urgent') || txt.includes('today') || txt.includes('now')) return "If this is urgent, call us at +2349132272022. Otherwise tell us the preferred start time and we'll prioritize your request.";
+          if(txt.includes('hello') || txt.includes('hi')) return "Hi there 👋 — would you like to find a caregiver or post a family request?";
+          return WAITING_REPLY;
+        }
+
+        // create a quick UUID for chat ref
+        function uuidv4() {
+          return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+          });
+        }
+
+        // POST to server to trigger staff emails (server must implement /api/notify_staff)
+        async function notifyStaffBackend(payload) {
+          try {
+            const res = await fetch('/api/notify_staff', {
+              method: 'POST',
+              credentials: 'same-origin',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(payload)
+            });
+            const j = await res.json().catch(()=>null);
+            return { ok: res.ok, json: j };
+          } catch (err) {
+            console.error('notifyStaffBackend failed', err);
+            return { ok: false, error: err };
+          }
+        }
+
+        // Fallback: open mailto composer for each staff (best-effort only: requires local email client)
+        function fallbackMailToAll(subject, body) {
+          try {
+            STAFF_EMAILS.forEach(function(addr, idx){
+              const mailto = 'mailto:' + encodeURIComponent(addr) + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+              // open each in new tab/window (may be blocked); stagger to reduce popup-block risks
+              setTimeout(function(){ window.open(mailto, '_blank'); }, idx * 150);
+            });
+          } catch (e) {
+            console.warn('mailto fallback failed', e);
+          }
+        }
+
+        function userSends(text) {
+          if (window.__cc_is_agent) return; 
+          if(!text || !text.trim()) return;
+          appendMessage(text, 'user', { timestamp: Date.now() });
+          notifyStaff(text);
+
+          if (lastBotWasWaiting) {
+            const follow = analyzeFollowUp(text);
+            appendMessage(follow, 'bot');
+            lastBotWasWaiting = false;
+            return;
+          }
+
+          const reply = simulatedReply(text);
+          appendMessage(reply, 'bot');
+          // WHEN the bot replies with the WAITING_REPLY text, immediately notify staff (server + fallback)
+          if (reply === WAITING_REPLY) {
+            lastBotWasWaiting = true;
+
+            // create a chat reference so staff can click and open the live chat to continue
+            const chatRef = uuidv4();
+            const payload = {
+              chat_ref: chatRef,
+              visitor_message: text,
+              visitor_agent_hint: 'live-chat from site footer widget',
+              timestamp: new Date().toISOString(),
+              // <-- IMPORTANT: include agent=1 here so the email link opens the chat panel for agents only
+              link: (window.location.origin || (window.location.protocol + '//' + window.location.host)) + '/?chat_ref=' + chatRef + '&agent=1'
+            };
+
+            // fire & forget backend notification; if it fails, fallback to mailto
+            notifyStaffBackend(payload).then(function(result){
+              if (result && result.ok) {
+                console.info('Staff notification delivered via server', result.json);
+              } else {
+                console.warn('Staff notification server failed, using mailto fallback', result);
+                const subject = 'New live chat waiting — Care Companion';
+                const body = `A visitor needs a reply. Visitor message: "${text}"\n\nOpen chat: ${payload.link}\n\n(If the link fails, login to the admin and search for chat ref ${chatRef})`;
+                fallbackMailToAll(subject, body);
+              }
+            }).catch(function(err){
+              console.error('notifyStaffBackend unexpected error', err);
+              const subject = 'New live chat waiting — Care Companion';
+              const body = `A visitor needs a reply. Visitor message: "${text}"\n\nOpen chat: ${payload.link}\n\n(If the link fails, login to the admin and search for chat ref ${chatRef})`;
+              fallbackMailToAll(subject, body);
+            });
+          } else {
+            lastBotWasWaiting = false;
+          }
+        }
+
+        // visitor send wiring (unchanged)
+        chatSend && chatSend.addEventListener('click', function(){
+          const v = (chatInput.value||'').trim();
+          if(!v) { chatInput.focus(); return; }
+          userSends(v);
+          chatInput.value = '';
+          chatInput.focus();
+        });
+
+        chatInput && chatInput.addEventListener('keydown', function(e){
+          if(e.key === 'Enter') {
+            e.preventDefault();
+            chatSend.click();
+          }
+        });
+
+        chatClear && chatClear.addEventListener('click', function(){
+          chatMessages.innerHTML = '';
+          appendMessage("Hi — welcome to Care Companion. How can we help you today?", 'bot');
+          unreadCount = 0;
+          updateBadge();
+          lastBotWasWaiting = false;
+          try { document.dispatchEvent(new CustomEvent('chat:cleared', { detail: { time: Date.now() } })); } catch(e){}
+        });
+
+        const openObserver = new MutationObserver(() => {
+          const visible = panel.classList.contains('show');
+          if (visible) { unreadCount = 0; updateBadge(); try { document.dispatchEvent(new CustomEvent('chat:panel-opened', { detail: { time: Date.now() } })); } catch(e){} }
+        });
+        openObserver.observe(panel, { attributes: true, attributeFilter: ['class'] });
+
+        window.CareCompanionChat = window.CareCompanionChat || {};
+        window.CareCompanionChat.postSystemMessage = function(msg){ appendMessage(msg, 'bot'); };
+        window.CareCompanionChat.markAllRead = function(){ unreadCount = 0; updateBadge(); };
+        window.CareCompanionChat.getUnread = function(){ return unreadCount; };
+
+        const observer = new MutationObserver(()=> {
+          if(chatMessages) chatMessages.setAttribute('aria-live','polite');
+        });
+        observer.observe(chatMessages, { childList:true });
+
+        updateBadge();
+
+        document.addEventListener('chat:new-message', function(e){
+          console.info("Staff note (event): new chat message received", e.detail);
+        });
+
+      })();
+    </script>
+
+    
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+  (function(){
+    // Initialize when DOM is ready to be sure elements exist.
+    function initAgent() {
+      try {
+        function getParam(name) { return new URLSearchParams(window.location.search).get(name); }
+        const chatRef = getParam('chat_ref') || getParam('ref') || '';
+        const isAgent = (getParam('agent') === '1' || getParam('agent') === 'true');
+
+        // mark page as agent-mode immediately
+        window.__cc_is_agent = !!isAgent;
+
+        // Only act when the email link includes both chat_ref and agent=1
+        if (!chatRef || !isAgent) {
+          console.info('Agent script: not an agent page or missing chat_ref; exiting.');
+          return;
+        }
+        console.info('Agent script: initializing for chat_ref=', chatRef);
+
+        // Helper: open the chat panel (idempotent)
+        function openPanelAndFocus() {
+          try {
+            const panel = document.getElementById('liveChatPanel');
+            const openBtn = document.getElementById('openChat');
+            const input = document.getElementById('chatInput');
+            if (panel && !panel.classList.contains('show')) {
+              panel.classList.add('show');
+              panel.setAttribute('aria-hidden','false');
+              if (openBtn) try { openBtn.setAttribute('aria-expanded','true'); } catch(e){}
+            }
+            if (input) setTimeout(()=> input.focus(), 200);
+          } catch (e) { console.warn('Agent: openPanelAndFocus failed', e); }
+        }
+
+        // Very early: attempt to replace/clean the send button to remove any visitor handlers
+        try {
+          const oldSend = document.getElementById('chatSend');
+          if (oldSend && oldSend.parentNode) {
+            const cleanSend = oldSend.cloneNode(true);
+            oldSend.parentNode.replaceChild(cleanSend, oldSend);
+          }
+        } catch(e){ console.warn('Agent: early send replacement failed', e); }
+
+        // immediately open panel (ensures agent sees panel even if sockets unavailable)
+        openPanelAndFocus();
+
+        // Load transcript from server so agent sees earlier messages immediately
+        async function loadTranscript() {
+          try {
+            const resp = await fetch('/api/chat_transcript?ref=' + encodeURIComponent(chatRef), { credentials: 'same-origin' });
+            const j = await resp.json().catch(()=>null);
+            const msgsContainer = document.getElementById('chatMessages');
+            if (!msgsContainer) return;
+            msgsContainer.innerHTML = ''; // replace initial bot message with real transcript
+
+            if (!j || !j.ok) {
+              const note = document.createElement('div');
+              note.className = 'msg bot';
+              note.textContent = 'Could not load previous messages; you can still reply and join the chat.';
+              msgsContainer.appendChild(note);
+              msgsContainer.scrollTop = msgsContainer.scrollHeight;
+              return;
+            }
+
+            const msgs = j.messages || [];
+            if (msgs.length === 0) {
+              const empty = document.createElement('div');
+              empty.className = 'msg bot';
+              empty.textContent = 'No previous messages in this chat. Waiting for the visitor...';
+              msgsContainer.appendChild(empty);
+              msgsContainer.scrollTop = msgsContainer.scrollHeight;
+              return;
+            }
+
+            msgs.forEach(function(m){
+              const cls = (m.who === 'agent') ? 'user' : 'bot';
+              const el = document.createElement('div');
+              el.className = 'msg ' + cls;
+              el.textContent = m.text || '';
+              msgsContainer.appendChild(el);
+            });
+            msgsContainer.scrollTop = msgsContainer.scrollHeight;
+          } catch (err) {
+            console.warn('Agent: loadTranscript failed', err);
+            const msgsContainer = document.getElementById('chatMessages');
+            if (msgsContainer) {
+              msgsContainer.innerHTML = '';
+              const note = document.createElement('div');
+              note.className = 'msg bot';
+              note.textContent = 'Error loading chat history — you can still reply.';
+              msgsContainer.appendChild(note);
+            }
+          }
+        }
+
+        // Connect sockets if socket.io client is available
+        let socket = null;
+        try {
+          if (typeof io !== 'undefined') {
+            socket = io();
+            socket.on('connect', function(){
+              try { socket.emit('agent_join', { chat_ref: chatRef }); } catch(e) { console.warn('agent: emit agent_join failed', e); }
+              console.info('Agent socket connected, joined', chatRef);
+            });
+
+            socket.on('new_message', function(data){
+              try {
+                const cls = (data.who === 'agent') ? 'user' : 'bot';
+                const el = document.createElement('div');
+                el.className = 'msg ' + cls;
+                el.textContent = data.text || '';
+                const msgs = document.getElementById('chatMessages');
+                if (msgs) { msgs.appendChild(el); msgs.scrollTop = msgs.scrollHeight; }
+              } catch(e){ console.warn('agent: socket new_message handler error', e); }
+            });
+          } else {
+            console.info('Agent: socket.io client not present — realtime skipped.');
+          }
+        } catch (e) {
+          console.warn('Agent: socket connect attempt failed', e);
+        }
+
+        // Ensure agent send is reliably wired: socket preferred, POST fallback, optimistic UI
+        (function wireAgentSend(){
+          const sendBtn = document.getElementById('chatSend');
+          const input = document.getElementById('chatInput');
+          if (!sendBtn || !input) {
+            console.warn('Agent: send or input not found; cannot wire send');
+            return;
+          }
+
+          // remove existing handlers by cloning the node
+          try {
+            const newSend = sendBtn.cloneNode(true);
+            sendBtn.parentNode.replaceChild(newSend, sendBtn);
+
+            newSend.addEventListener('click', async function(){
+              try {
+                const v = (input.value||'').trim();
+                if(!v) { input.focus(); return; }
+
+                // optimistic UI: append locally so agent sees it immediately
+                try {
+                  const msgs = document.getElementById('chatMessages');
+                  if (msgs) {
+                    const el = document.createElement('div');
+                    el.className = 'msg user';
+                    el.textContent = v;
+                    msgs.appendChild(el);
+                    msgs.scrollTop = msgs.scrollHeight;
+                  }
+                } catch(e){ console.warn('Agent: optimistic append failed', e); }
+
+                // 1) socket emit if available
+                try {
+                  if (socket && socket.emit) {
+                    socket.emit('agent_message', { chat_ref: chatRef, text: v });
+                  } else if (typeof io !== 'undefined') {
+                    // try ephemeral socket if needed
+                    try { const s = io(); s.emit('agent_message', { chat_ref: chatRef, text: v }); } catch(e){}
+                  }
+                } catch(e){ console.warn('Agent: socket emit failed', e); }
+
+                // 2) fallback POST to server to ensure persistence + server-side emit
+                try {
+                  await fetch('/api/chat_message', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify({ chat_ref: chatRef, text: v, who: 'agent' })
+                  });
+                } catch (e) {
+                  console.warn('Agent: fallback POST failed', e);
+                }
+
+                input.value = '';
+                input.focus();
+              } catch(e){
+                console.error('Agent: send handler failed', e);
+              }
+            });
+
+            // Enter to send
+            input.addEventListener('keydown', function(e){
+              if(e.key === 'Enter') { e.preventDefault(); newSend.click(); }
+            });
+
+          } catch (e) {
+            console.warn('Agent: wireAgentSend installation failed', e);
+          }
+        })();
+
+        // load transcript now
+        loadTranscript();
+
+      } catch(err) {
+        console.error('Agent init error', err);
+      }
+    } // end initAgent
+
+    // DOM ready / immediate init
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initAgent);
+    } else {
+      initAgent();
+    }
+  })();
+  </script>
+
+  <script>
+  (function(){
+    const POST_PANEL_ID = 'postReplyPanel';
+    const MESSAGES_ID = 'chatMessages';
+    const INPUT_ID = 'chatInput';
+    const SEND_INLINE_ID = 'chatSendInline';
+    const SEND_OLD_ID = 'chatSend'; // extra old id (safe to disable both)
+    const AGENT_BTN_ID = 'panelChatAgentBtn';
+    const ARROW_ID = 'ccBlinkArrow';
+    const TRIGGER_TEXT_START = 'Please if you would like to chat with an agent';
+
+    // Add blinking arrow CSS and helper styles once
+    if (!document.getElementById('ccDisablePatchStyles')) {
+      const s = document.createElement('style');
+      s.id = 'ccDisablePatchStyles';
+      s.textContent = `
+        #${ARROW_ID}{ display:inline-block; width:0; height:0; margin-right:8px; vertical-align:middle;
+          border-top:8px solid transparent; border-bottom:8px solid transparent; border-left:12px solid var(--accent);
+          transform: translateY(1px); animation: cc-blink 1s linear infinite; }
+        @keyframes cc-blink{0%,100%{opacity:1}50%{opacity:0}}
+        .cc-disabled { opacity:0.48 !important; pointer-events:none !important; }
+        /* Ensure post panel fits composer area when active */
+        #${POST_PANEL_ID}.cc-in-composer { display:flex !important; align-items:center; gap:8px; padding:12px !important; }
+      `;
+      document.head.appendChild(s);
+    }
+
+    // helpers
+    const $ = id => document.getElementById(id);
+
+    function ensureArrowNode(){
+      let a = $(ARROW_ID);
+      if (!a) {
+        a = document.createElement('span');
+        a.id = ARROW_ID;
+        // aria-hidden since decorative
+        a.setAttribute('aria-hidden','true');
+      }
+      return a;
+    }
+
+    let composerDisabled = false;
+
+    function disableComposerAndShowButtons() {
+      if (composerDisabled) return;
+      const input = $(INPUT_ID);
+      const sendInline = $(SEND_INLINE_ID);
+      const sendOld = $(SEND_OLD_ID);
+      const postPanel = $(POST_PANEL_ID);
+      const agentBtn = $(AGENT_BTN_ID);
+
+      if (input) { input.disabled = true; input.readOnly = true; input.classList.add('cc-disabled'); try{ input.setAttribute('tabindex','-1'); }catch{} }
+      [sendInline, sendOld].forEach(b=>{
+        if (b){ b.disabled = true; b.classList.add('cc-disabled'); try{ b.style.cursor='default'; }catch{} }
+      });
+      if (postPanel) {
+        postPanel.classList.add('cc-in-composer');
+        postPanel.style.display = 'flex';
+        postPanel.setAttribute('aria-hidden','false');
+      }
+      // arrow insertion
+      if (agentBtn) {
+        const a = ensureArrowNode();
+        if (!a.parentNode) {
+          agentBtn.parentNode.insertBefore(a, agentBtn);
+        }
+      }
+      composerDisabled = true;
+    }
+
+    function enableComposerAndHideButtons() {
+      if (!composerDisabled) return;
+      const input = $(INPUT_ID);
+      const sendInline = $(SEND_INLINE_ID);
+      const sendOld = $(SEND_OLD_ID);
+      const postPanel = $(POST_PANEL_ID);
+
+      if (input) { input.disabled = false; input.readOnly = false; input.classList.remove('cc-disabled'); try{ input.removeAttribute('tabindex'); input.focus(); }catch{} }
+      [sendInline, sendOld].forEach(b=>{
+        if (b){ b.disabled = false; b.classList.remove('cc-disabled'); try{ b.style.cursor=''; }catch{} }
+      });
+      if (postPanel) {
+        postPanel.classList.remove('cc-in-composer');
+        postPanel.style.display = 'none';
+        postPanel.setAttribute('aria-hidden','true');
+      }
+      const a = $(ARROW_ID);
+      if (a && a.parentNode) a.parentNode.removeChild(a);
+      composerDisabled = false;
+    }
+
+    // Hook Clear button to re-enable composer (safe: leaves your own clear logic intact)
+    const clearBtn = $('chatClear');
+    if (clearBtn) {
+      // attach additional handler after existing ones
+      clearBtn.addEventListener('click', function(){
+        // small delay to let your clear code run first
+        setTimeout(enableComposerAndHideButtons, 50);
+      }, { passive: true });
+    }
+
+    // Core: watch for messages node mutations and only trigger disable when:
+    //  - there's at least one user message earlier in the list AND
+    //  - a bot message appears whose text begins with TRIGGER_TEXT_START
+    const messagesNode = $(MESSAGES_ID);
+    const postPanel = $(POST_PANEL_ID);
+
+    function checkAndMaybeDisable() {
+      try {
+        const msgs = messagesNode ? Array.from(messagesNode.children) : [];
+        if (msgs.length === 0) return;
+        // Find index of the trigger bot message (first occurrence)
+        let triggerIndex = -1;
+        for (let i=0;i<msgs.length;i++){
+          const el = msgs[i];
+          if (!el) continue;
+          const txt = (el.textContent || '').trim();
+          if (txt.indexOf(TRIGGER_TEXT_START) === 0) { triggerIndex = i; break; }
+        }
+        if (triggerIndex < 0) return; // trigger message not found
+        // ensure there exists a 'user' message before triggerIndex
+        const userBefore = msgs.slice(0, triggerIndex).some(n => n.classList && n.classList.contains('user'));
+        if (!userBefore) return;
+        // at this point we should show the post panel and disable composer
+        disableComposerAndShowButtons();
+      } catch (e) {
+        console.warn('checkAndMaybeDisable error', e);
+      }
+    }
+
+    if (messagesNode) {
+      const mo = new MutationObserver(function(muts){
+        // on added nodes, check state
+        for (const m of muts) {
+          if (m.type === 'childList' && m.addedNodes && m.addedNodes.length) {
+            // check once per mutation batch
+            checkAndMaybeDisable();
+            break;
+          }
+        }
+      });
+      mo.observe(messagesNode, { childList: true });
+      // initial check in case transcript already contains the pattern
+      setTimeout(checkAndMaybeDisable, 100);
+    } else {
+      // fallback polling if messages node not yet present
+      const poll = setInterval(function(){
+        const mn = $(MESSAGES_ID);
+        if (mn) {
+          clearInterval(poll);
+          // attach and check
+          const mo2 = new MutationObserver(function(muts){
+            for (const m of muts) {
+              if (m.type === 'childList' && m.addedNodes && m.addedNodes.length) { checkAndMaybeDisable(); break; }
+            }
+          });
+          mo2.observe(mn, { childList: true });
+          setTimeout(checkAndMaybeDisable, 150);
+        }
+      }, 150);
+      // stop polling after 8s
+      setTimeout(()=>clearInterval(poll), 8000);
+    }
+
+    // Safety: also disable if postReplyPanel is manually shown by other code (detect style/class)
+    if (postPanel) {
+      const observerPanel = new MutationObserver(function(){
+        try {
+          const visible = window.getComputedStyle(postPanel).display !== 'none';
+          if (visible) {
+            // ensure only disabled if the trigger condition (user before trigger) holds
+            checkAndMaybeDisable();
+          } else {
+            // if hidden, re-enable just in case
+            enableComposerAndHideButtons();
+          }
+        } catch(e){}
+      });
+      observerPanel.observe(postPanel, { attributes: true, attributeFilter: ['style','class'] });
+    }
+
+    // Prevent Enter key from sending only while composerDisabled
+    window.addEventListener('keydown', function(e){
+      const input = $(INPUT_ID);
+      if (!input) return;
+      if ((input.disabled || input.readOnly) && document.activeElement === input && e.key === 'Enter') {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        return false;
+      }
+    }, true);
+
+    // Guard clicks to send buttons while composerDisabled (delegated)
+    document.addEventListener('click', function(e){
+      if (!composerDisabled) return;
+      const sendInline = $(SEND_INLINE_ID);
+      const sendOld = $(SEND_OLD_ID);
+      const t = e.target;
+      if (sendInline && (t === sendInline || sendInline.contains(t))) {
+        e.preventDefault(); e.stopImmediatePropagation(); return false;
+      }
+      if (sendOld && (t === sendOld || sendOld.contains(t))) {
+        e.preventDefault(); e.stopImmediatePropagation(); return false;
+      }
+    }, true);
+
+    // Expose for debug
+    window._cc_checkDisableTrigger = checkAndMaybeDisable;
+    window._cc_enableComposer = enableComposerAndHideButtons;
+    window._cc_disableComposer = disableComposerAndShowButtons;
+
+  })();
+  </script>
+
+  </footer>
+  <!-- ========================= end footer ========================= -->
+
+  <!-- =========================
+       Contact fallback: mailto / tel -> toast + copy fallback (footer part 2)
+       ========================= -->
+  <style>
+    /* small, self-contained toast styles (safe to paste into footer/base template) */
+    #cc-contact-toast {
+      position: fixed;
+      right: 20px;
+      bottom: 22px;
+      background: linear-gradient(180deg,#eaf8ff,#d9f3ff);
+      color: #07102a;
+      border: 1px solid rgba(30,95,191,0.12);
+      padding: 12px 14px;
+      border-radius: 10px;
+      box-shadow: 0 12px 36px rgba(2,8,40,0.18);
+      z-index: 40000;
+      display: none;
+      min-width: 260px;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+    #cc-contact-toast .cc-head { font-weight:800; font-size:14px; margin-bottom:6px; color:#07243f }
+    #cc-contact-toast .cc-body { font-size:13px; color:#07243f; margin-bottom:8px }
+    #cc-contact-toast .cc-actions { display:flex; gap:8px; justify-content:flex-end }
+    .cc-copy-btn {
+      background: linear-gradient(90deg,#2153ff,#4f7ef7);
+      color: #fff;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 0;
+      font-weight:800;
+      cursor: pointer;
+    }
+    .cc-close-btn {
+      background: transparent;
+      border: 1px solid rgba(7,36,80,0.06);
+      padding: 8px 10px;
+      border-radius:8px;
+      cursor:pointer;
+    }
+
+    /* small responsive tweak so toast doesn't overflow on tiny screens */
+    @media (max-width:420px) {
+      #cc-contact-toast { left: 12px; right: 12px; width: auto; min-width: 0; }
+    }
+  </style>
+
+  <!-- Toast markup (will be created once if missing) -->
+  <div id="cc-contact-toast" role="status" aria-live="polite" aria-hidden="true">
+    <div class="cc-head" id="cc-contact-toast-head">Contact</div>
+    <div class="cc-body" id="cc-contact-toast-body">Copy this contact info</div>
+    <div class="cc-actions">
+      <button class="cc-copy-btn" id="cc-contact-copy">Copy</button>
+      <button class="cc-close-btn" id="cc-contact-close">Close</button>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    // Detect mobile-ish devices (we assume mobile will handle mailto/tel naturally)
+    const isMobile = /Mobi|Android|iPhone|iPad|iPod|Windows Phone/i.test(navigator.userAgent || '');
+
+    // DOM references
+    const toast = document.getElementById('cc-contact-toast');
+    const head = document.getElementById('cc-contact-toast-head');
+    const body = document.getElementById('cc-contact-toast-body');
+    const btnCopy = document.getElementById('cc-contact-copy');
+    const btnClose = document.getElementById('cc-contact-close');
+
+    // Show toast with copy text (text will be copied by Copy button)
+    function showContactToast(title, message, copyText) {
+      if (!toast) return;
+      head.textContent = title || 'Contact';
+      body.textContent = message || copyText || '';
+      toast.dataset.copy = copyText || '';
+      toast.style.display = 'block';
+      toast.setAttribute('aria-hidden', 'false');
+    }
+    function hideContactToast() {
+      if (!toast) return;
+      toast.style.display = 'none';
+      toast.setAttribute('aria-hidden', 'true');
+      toast.dataset.copy = '';
+    }
+
+    // Copy action
+    btnCopy && btnCopy.addEventListener('click', function () {
+      const txt = (toast.dataset.copy || '').trim();
+      if (!txt) return;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt).then(function () {
+          btnCopy.textContent = 'Copied';
+          setTimeout(function () { btnCopy.textContent = 'Copy'; hideContactToast(); }, 1300);
+        }).catch(function () {
+          alert('Copy: ' + txt);
+          hideContactToast();
+        });
+      } else {
+        // fallback
+        try {
+          const el = document.createElement('textarea');
+          el.value = txt;
+          el.style.position = 'fixed'; el.style.left = '-9999px';
+          document.body.appendChild(el);
+          el.select();
+          document.execCommand('copy');
+          document.body.removeChild(el);
+          btnCopy.textContent = 'Copied';
+          setTimeout(function () { btnCopy.textContent = 'Copy'; hideContactToast(); }, 1300);
+        } catch (e) {
+          alert('Copy: ' + txt);
+          hideContactToast();
+        }
+      }
+    });
+
+    btnClose && btnClose.addEventListener('click', hideContactToast);
+
+    // Attempt to open link then show fallback toast for desktop after short delay
+    function tryOpenThenMaybeShowToast(href, toastTitle, toastMessage, copyText) {
+      try {
+        // first attempt (navigating the location has best chance to open default app)
+        window.location.href = href;
+        // also attempt window.open (some browsers may better handle)
+        try { window.open(href); } catch (e) { /* ignore */ }
+      } catch (e) { /* ignore */ }
+
+      // only show fallback toast on non-mobile devices (mobile usually handles mailto/tel)
+      if (isMobile) return;
+
+      // show helpful fallback shortly after attempt
+      setTimeout(function () {
+        showContactToast(toastTitle, toastMessage, copyText);
+      }, 650);
+    }
+
+    // Main wiring: find anchors and buttons with mailto: or tel:
+    function wireContactHandlers(root) {
+      root = root || document;
+      const anchors = Array.from(root.querySelectorAll('a[href^="mailto:"], a[href^="tel:"]'));
+      anchors.forEach(function (a) {
+        if (a.__cc_contact_wired) return;
+        a.__cc_contact_wired = true;
+        a.addEventListener('click', function (ev) {
+          // prefer default mobile behaviour, but intercept to provide fallback on desktop
+          ev && ev.preventDefault && ev.preventDefault();
+
+          const href = (a.getAttribute('href') || '').trim();
+          if (!href) return;
+
+          if (href.toLowerCase().startsWith('mailto:')) {
+            const addr = href.replace(/^mailto:/i, '');
+            tryOpenThenMaybeShowToast(href, 'Send email', 'If your mail app did not open automatically, copy this address and paste it into your email client:', addr);
+          } else if (href.toLowerCase().startsWith('tel:')) {
+            const num = href.replace(/^tel:/i, '');
+            tryOpenThenMaybeShowToast(href, 'Call support', 'If your device did not open a phone app, copy this number to call manually:', num);
+          } else {
+            // fallback: just try to open normally
+            try { window.location.href = href; } catch (e) { try { window.open(href); } catch (e2) {} }
+          }
+        }, { passive: false });
+      });
+
+      // Also wire elements that use data-contact-href (optional pattern used for non-anchor buttons)
+      const btns = Array.from(root.querySelectorAll('[data-contact-href]'));
+      btns.forEach(function (b) {
+        if (b.__cc_contact_wired) return;
+        b.__cc_contact_wired = true;
+        b.addEventListener('click', function (ev) {
+          ev && ev.preventDefault && ev.preventDefault();
+          const href = (b.getAttribute('data-contact-href') || '').trim();
+          if (!href) return;
+          if (href.toLowerCase().startsWith('mailto:')) {
+            const addr = href.replace(/^mailto:/i, '');
+            tryOpenThenMaybeShowToast(href, 'Send email', 'If your mail app did not open automatically, copy this address and paste it into your email client:', addr);
+          } else if (href.toLowerCase().startsWith('tel:')) {
+            const num = href.replace(/^tel:/i, '');
+            tryOpenThenMaybeShowToast(href, 'Call support', 'If your device did not open a phone app, copy this number to call manually:', num);
+          } else {
+            try { window.location.href = href; } catch (e) { try { window.open(href); } catch (e2) {} }
+          }
+        }, { passive: false });
+      });
+    }
+
+    // Wire document now and also on DOM changes (so dynamically inserted footers/pages are handled)
+    wireContactHandlers(document);
+
+    // Optional: re-run wiring for nodes added later
+    const mo = new MutationObserver(function (mut) {
+      mut.forEach(function (m) {
+        if (m.type === 'childList' && m.addedNodes && m.addedNodes.length) {
+          // check each added node for anchors/buttons
+          m.addedNodes.forEach(function (n) {
+            if (!(n instanceof Element)) return;
+            wireContactHandlers(n);
+          });
+        }
+      });
+    });
+    mo.observe(document.documentElement || document.body, { childList: true, subtree: true });
+
+  })();
+  </script>
+
+  <!-- =========== NEW: button hover/focus sync for Request Matching <-> Contact Us =========== -->
+  <script>
+  (function(){
+    try {
+      const reqBtn = document.getElementById('footerRequestMatching');
+      // find the contact link inside the brand blurb that points to /contact
+      const contactLink = document.querySelector('.brand .blurb a[href="/contact"]');
+
+      if (!reqBtn || !contactLink) {
+        // nothing to do
+        return;
+      }
+
+      const PRIMARY = 'footer-btn-primary';
+      const GHOST = 'footer-btn-ghost';
+
+      // set initial default state: Request Matching primary, Contact ghost
+      function setDefault() {
+        reqBtn.classList.add(PRIMARY);
+        reqBtn.classList.remove(GHOST);
+        contactLink.classList.add(GHOST);
+        contactLink.classList.remove(PRIMARY);
+      }
+
+      setDefault();
+
+      function makePrimary(el) {
+        if (el === reqBtn) {
+          reqBtn.classList.add(PRIMARY);
+          reqBtn.classList.remove(GHOST);
+          contactLink.classList.add(GHOST);
+          contactLink.classList.remove(PRIMARY);
+        } else if (el === contactLink) {
+          contactLink.classList.add(PRIMARY);
+          contactLink.classList.remove(GHOST);
+          reqBtn.classList.add(GHOST);
+          reqBtn.classList.remove(PRIMARY);
+        }
+      }
+
+      function restoreAfterLeave() {
+        // if pointer is over either, ensure that one stays primary; otherwise restore default
+        if (reqBtn.matches(':hover') || reqBtn.matches(':focus')) {
+          makePrimary(reqBtn);
+          return;
+        }
+        if (contactLink.matches(':hover') || contactLink.matches(':focus')) {
+          makePrimary(contactLink);
+          return;
+        }
+        setDefault();
+      }
+
+      // mouse + keyboard interactions
+      [reqBtn, contactLink].forEach(node => {
+        node.addEventListener('mouseenter', () => makePrimary(node));
+        node.addEventListener('focus', () => makePrimary(node));
+        node.addEventListener('mouseleave', () => setTimeout(restoreAfterLeave, 40));
+        node.addEventListener('blur', () => setTimeout(restoreAfterLeave, 40));
+      });
+
+      // also handle touch (tap) - toggle briefly
+      [reqBtn, contactLink].forEach(node => {
+        node.addEventListener('touchstart', () => makePrimary(node), { passive: true });
+      });
+
+    } catch (e) {
+      console.warn('Footer button hover script error', e);
+    }
+  })();
+  </script>
+
+  <!-- Fix: ensure View family / View caregivers buttons are visible in modal & banner -->
+  <style>
+    /* high-specificity overrides for modal/banner CTAs */
+    /* adjust selectors if your modal has a different container id/class */
+    #modalBackdrop, .modal, .permission-box, .alert-box, .top-banner, #topBanner, .banner, .hero-banner {
+      mix-blend-mode: normal !important;
+      -webkit-font-smoothing: antialiased !important;
+    }
+
+    /* Primary CTA inside modal/banner (most common button classes) */
+    #modalBackdrop .nl-btn,
+    #modalBackdrop .view-btn,
+    .modal .nl-btn,
+    .modal .view-btn,
+    .permission-box .nl-btn,
+    .permission-box .view-btn,
+    .top-banner .nl-btn,
+    .top-banner .view-btn,
+    #topBanner .nl-btn,
+    #topBanner .view-btn,
+    .banner .nl-btn,
+    .banner .view-btn {
+      background: linear-gradient(90deg,#2153ff 0%,#4f7ef7 100%) !important;
+      color: #ffffff !important;
+      -webkit-text-fill-color: #ffffff !important; /* for Safari/WebKit */
+      border: 0 !important;
+      box-shadow: 0 8px 20px rgba(33,83,255,0.14) !important;
+      position: relative !important;
+      z-index: 10050 !important;
+      mix-blend-mode: normal !important;
+      opacity: 1 !important;
+    }
+
+    /* make sure any inner text/spans are white too */
+    #modalBackdrop .nl-btn * ,
+    #modalBackdrop .view-btn * ,
+    .modal .nl-btn * ,
+    .modal .view-btn * ,
+    .top-banner .nl-btn * ,
+    .top-banner .view-btn * ,
+    .banner .nl-btn * ,
+    .banner .view-btn * {
+      color: #ffffff !important;
+      -webkit-text-fill-color: #ffffff !important;
+    }
+
+    /* Close button kept visible and above CTAs */
+    #modalBackdrop .close,
+    .modal .close,
+    .top-banner .close {
+      color: rgba(255,255,255,0.96) !important;
+      z-index: 10060 !important;
+    }
+
+    /* Accessibility: visible focus */
+    #modalBackdrop .nl-btn:focus,
+    .modal .nl-btn:focus,
+    .top-banner .nl-btn:focus {
+      outline: 3px solid rgba(79,126,247,0.2) !important;
+      outline-offset: 3px !important;
+    }
+
+    /* Ensure social anchors show their icons cleanly (no gradient background) */
+    /* This is deliberately specific and low-impact */
+    .social a {
+      background: transparent !important;
+      box-shadow: none !important;
+      border: 0 !important;
+      padding: 0 !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+
+    .social a img {
+      width: 26px !important;
+      height: 26px !important;
+      object-fit: contain !important;
+      display: block !important;
+    }
+  </style>
+
+  <script>
+  /* Combined script:
+     - shows CTAs (View family/View caregivers) when their labels are invisible
+     - avoids touching .social anchors or anchors containing <img>
+     - repairs social icons if they were replaced earlier
+  */
+  document.addEventListener('DOMContentLoaded', function () {
+    try {
+      const targetLabels = [
+        'view family', 'view families',
+        'view caregiver', 'view caregivers',
+        'view family ›', 'view caregivers ›', 'view family >', 'view caregivers >'
+      ];
+
+      // find candidates but SKIP anchors inside .social and any element that already contains an <img>
+      const allElements = Array.from(document.querySelectorAll('button, a'));
+      const candidates = allElements.filter(el => {
+        if (el.closest && el.closest('.social')) return false; // never touch social anchors
+        if (el.querySelector && el.querySelector('img')) return false; // skip if it already has an image
+        return true;
+      });
+
+      // enforce visible style when element text/aria/data-action matches target labels
+      candidates.forEach(el => {
+        try {
+          const raw = (el.textContent || '').trim().toLowerCase();
+          const aria = (el.getAttribute('aria-label') || '').toLowerCase();
+          const dataAction = (el.getAttribute('data-action') || '').toLowerCase();
+          const matchesLabel = targetLabels.some(lbl => raw === lbl || raw.includes(lbl) || aria.includes(lbl) || dataAction.includes(lbl));
+          if (!matchesLabel) return;
+
+          // apply safe styles to ensure text is visible
+          el.style.background = 'linear-gradient(90deg,#2153ff,#4f7ef7)';
+          el.style.color = '#ffffff';
+          el.style.border = '0';
+          el.style.position = 'relative';
+          el.style.zIndex = '10050';
+          el.style.boxShadow = '0 8px 20px rgba(33,83,255,0.14)';
+          el.style.opacity = '1';
+          el.style.webkitTextFillColor = '#ffffff';
+          el.style.mixBlendMode = 'normal';
+
+          // force color on children (in case nested spans have their own color)
+          Array.from(el.querySelectorAll('*')).forEach(ch => {
+            try { ch.style.color = '#ffffff'; ch.style.webkitTextFillColor = '#ffffff'; } catch(e){}
+          });
+        } catch (innerErr) {
+          // non-fatal per element
+          console.warn('cta-style-apply failed for', el, innerErr);
+        }
+      });
+
+      // Fallback: if an element has no visible text but has an aria-label, reveal ARIA — but SKIP social anchors and elements with images
+      candidates.forEach(el => {
+        try {
+          const visibleText = (el.textContent || '').trim();
+          const aria = el.getAttribute('aria-label') || '';
+          if (!visibleText && aria) {
+            // Add a small visually-hidden span containing aria text first (so we don't destroy existing structure)
+            // but prefer to set textContent only for true CTA elements (buttons/links)
+            const span = document.createElement('span');
+            span.className = 'cc-aria-fallback';
+            span.textContent = aria;
+            // small inline style so it appears normally (not hidden) — this is only for fallback
+            span.style.display = 'inline';
+            span.style.color = '#ffffff';
+            el.appendChild(span);
+
+            // ensure styling so label is visible
+            el.style.background = 'linear-gradient(90deg,#2153ff,#4f7ef7)';
+            el.style.color = '#ffffff';
+            el.style.webkitTextFillColor = '#ffffff';
+          }
+        } catch (innerErr) {
+          console.warn('aria-fallback failed for', el, innerErr);
+        }
+      });
+
+      /* -------------------------
+         Restore social icons (if they were replaced earlier)
+         ------------------------- */
+      const mapping = [
+        { test: h => h.includes('x.com'), src: 'static/images/x.logo.png', alt: 'X / Care Companion' },
+        { test: h => h.includes('tiktok.com'), src: 'static/images/tiktok_photo.png', alt: 'TikTok / Care Companion' },
+        { test: h => h.includes('instagram.com'), src: 'static/images/instagram-logo.svg', alt: 'Instagram' },
+        { test: h => h.includes('linkedin.com'), src: 'static/images/linkedin-logo.svg', alt: 'LinkedIn' }
+      ];
+
+      function restoreOneAnchor(a) {
+        if (!a || !(a instanceof Element)) return false;
+        // if it already contains an <img>, just normalise its wrapper style and exit
+        if (a.querySelector('img')) {
+          a.style.background = 'transparent';
+          a.style.boxShadow = 'none';
+          a.style.border = '0';
+          return false;
+        }
+
+        const href = (a.getAttribute('href') || '').toLowerCase();
+        const text = (a.textContent || '').trim().toLowerCase();
+
+        let entry = mapping.find(m => m.test(href) || (m.alt && text.includes(m.alt.toLowerCase().split(' ')[0])));
+        if (!entry) return false;
+
+        // remove accidental fallback text but preserve aria-label if present
+        const aria = a.getAttribute('aria-label') || '';
+        a.textContent = '';
+
+        const img = document.createElement('img');
+        img.src = entry.src;
+        img.alt = entry.alt;
+        img.width = 26;
+        img.height = 26;
+        img.style.width = '26px';
+        img.style.height = '26px';
+        img.style.objectFit = 'contain';
+        a.appendChild(img);
+
+        // normalise anchor wrapper style for icons
+        a.style.background = 'transparent';
+        a.style.boxShadow = 'none';
+        a.style.border = '0';
+        a.style.padding = '0';
+        a.style.display = 'inline-flex';
+        a.style.alignItems = 'center';
+        a.style.justifyContent = 'center';
+        return true;
+      }
+
+      const socialAnchors = Array.from(document.querySelectorAll('.social a'));
+      socialAnchors.forEach(a => restoreOneAnchor(a));
+      // retry shortly in case another script runs later
+      setTimeout(() => socialAnchors.forEach(a => restoreOneAnchor(a)), 160);
+
+    } catch (err) {
+      console.warn('combined-fix script error', err);
+    }
+  });
+  </script>
+
+<!-- Replace existing caregiver modal block with this combined block (place before </body>) -->
+<style>
+/* Shared modal styles */
+.cc-modal-inline { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 20000; font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial; }
+.cc-modal-inline.show { display:flex; }
+.cc-modal-card { width:100%; max-width:520px; margin:16px; border-radius:12px; background: linear-gradient(180deg,#fff,#f6f8ff); box-shadow: 0 20px 60px rgba(8,18,60,0.18); padding:18px; color:#072049; display:flex; gap:12px; align-items:flex-start; }
+.cc-modal-left{width:56px;height:56px;border-radius:12px;background:linear-gradient(180deg,#e6e9ff,#cfcfff); display:flex;align-items:center;justify-content:center;font-weight:700;color:#24307a}
+.cc-modal-content h3{margin:0 0 6px;font-size:18px}
+.cc-modal-content p{margin:0;font-size:14px;color:#0b2a4a;opacity:.95}
+.cc-modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:12px}
+.cc-btn-primary{background:linear-gradient(90deg,#3b6cff,#6aa8ff);color:#fff;padding:10px 14px;border-radius:10px;border:0;font-weight:700;cursor:pointer}
+.cc-btn-ghost{background:transparent;border:1px solid rgba(11,42,90,0.06);padding:10px 12px;border-radius:10px;color:#0b2a4a;font-weight:700;cursor:pointer}
+@media(max-width:520px){.cc-modal-left{display:none}.cc-modal-actions{flex-direction:column}.cc-btn-primary,.cc-btn-ghost{width:100%}}
+</style>
+
+<!-- Caregiver-block modal -->
+<div id="caregiverBlockedModal" class="cc-modal-inline" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="cc-modal-card" role="document" aria-labelledby="cbTitle" aria-describedby="cbDesc">
+    <div class="cc-modal-left" aria-hidden="true">i</div>
+    <div class="cc-modal-content" style="flex:1">
+      <h3 id="cbTitle">Access restricted</h3>
+      <p id="cbDesc">Sorry — caregivers cannot view the <strong>Find Caregiver</strong> page. You can browse families instead.</p>
+      <div class="cc-modal-actions">
+        <button id="cbCloseBtn" class="cc-btn-ghost" type="button">Close</button>
+        <button id="cbViewFamiliesBtn" class="cc-btn-primary" type="button">View Families</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Family-block modal -->
+<div id="familyBlockedModal" class="cc-modal-inline" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="cc-modal-card" role="document" aria-labelledby="fbTitle" aria-describedby="fbDesc">
+    <div class="cc-modal-left" aria-hidden="true">i</div>
+    <div class="cc-modal-content" style="flex:1">
+      <h3 id="fbTitle">Access restricted</h3>
+      <p id="fbDesc">Sorry — families cannot view the <strong>Find Family</strong> page. You can browse caregivers instead.</p>
+      <div class="cc-modal-actions">
+        <button id="fbCloseBtn" class="cc-btn-ghost" type="button">Close</button>
+        <button id="fbViewCaregiversBtn" class="cc-btn-primary" type="button">View Caregivers</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  // Read server flags from body data attributes (must exist)
+  function readFlags() {
+    const b = document.body;
+    const loggedAttr = String(b.getAttribute('data-logged-in') || '').toLowerCase();
+    const roleAttr = String(b.getAttribute('data-user-role') || '').toLowerCase();
+    const pubAttr = String(b.getAttribute('data-profile-published') || '').toLowerCase();
+    return {
+      isLogged: (loggedAttr === '1' || loggedAttr === 'true'),
+      role: roleAttr,
+      isPublished: (pubAttr === '1' || pubAttr === 'true')
+    };
+  }
+
+  function shouldBlockCaregiver() {
+    const f = readFlags();
+    return f.isLogged && f.role === 'caregiver' && f.isPublished;
+  }
+  function shouldBlockFamily() {
+    const f = readFlags();
+    return f.isLogged && f.role === 'family' && f.isPublished;
+  }
+
+  // Modal elements
+  const caregiverModal = document.getElementById('caregiverBlockedModal');
+  const caregiverClose = document.getElementById('cbCloseBtn');
+  const caregiverViewFamilies = document.getElementById('cbViewFamiliesBtn');
+
+  const familyModal = document.getElementById('familyBlockedModal');
+  const familyClose = document.getElementById('fbCloseBtn');
+  const familyViewCaregivers = document.getElementById('fbViewCaregiversBtn');
+
+  // Generic open/close helpers (works for either modal element)
+  function openModal(modalEl, primaryFocusEl) {
+    if (!modalEl) return;
+    modalEl.classList.add('show');
+    modalEl.setAttribute('aria-hidden', 'false');
+    // move focus to primary action
+    setTimeout(()=> { try { primaryFocusEl && primaryFocusEl.focus(); } catch(e){} }, 30);
+    document.addEventListener('keydown', onKeyDown);
+    modalEl._prevActive = document.activeElement;
+  }
+  function closeModal(modalEl) {
+    if (!modalEl) return;
+    modalEl.classList.remove('show');
+    modalEl.setAttribute('aria-hidden', 'true');
+    document.removeEventListener('keydown', onKeyDown);
+    try { if (modalEl._prevActive && typeof modalEl._prevActive.focus === 'function') modalEl._prevActive.focus(); } catch(e){}
+  }
+  function onKeyDown(e) {
+    if (e.key === 'Escape' || e.key === 'Esc') {
+      // close whichever modal is open
+      if (caregiverModal && caregiverModal.classList.contains('show')) closeModal(caregiverModal);
+      if (familyModal && familyModal.classList.contains('show')) closeModal(familyModal);
+    }
+    if (e.key === 'Tab') {
+      // trap focus inside whichever modal is open
+      const activeModal = caregiverModal.classList.contains('show') ? caregiverModal : (familyModal.classList.contains('show') ? familyModal : null);
+      if (!activeModal) return;
+      const focusables = Array.from(activeModal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')).filter(el=>el.offsetWidth || el.offsetHeight);
+      if (!focusables.length) return;
+      const first = focusables[0], last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  }
+
+  // Delegated click interception for both links/buttons
+  document.addEventListener('click', function (ev) {
+    // allow ctrl/cmd/new-tab and middle-click
+    if (ev.ctrlKey || ev.metaKey || ev.button === 1) return;
+    const el = ev.target;
+    if (!el) return;
+    const a = el.closest ? el.closest('a, button') : null;
+    if (!a) return;
+    const href = a.getAttribute && a.getAttribute('href') || '';
+    const id = a.id || '';
+    const classes = a.className || '';
+
+    const wantsCaregiver = (href.indexOf('/find-caregiver') !== -1 || id === 'navFindCaregiver' || (classes && classes.indexOf('find-care') !== -1));
+    const wantsFamily = (href.indexOf('/find-family') !== -1 || id === 'navFindFamily' || (classes && classes.indexOf('find-jobs') !== -1));
+
+    if (wantsCaregiver && shouldBlockCaregiver()) {
+      ev.preventDefault(); ev.stopPropagation();
+      openModal(caregiverModal, caregiverViewFamilies);
+      return;
+    }
+    if (wantsFamily && shouldBlockFamily()) {
+      ev.preventDefault(); ev.stopPropagation();
+      openModal(familyModal, familyViewCaregivers);
+      return;
+    }
+    // otherwise allow navigation
+  }, { capture: true });
+
+  // Wire modal buttons
+  if (caregiverClose) caregiverClose.addEventListener('click', ()=> closeModal(caregiverModal));
+  if (caregiverViewFamilies) caregiverViewFamilies.addEventListener('click', ()=> { window.location.href = '/find-family'; });
+
+  if (familyClose) familyClose.addEventListener('click', ()=> closeModal(familyModal));
+  if (familyViewCaregivers) familyViewCaregivers.addEventListener('click', ()=> { window.location.href = '/find-caregiver'; });
+
+})();
+</script>
+
+<!-- ===== SAFE: scoped Request-matching modal + handlers (paste once, keep caregiver/family modals) ===== -->
+<style>
+  /* Scoped - no global leakage */
+  #cc-request-modal-scope { --cc-bg: #07243f; --cc-accent1: #2153FF; --cc-accent2: #3B6FF6; --cc-ice: #eaf6ff; }
+
+  #cc-request-modal-scope .cc-backdrop {
+    position: fixed; inset: 0; display: none; align-items: center; justify-content: center;
+    background: rgba(2,10,30,0.6); z-index: 19000; padding: 20px;
+  }
+
+  #cc-request-modal-scope .cc-panel {
+    width: 100%; max-width: 640px; border-radius: 12px; overflow: hidden;
+    box-shadow: 0 18px 60px rgba(2,12,30,0.28);
+    background: linear-gradient(180deg, var(--cc-bg), #0b3b63);
+    color: var(--cc-ice);
+    border: 1px solid rgba(255,255,255,0.03);
+  }
+
+  #cc-request-modal-scope .cc-body { padding: 20px; color: var(--cc-ice); }
+  #cc-request-modal-scope .cc-title { margin: 0 0 8px 0; font-size: 18px; font-weight: 700; color: #fff; }
+  #cc-request-modal-scope .cc-sub { font-size:13px; color: rgba(230,245,255,0.8); }
+
+  #cc-request-modal-scope .cc-field { display:block; margin-bottom:10px; }
+  #cc-request-modal-scope .cc-label { display:block; margin-bottom:6px; font-weight:700; color:var(--cc-ice); font-size:13px; }
+  #cc-request-modal-scope .cc-input,
+  #cc-request-modal-scope .cc-select,
+  #cc-request-modal-scope .cc-textarea {
+    width:100%; padding:10px; border-radius:8px; border:1px solid rgba(255,255,255,0.06);
+    font-size:14px; background: rgba(255,255,255,0.02); color: var(--cc-ice); box-sizing:border-box;
+  }
+  #cc-request-modal-scope .cc-textarea { min-height:90px; resize:vertical; }
+
+  #cc-request-modal-scope .cc-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:6px; }
+  #cc-request-modal-scope .cc-close { background:transparent; border:1px solid rgba(255,255,255,0.06); padding:8px 12px; border-radius:8px; cursor:pointer; color:var(--cc-ice); }
+  #cc-request-modal-scope .cc-btn {
+    background: linear-gradient(90deg,var(--cc-accent1),var(--cc-accent2));
+    color:#fff; padding:12px 18px; border-radius:10px; font-weight:700; border:0; cursor:pointer;
+    box-shadow: 0 10px 30px rgba(33,83,255,0.14);
+  }
+  #cc-request-modal-scope .cc-spinner { display:inline-block; width:14px; height:14px; border-radius:50%; border:2px solid rgba(255,255,255,0.9); border-top-color: rgba(255,255,255,0.25); animation: cc-spin 1s linear infinite; margin-right:8px; vertical-align:middle; }
+  @keyframes cc-spin { to { transform: rotate(360deg); } }
+
+  #cc-request-modal-scope #cc-toast {
+    position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 20000; display: none;
+    padding: 16px 22px; border-radius: 12px; font-weight: 900; font-size: 16px; min-width: 320px; text-align: center;
+    box-shadow: 0 18px 60px rgba(2,12,30,0.24); backdrop-filter: blur(6px);
+  }
+  #cc-request-modal-scope #cc-toast.success { color:#07243f; background: linear-gradient(90deg,#eaf8ff 0%, #d9f3ff 100%); border: 1px solid rgba(30,95,191,0.14); }
+  #cc-request-modal-scope #cc-toast.error { color:#ffd6d6; background: rgba(70,18,18,0.95); border:1px solid rgba(255,120,120,0.12); }
+
+  @media (max-width:560px) {
+    #cc-request-modal-scope .cc-panel { margin: 12px; max-width: 92%; }
+    #cc-request-modal-scope #cc-toast { min-width: 260px; left: 50%; right: auto; }
+  }
+</style>
+
+<div id="cc-request-modal-scope" aria-hidden="true">
+  <div class="cc-backdrop" id="cc-backdrop" role="dialog" aria-modal="true" aria-hidden="true">
+    <div class="cc-panel" role="document" aria-labelledby="cc-modal-title">
+      <div class="cc-body">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <h2 id="cc-modal-title" class="cc-title">Request matching</h2>
+            <div class="cc-sub">Tell us briefly what you need — we’ll shortlist suitable carers.</div>
+          </div>
+          <button id="cc-close" class="cc-close" aria-label="Close dialog">Close</button>
+        </div>
+
+        <form id="cc-form" method="post" action="{{ url_for('services_contact') }}" style="margin-top:12px;">
+          <div class="cc-field"><label class="cc-label" for="cc-name">Your name</label><input id="cc-name" class="cc-input" name="name" type="text" placeholder="Full name" required></div>
+
+          <div class="cc-field"><label class="cc-label" for="cc-email">Email</label><input id="cc-email" class="cc-input" name="email" type="email" placeholder="you@example.com" required></div>
+
+          <div class="cc-field"><label class="cc-label" for="cc-service">Service</label>
+            <select id="cc-service" name="service" class="cc-select">
+              <option value="personal_care">Personal care</option>
+              <option value="medication">Medication reminder</option>
+              <option value="infant_care">Infant / child care</option>
+              <option value="meal_prep">Meal prep & errands</option>
+              <option value="companionship">Companionship</option>
+              <option value="specialist">Specialist care</option>
+              <option value="other">Other / Multiple</option>
+            </select>
+          </div>
+
+          <div class="cc-field"><label class="cc-label" for="cc-role">Role</label>
+            <select id="cc-role" name="role" class="cc-select">
+              <option value="family">Family (seeking caregiver)</option>
+              <option value="caregiver">Caregiver (offering services)</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <div class="cc-field"><label class="cc-label" for="cc-message">Brief message (schedule, location, needs)</label>
+            <textarea id="cc-message" class="cc-textarea" name="message" placeholder="e.g. 3 days/week mornings, location, special needs"></textarea>
+          </div>
+
+          <div class="cc-actions">
+            <button type="button" id="cc-cancel" class="cc-close">Cancel</button>
+            <button type="submit" id="cc-submit" class="cc-btn">Send request</button>
+          </div>
+
+          <input type="hidden" name="referrer" value="{{ request.path }}">
+        </form>
+
+      </div>
+    </div>
+  </div>
+
+  <div id="cc-toast" role="status" aria-live="polite"></div>
+</div>
+
+<script>
+(function(){
+  if (window.__cc_request_modal_installed) return;
+  window.__cc_request_modal_installed = true;
+
+  const backdrop = document.getElementById('cc-backdrop');
+  const openFooterBtn = document.getElementById('footerRequestMatching');
+  const closeBtns = [document.getElementById('cc-close'), document.getElementById('cc-cancel')].filter(Boolean);
+  const form = document.getElementById('cc-form');
+  const toast = document.getElementById('cc-toast');
+  const submitBtn = document.getElementById('cc-submit');
+
+  function showModal(){
+    if(!backdrop) return false;
+    backdrop.style.display = 'flex';
+    backdrop.setAttribute('aria-hidden','false');
+    try { const el = document.getElementById('cc-name'); if (el) setTimeout(()=> el.focus(), 60); } catch(e){}
+    return true;
+  }
+  function hideModal(){
+    if(!backdrop) return;
+    backdrop.style.display = 'none';
+    backdrop.setAttribute('aria-hidden','true');
+  }
+
+  if (openFooterBtn) {
+    openFooterBtn.addEventListener('click', function(ev){
+      try { ev.preventDefault(); } catch(e){}
+      showModal();
+    }, { passive:false });
+  }
+
+  // delegated handler: prevents navigation and opens the modal for any matching trigger
+  if (!window.__cc_request_matching_wired) {
+    window.__cc_request_matching_wired = true;
+    document.addEventListener('click', function(e){
+      try {
+        if (e.ctrlKey || e.metaKey || e.button === 1) return;
+        const el = e.target && e.target.closest ? e.target.closest('button, a, [role="button"]') : e.target;
+        if (!el) return;
+        const txt = (el.getAttribute('aria-label') || el.title || el.textContent || '').toLowerCase();
+        const id = (el.id || '').toLowerCase();
+        const cls = (el.className || '').toLowerCase();
+        const data = el.dataset || {};
+
+        if (data.openRequest !== undefined || data.openrequest !== undefined) { e.preventDefault(); e.stopPropagation(); showModal(); return; }
+        if (id.includes('request') && id.includes('match')) { e.preventDefault(); e.stopPropagation(); showModal(); return; }
+        if (/\b(request-?matching|requestmatching|request-?match|open-?request)\b/.test(cls)) { e.preventDefault(); e.stopPropagation(); showModal(); return; }
+        if (txt && (txt.includes('request matching') || txt === 'request matching' || txt.includes('request match'))) { e.preventDefault(); e.stopPropagation(); showModal(); return; }
+      } catch (err) { console.warn('cc: delegated open handler error', err); }
+    }, true);
+
+    document.addEventListener('keydown', function(e){
+      try {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        const el = document.activeElement;
+        if (!el) return;
+        const txt = (el.getAttribute('aria-label') || el.title || el.textContent || '').toLowerCase();
+        const id = (el.id || '').toLowerCase();
+        const cls = (el.className || '').toLowerCase();
+        const data = el.dataset || {};
+        if (data.openRequest !== undefined || (id.includes('request') && id.includes('match')) || /\b(request-?matching|requestmatching|request-?match|open-?request)\b/.test(cls) || (txt && (txt.includes('request matching')||txt.includes('request match')))) {
+          e.preventDefault(); e.stopPropagation(); showModal();
+        }
+      } catch (err) {}
+    }, true);
+  }
+
+  closeBtns.forEach(b => b.addEventListener('click', hideModal));
+  if (backdrop) backdrop.addEventListener('click', function(e){ if (e.target === backdrop) hideModal(); });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape') hideModal(); });
+
+  function showToast(msg, ok=true, persistMs=4200){
+    if(!toast) return;
+    toast.className = ok ? 'success' : 'error';
+    toast.textContent = msg;
+    toast.style.display = 'block';
+    toast.style.opacity = '0';
+    toast.style.transform = 'translate(-50%, -50%) scale(0.96)';
+    requestAnimationFrame(()=>{ toast.style.transition = 'opacity 240ms ease, transform 240ms cubic-bezier(.2,.9,.3,1)'; toast.style.opacity='1'; toast.style.transform='translate(-50%,-50%) scale(1)'; });
+    if(persistMs > 0) setTimeout(()=> hideToast(), persistMs);
+  }
+  function hideToast(){ if(!toast) return; toast.style.opacity = '0'; toast.style.transform='translate(-50%,-50%) scale(0.98)'; setTimeout(()=>{ toast.style.display='none'; toast.textContent=''; toast.className=''; toast.style.transition=''; }, 280); }
+
+  function waitMin(minMs, startTs){
+    const elapsed = Math.max(0, Date.now() - (startTs || Date.now()));
+    return new Promise(resolve => setTimeout(resolve, Math.max(0, minMs - elapsed)));
+  }
+
+  if (form) {
+    form.addEventListener('submit', async function(e){
+      e.preventDefault();
+      const fd = new FormData(form);
+      const payload = Object.fromEntries(fd.entries());
+
+      if (!payload.name || !payload.email) {
+        showToast('Please provide name & email', false, 4200);
+        return;
+      }
+
+      const origHtml = submitBtn ? submitBtn.innerHTML : null;
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.setAttribute('aria-busy','true');
+        submitBtn.innerHTML = '<span class="cc-spinner" aria-hidden="true"></span> Sending…';
+      }
+
+      const start = Date.now();
+      let fetchOk = false;
+      let fetchMsg = 'Request sent — we will contact you shortly';
+
+      try {
+        const res = await fetch(form.action, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin',
+          body: JSON.stringify(payload)
+        }).catch(()=>null);
+
+        const data = res ? await res.json().catch(()=>null) : null;
+
+        if (res && (res.ok) && (data && (data.success || data.sent || data.status === 'ok' || data.message))) {
+          fetchOk = true;
+          if (data && data.message) fetchMsg = data.message;
+        } else if (res && !res.ok) {
+          let err = (data && (data.error || data.message)) || ('Send failed (' + (res.status || 'error') + ')');
+          fetchOk = false;
+          fetchMsg = err;
+        } else {
+          fetchOk = true;
+        }
+      } catch (err) {
+        fetchOk = false;
+        fetchMsg = (err && err.message) ? err.message : 'Network error';
+      }
+
+      await waitMin(5000, start);
+
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.removeAttribute('aria-busy');
+        submitBtn.innerHTML = origHtml || 'Send request';
+      }
+
+      if (fetchOk) {
+        showToast(fetchMsg || 'Request sent — we will contact you shortly', true, 4200);
+        try { form.reset(); } catch(e){}
+        hideModal();
+      } else {
+        showToast(fetchMsg || 'Send failed — try again', false, 5200);
+      }
+    });
+  }
+})();
+</script>
+<!-- ===== end scoped Request-matching modal ===== -->
+ 
+<!-- Logout confirmation modal -->
+<div id="logoutConfirmModal" class="cc-modal" role="dialog" aria-modal="true" aria-labelledby="logoutConfirmTitle" aria-hidden="true" style="display:none;">
+  <div class="cc-modal-backdrop" data-close="backdrop"></div>
+  <div class="cc-modal-panel" role="document">
+    <button class="cc-modal-close" type="button" aria-label="Close confirmation">&times;</button>
+
+    <div class="cc-modal-body">
+      <div class="cc-modal-avatar" id="logoutConfirmAvatarWrap" aria-hidden="true">
+        <img id="logoutConfirmAvatar" src="{{ url_for('static', filename='images/avatar cc.jfif') }}" alt="Avatar">
+      </div>
+
+      <h2 id="logoutConfirmTitle">Are you sure you want to sign out?</h2>
+      <p id="logoutConfirmText">Signing out will end your session on this device. You can sign in again anytime.</p>
+
+      <div class="cc-modal-actions">
+        <button id="logoutCancelBtn" class="btn cc-btn-ghost" type="button">Cancel</button>
+        <button id="logoutConfirmBtn" class="btn cc-btn-danger" type="button">
+          <span class="btn-spinner" style="display:none;"></span>
+          Sign out
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const ham = document.getElementById('mobileHamburger');
+  const topRight = document.querySelector('.top-right-controls');
+  const profileBtn = document.getElementById('profileBtn');
+  const profileMenu = document.getElementById('profileMenu');
+
+  if (!ham || !topRight) return;
+
+  function isMobileView() {
+    return window.matchMedia && window.matchMedia('(max-width: 760px)').matches;
+  }
+
+  let nav = document.getElementById('mobileNav') || document.querySelector('.mobile-nav-panel');
+
+  if (!nav) {
+    nav = document.createElement('nav');
+    nav.id = 'mobileNav';
+    nav.className = 'mobile-nav-panel';
+    nav.setAttribute('aria-hidden', 'true');
+
+    const inner = document.createElement('div');
+    inner.className = 'mobile-nav-inner';
+
+     const src = document.querySelector('.main-nav'); 
+    if (src) {
+      inner.innerHTML = src.innerHTML;
+    }
+
+    nav.appendChild(inner);
+    document.body.appendChild(nav);
+  }
+
+  function computeNavWidthRespectingAvatar() {
+    try {
+      const tr = topRight.getBoundingClientRect();
+      const avatarLeft = Math.max(0, Math.floor(tr.left));
+      const gap = 12;
+      let desired = Math.max(160, avatarLeft - gap);
+      const maxAllowed = Math.round(window.innerWidth * 0.92);
+      desired = Math.min(desired, maxAllowed);
+
+      nav.style.setProperty('--nav-width', desired + 'px');
+      nav.style.width = desired + 'px';
+    } catch (e) {}
+  }
+
+  let overlay = document.getElementById('mobileNavOverlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'mobileNavOverlay';
+    overlay.style.cssText = [
+      'position:fixed',
+      'inset:0',
+      'background:rgba(0,0,0,0.32)',
+      'opacity:0',
+      'pointer-events:none',
+      'transition:opacity .28s ease',
+      'z-index:10090'
+    ].join(';');
+    document.body.appendChild(overlay);
+  }
+
+  function openNav() {
+    if (!isMobileView()) return;
+    nav.style.display = 'block';
+    nav.classList.add('open');
+    nav.setAttribute('aria-hidden', 'false');
+    overlay.style.opacity = '1';
+    overlay.style.pointerEvents = 'auto';
+    ham.setAttribute('aria-expanded', 'true');
+    document.body.classList.add('mobile-nav-open');
+    document.documentElement.style.overflow = 'hidden';
+  }
+
+  function closeNav() {
+    nav.classList.remove('open');
+    nav.setAttribute('aria-hidden', 'true');
+    overlay.style.opacity = '0';
+    overlay.style.pointerEvents = 'none';
+    ham.setAttribute('aria-expanded', 'false');
+    document.body.classList.remove('mobile-nav-open');
+    document.documentElement.style.overflow = '';
+  }
+
+  ham.addEventListener('click', function (ev) {
+    ev.preventDefault();
+    ev.stopPropagation();
+    if (!isMobileView()) return;
+    if (nav.classList.contains('open')) closeNav();
+    else openNav();
+  });
+
+  overlay.addEventListener('click', function (ev) {
+    ev.stopPropagation();
+    closeNav();
+  });
+
+  document.addEventListener('click', function (ev) {
+    if (!isMobileView()) return;
+    if (!nav.contains(ev.target) && !ham.contains(ev.target)) {
+      if (nav.classList.contains('open')) closeNav();
+    }
+  }, { passive: true });
+
+  document.addEventListener('keydown', function (ev) {
+    if ((ev.key === 'Escape' || ev.key === 'Esc') && nav.classList.contains('open')) {
+      closeNav();
+    }
+  });
+
+  window.addEventListener('resize', function () {
+    computeNavWidthRespectingAvatar();
+    if (!isMobileView()) closeNav();
+  }, { passive: true });
+
+  window.addEventListener('orientationchange', computeNavWidthRespectingAvatar, { passive: true });
+
+  // Profile dropdown
+  if (profileBtn && profileMenu) {
+    function openMenu() {
+      profileMenu.classList.add('show');
+      profileMenu.setAttribute('aria-hidden','false');
+      profileBtn.setAttribute('aria-expanded','true');
+    }
+    function closeMenu() {
+      profileMenu.classList.remove('show');
+      profileMenu.setAttribute('aria-hidden','true');
+      profileBtn.setAttribute('aria-expanded','false');
+    }
+
+    profileBtn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      if (profileMenu.classList.contains('show')) closeMenu();
+      else openMenu();
+    });
+
+    document.addEventListener('click', function () {
+      closeMenu();
+    });
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' || e.key === 'Esc') closeMenu();
+    });
+
+    profileMenu.addEventListener('click', function (e) {
+      e.stopPropagation();
+    });
+  }
+
+  computeNavWidthRespectingAvatar();
+})();
+</script>
+
+
+</body>
+</html>

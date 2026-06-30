@@ -1,0 +1,1764 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Login • Care Companion</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <!-- Fonts & icons (same as About page) -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <style>
+      :root{
+        --berry:     #6A5CFA;
+        --cobalt:    #2153FF;
+        --airforce:  #3B6FF6;
+        --navy:      #041B3B;
+        --ice:       #e6f4ff;
+        --muted:     #a6bacf;
+        --card:      linear-gradient(180deg, rgba(8,30,66,0.9), rgba(11,51,120,0.95));
+        --glass:     rgba(255,255,255,0.06);
+        --radius:    14px;
+      }
+
+      *{ box-sizing:border-box; margin:0; padding:0; }
+      html, body { height:100%; }
+      body{
+        font-family:"Poppins", system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+        background: linear-gradient(180deg, #07132a 0%, #041027 60%, #02101b 100%);
+        color: #dbefff;
+        -webkit-font-smoothing:antialiased;
+        -moz-osx-font-smoothing:grayscale;
+        min-height:100vh;
+        line-height:1.5;
+        padding:20px;
+      }
+
+      .page {
+        width:100%;
+        max-width:1180px;
+        margin: 10px auto;
+        padding: 18px;
+      }
+
+      /* Top banner / nav copied from About page */
+      .top-banner {
+        width:100%;
+        background: linear-gradient(90deg, var(--berry), var(--cobalt));
+        color:#fff;
+        text-align:center;
+        padding:10px 14px;
+        font-weight:700;
+        border-radius:12px;
+        box-shadow: 0 8px 30px rgba(33,83,255,0.12);
+        margin-bottom:12px;
+      }
+
+      /* NEW: off-white section base (kept dark-to-light naming for compatibility) */
+      .off-white-section{
+        display:flex;
+        align-items:center;
+        gap:18px;
+        padding:12px;
+        background: linear-gradient(90deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+        border-radius:12px;
+        border: 1px solid rgba(255,255,255,0.03);
+        color: #e6f4ff;
+        margin-bottom:18px;
+        position: relative; /* ensure positioning context for mobile controls */
+      }
+      .brand { display:flex; align-items:center; gap:12px; }
+      .brand img { width:88px; height:56px; object-fit:contain; filter: drop-shadow(0 6px 20px rgba(0,0,0,0.5)); }
+
+      .nav-menu { margin-left:20px; display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+      .nav-menu a {
+        color: rgba(255,255,255,0.9);
+        padding:8px 10px; border-radius:10px; font-weight:600; font-size:14px;
+        transition: all 220ms cubic-bezier(.2,.9,.3,1);
+      }
+      .nav-menu a[aria-current="page"]{ background: linear-gradient(90deg,var(--cobalt),var(--airforce)); color:#fff; box-shadow:0 10px 30px rgba(33,83,255,0.12); }
+      .nav-menu a:hover{ transform:translateY(-3px); box-shadow:0 12px 36px rgba(33,83,255,0.08); }
+
+      /* Centered card (login) */
+      .center-wrap {
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        width:100%;
+        margin-top:6px;
+      }
+
+      .card{
+        /* dark card style from registration/login earlier */
+        background: var(--card);
+        padding:28px;
+        border-radius:14px;
+        width:100%;
+        max-width:420px;
+        box-shadow: 0 30px 80px rgba(6, 27, 60, 0.35);
+        border: 1px solid rgba(255,255,255,0.04);
+        backdrop-filter: blur(6px);
+      }
+
+      h1{ margin:0 0 8px; font-size:22px; color:var(--ice); }
+      p.lead { margin:0 0 18px; color: var(--muted); font-size:14px; }
+
+      .field{
+        width:100%;
+        box-sizing: border-box;
+        padding:12px;
+        border-radius:8px;
+        border:1px solid rgba(255,255,255,0.06);
+        background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+        color: var(--ice);
+        margin-bottom:12px;
+        outline:none;
+        font-size:14px;
+      }
+      .field::placeholder{ color: rgba(245,249,255,0.6); }
+      .field:focus{
+        border-color: rgba(255,255,255,0.12);
+        box-shadow: 0 6px 20px rgba(11,99,216,0.06);
+        transform: translateY(-1px);
+        background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));
+      }
+
+      .btn{
+        width:100%; padding:12px; border-radius:10px; border:none; font-weight:700;
+        background: linear-gradient(90deg, var(--berry), var(--airforce));
+        color: var(--ice); cursor:pointer;
+      }
+      .btn:hover{ filter:brightness(1.03); transform: translateY(-1px); }
+
+      .meta{ text-align:center; margin-top:14px; font-size:14px; color: var(--muted); }
+      .link{ color: #00d4ff; text-decoration:none; font-weight:700; }
+
+      .errors{ background: rgba(244,67,54,0.12); padding:10px; border-radius:8px; margin-bottom:12px; color:#ffd6d0; border:1px solid rgba(244,67,54,0.28); }
+      .success{ background: rgba(76,175,80,0.12); padding:10px; border-radius:8px; margin-bottom:12px; color:#dff6de; border:1px solid rgba(76,175,80,0.35); }
+
+      .row-inline{ display:flex; align-items:flex-end; gap:12px; margin-bottom:10px; }
+      .row-inline > .cell { flex:1; min-width:0; }
+
+      .forgot-link{
+        background:transparent;
+        border:none;
+        color: #00d4ff;
+        font-weight:700;
+        cursor:pointer;
+        font-size:13px;
+        text-decoration:underline;
+        padding:6px;
+        border-radius:8px;
+      }
+
+      @media (max-width:720px){
+        .nav-menu { display:inline-flex; gap:8px; overflow:auto; padding-bottom:6px; }
+        .card{ max-width: 92vw; padding:20px; }
+        .off-white-section{ gap:12px; padding:10px; }
+        .brand img{ width:68px; height:44px; }
+      }
+
+      a:focus, button:focus, input:focus, select:focus, textarea:focus { outline:3px solid rgba(33,83,255,0.14); outline-offset:3px; border-radius:8px; }
+
+      /* Modal/blocked modals styles (your originals retained) */
+      .cc-modal-inline { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 20000; font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial; }
+      .cc-modal-inline.show { display:flex; }
+      .cc-modal-card { width:100%; max-width:520px; margin:16px; border-radius:12px; background: linear-gradient(180deg,#fff,#f6f8ff); box-shadow: 0 20px 60px rgba(8,18,60,0.18); padding:18px; color:#072049; display:flex; gap:12px; align-items:flex-start; }
+      .cc-modal-left{width:56px;height:56px;border-radius:12px;background:linear-gradient(180deg,#e6e9ff,#cfcfff); display:flex;align-items:center;justify-content:center;font-weight:700;color:#24307a}
+      .cc-modal-content h3{margin:0 0 6px;font-size:18px}
+      .cc-modal-content p{margin:0;font-size:14px;color:#0b2a4a;opacity:.95}
+      .cc-modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:12px}
+      .cc-btn-primary{background:linear-gradient(90deg,#3b6cff,#6aa8ff);color:#fff;padding:10px 14px;border-radius:10px;border:0;font-weight:700;cursor:pointer}
+      .cc-btn-ghost{background:transparent;border:1px solid rgba(11,42,90,0.06);padding:10px 12px;border-radius:10px;color:#0b2a4a;font-weight:700;cursor:pointer}
+      @media(max-width:520px){.cc-modal-left{display:none}.cc-modal-actions{flex-direction:column}.cc-btn-primary,.cc-btn-ghost{width:100%}}
+
+      /* ====== START: mobile header & off-white-section mobile behavior (copied from index) ====== */
+
+      /* The styles below implement the index page mobile header behavior.
+         They are scoped to small viewports and won't affect desktop. */
+
+      /* LEFT: default desktop mobile-hamburger hidden */
+      .mobile-hamburger { display: none; }
+      .mobile-nav-panel { display: none; }
+
+      /* Mobile header changes */
+      @media (max-width: 760px) {
+
+        /* reduce header height and force pure white background */
+        .off-white-section {
+          height: 56px !important;
+          padding: 0 !important;
+          background-color: #ffffff !important;
+          align-items: stretch;
+          position: relative;
+        }
+
+        /* logo must touch left/top/bottom and not exceed header */
+        .off-white-section #siteLogo {
+          height: 100%;
+          width: auto;
+          display: block;
+          object-fit: contain;
+          margin: 0;
+          padding: 0;
+          vertical-align: middle;
+        }
+
+        /* show hamburger on mobile */
+        .mobile-hamburger {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          background: transparent;
+          border: 0;
+          padding: 8px;
+          margin-left: 6px;
+          cursor: pointer;
+          color: #062c55;
+          height: 56px;
+          box-sizing: border-box;
+        }
+        .mobile-hamburger svg { fill: #062c55; }
+
+        /* hide the desktop nav on mobile (desktop stays intact) */
+        .nav-menu { display: none !important; }
+
+        /* avatar on same horizontal line (right side) */
+        .top-right-controls {
+          position: absolute;
+          right: 12px;
+          top: 50%;
+          transform: translateY(-50%);
+          z-index: 80;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          pointer-events: auto;
+        }
+        .top-right-controls .profile-btn .avatar {
+          width: 40px;
+          height: 40px;
+          border-radius: 999px;
+          object-fit: cover;
+        }
+
+        /* Mobile sliding panel; --mobile-panel-right is set by JS to stop before avatar */
+        .mobile-nav-panel {
+          position: absolute;
+          left: 0;
+          top: 0;
+          bottom: 0;
+          right: var(--mobile-panel-right, 88px);
+          background: linear-gradient(180deg, #ffffff, #f7fbff);
+          box-shadow: 0 18px 48px rgba(2,10,30,0.12);
+          padding: 12px 16px;
+          transform: translateX(calc(-100% - 8px));
+          transition: transform 320ms cubic-bezier(.22,.9,.3,1);
+          z-index: 70;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+          overflow-y: auto;
+          border-radius: 0 12px 12px 0;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        .mobile-nav-panel.open { transform: translateX(0); }
+
+        .mobile-nav-panel a {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 12px 10px;
+          text-decoration: none;
+          color: #072049;
+          font-weight: 700;
+          border-radius: 10px;
+          background: transparent;
+          transition: background 160ms ease, transform 160ms ease;
+        }
+        .mobile-nav-panel a:hover,
+        .mobile-nav-panel a:focus {
+          background: rgba(33,83,255,0.06);
+          transform: translateY(-2px);
+          outline: none;
+        }
+
+        .mobile-nav-panel .drag-handle {
+          width: 44px;
+          height: 5px;
+          border-radius: 999px;
+          background: linear-gradient(90deg, rgba(33,83,255,0.12), rgba(127,196,255,0.12));
+          margin: 6px auto 8px;
+        }
+
+        .mobile-nav-panel .close-mobile-nav {
+          position: absolute;
+          right: 12px;
+          top: 10px;
+          border: none;
+          background: transparent;
+          cursor: pointer;
+          font-size: 18px;
+          color: #072049;
+        }
+
+        @media (max-width: 420px) {
+          .mobile-hamburger { padding: 6px; margin-left: 4px; height: 52px; }
+          .off-white-section { height: 52px; }
+          .mobile-nav-panel { padding: 10px 12px; }
+        }
+      } /* end mobile header media query */
+
+      /* FIX: hide accessible fallback text inside hamburger */
+      .mobile-hamburger .cc-aria-fallback,
+      .mobile-hamburger .cc-aria-fallback *,
+      .mobile-hamburger span:not(.hamburger-icon) {
+        display: none !important;
+        visibility: hidden !important;
+      }
+
+      /* Mobile off-canvas nav — modern, avatar-safe (bigger breakpoint rules) */
+      @media (max-width: 980px) {
+        .mobile-hamburger {
+          display: inline-flex !important;
+          align-items: center;
+          justify-content: center;
+          background: transparent !important;
+          border: 0 !important;
+          padding: 6px !important;
+          width: 44px;
+          height: 44px;
+          box-shadow: none !important;
+          z-index: 20050; /* raised so it sits above header/overlays and receives clicks */
+          cursor: pointer;
+          pointer-events: auto !important;
+        }
+
+        .top-right-controls {
+          position: absolute !important;
+          right: 12px !important;
+          top: 50% !important;
+          transform: translateY(-50%) !important;
+          z-index: 10200 !important;
+        }
+
+        .mobile-nav-panel,
+        #mobileNav {
+          --nav-width: 270px; /* fallback */
+          display: block !important;
+          position: fixed !important;
+          left: 0 !important;
+          top: 0 !important;
+          height: 100dvh !important;
+          width: var(--nav-width) !important;
+          max-width: 92vw !important;
+          background: #ffffff !important;
+          transform: translateX(calc(-1 * var(--nav-width))) !important;
+          transition: transform 420ms cubic-bezier(.22,.61,.36,1) !important;
+          will-change: transform;
+          z-index: 10100 !important;
+          box-shadow: 10px 0 36px rgba(6,20,50,0.12) !important;
+          overflow-y: auto !important;
+          -webkit-overflow-scrolling: touch !important;
+        }
+
+        .mobile-nav-panel.open,
+        #mobileNav.open {
+          transform: translateX(0) !important;
+        }
+
+        .mobile-nav-panel .mobile-nav-inner,
+        #mobileNav .mobile-nav-inner {
+          padding: 20px 8px;
+        }
+
+        .mobile-nav-panel .mobile-nav-inner a,
+        #mobileNav .mobile-nav-inner a {
+          display: block;
+          padding: 16px 20px;
+          color: #072049;
+          text-decoration: none;
+          font-weight: 700;
+          font-size: 16px;
+          background: transparent;
+          position: relative;
+        }
+
+        .mobile-nav-panel .mobile-nav-inner a:not(:last-child)::after,
+        #mobileNav .mobile-nav-inner a:not(:last-child)::after {
+          content: "";
+          position: absolute;
+          left: 20px;
+          right: 20px;
+          bottom: 0;
+          height: 1px;
+          border-radius: 1px;
+          background: linear-gradient(90deg, rgba(6,20,50,0.06), rgba(6,20,50,0.03));
+          transform-origin: center;
+        }
+
+        .mobile-nav-panel .mobile-nav-inner a:focus,
+        #mobileNav .mobile-nav-inner a:focus,
+        .mobile-nav-panel .mobile-nav-inner a:hover,
+        #mobileNav .mobile-nav-inner a:hover {
+          background: rgba(33,83,255,0.06);
+          outline: none;
+        }
+
+        .mobile-nav-panel .close-pill,
+        #mobileNav .close-pill {
+          display:flex;
+          align-items:center;
+          justify-content:flex-start;
+          gap:10px;
+          padding: 12px 16px;
+          font-weight:800;
+          color:#072049;
+          cursor:pointer;
+        }
+      } /* end 980px rules */
+
+      /* mobile-nav link separators + spacing */
+      .mobile-nav-panel .mobile-links a,
+      #mobileNav .mobile-links a {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 18px 22px;
+        text-decoration: none;
+        color: #072049;
+        font-weight: 700;
+        font-size: 16px;
+        background: transparent;
+        position: relative;
+        border-radius: 10px;
+      }
+      .mobile-nav-panel .mobile-links a:not(:last-child)::after,
+      #mobileNav .mobile-links a:not(:last-child)::after {
+        content: "";
+        position: absolute;
+        left: 20px;
+        right: 20px;
+        bottom: -1px;
+        height: 1.5px;
+        border-radius: 2px;
+        background: linear-gradient(90deg, rgba(6,20,50,0.06), rgba(6,20,50,0.02));
+        transform-origin: center;
+        pointer-events: none;
+        opacity: 0.95;
+      }
+      .mobile-nav-panel .mobile-links {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        padding-bottom: 20px;
+      }
+
+      .mobile-nav-panel .mobile-links a:focus,
+      .mobile-nav-panel .mobile-links a:hover,
+      #mobileNav .mobile-links a:focus,
+      #mobileNav .mobile-links a:hover {
+        background: rgba(33,83,255,0.06);
+        transform: translateY(-2px);
+        outline: none;
+      }
+
+      /* Final: call button — hidden on desktop by request, visible on mobile */
+      .top-right-controls .call-btn {
+        display: none !important; /* default hidden; mobile rules will show it where needed */
+        color: #062c55 !important;
+        background: linear-gradient(180deg,#ffffff,#f2f8ff);
+        border: 1px solid rgba(6,20,50,0.06);
+        box-shadow: 0 6px 18px rgba(6,20,50,0.06);
+        width: 40px;
+        height: 40px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        padding: 6px;
+        box-sizing: border-box;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .top-right-controls .call-btn svg {
+        display: block;
+        width: 18px;
+        height: 18px;
+        fill: currentColor;
+      }
+
+      @media (max-width: 760px) {
+        .top-right-controls .call-btn {
+          display: inline-flex !important;
+        }
+        @media (max-width: 520px) {
+          .top-right-controls .call-btn { width: 44px; height: 44px; border-radius: 12px; }
+          .top-right-controls .profile-btn .avatar { width: 40px; height: 40px; }
+        }
+      }
+
+      .top-right-controls *::before,
+      .top-right-controls *::after {
+        content: none !important;
+      }
+
+      .top-right-controls .cc-aria-fallback {
+        display: none !important;
+      }
+
+      .top-right-controls [role="tooltip"],
+      .top-right-controls .tooltip,
+      .top-right-controls .tippy-box,
+      .top-right-controls .tippy-content {
+        display: none !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+      }
+
+      .top-right-controls .call-btn {
+        font-size: 0 !important;
+        line-height: 0 !important;
+        -webkit-tap-highlight-color: transparent;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        padding: 6px;
+        border-radius: 10px;
+        box-sizing: border-box;
+      }
+
+      .top-right-controls .call-btn svg {
+        width: 18px;
+        height: 18px;
+        display: block;
+        fill: currentColor;
+        font-size: revert !important;
+        line-height: revert !important;
+      }
+
+      /* Updated dropdown typography to match index page (font family & weight & padding) */
+      .dropdown-menu {
+        display: none;
+        position: absolute;
+        right: 0;
+        margin-top: 8px;
+        min-width: 180px;
+        background: #ffffff;
+        border: 1px solid rgba(6,20,50,0.06);
+        box-shadow: 0 8px 24px rgba(6,20,50,0.08);
+        border-radius: 8px;
+        padding: 8px 0;
+        z-index: 10300;
+        /* ensure same font as index */
+        font-family: "Poppins", system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+      }
+      /* Apply heavier, slightly larger menu items to match index look */
+      .dropdown-menu .menu-item {
+        display: block;
+        text-decoration: none;
+        color: #0b2a66;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-weight: 800;              /* heavier thickness */
+        font-size: 15px;               /* slightly larger for readability & match */
+        line-height: 1.1;
+        background: transparent;
+      }
+      .dropdown-menu .menu-item:hover,
+      .dropdown-menu .menu-item:focus {
+        background: rgba(142,130,254,0.06);
+        outline: none;
+      }
+
+      .profile-dropdown.open .dropdown-menu {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .profile-btn {
+        background: transparent;
+        border: 0;
+        padding: 0;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .profile-btn .avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        object-fit: cover;
+        display: block;
+      }
+
+      /* mobile tap/active visual & stacking fixes */
+      .mobile-hamburger,
+      .mobile-hamburger:focus,
+      .mobile-hamburger:active,
+      .top-right-controls .call-btn,
+      .top-right-controls .call-btn:focus,
+      .top-right-controls .call-btn:active,
+      .profile-btn,
+      .profile-btn:focus,
+      .profile-btn:active {
+        -webkit-tap-highlight-color: transparent !important;
+        touch-action: manipulation !important;
+        -webkit-user-select: none !important;
+        user-select: none !important;
+        -webkit-appearance: none !important;
+        appearance: none !important;
+        background: transparent !important;
+        outline: none !important;
+        box-shadow: none !important;
+      }
+
+      .mobile-hamburger {
+        position: relative !important;
+        z-index: 20050 !important;
+        pointer-events: auto !important;
+      }
+
+      .top-right-controls .call-btn {
+        pointer-events: auto !important;
+        z-index: 10450 !important;
+      }
+
+      button.mobile-hamburger:focus,
+      button.mobile-hamburger:active,
+      button.call-btn:focus,
+      button.call-btn:active {
+        background: transparent !important;
+      }
+
+      @media (max-width: 980px) {
+        .top-right-controls {
+          pointer-events: auto;
+        }
+      }
+
+      @media (max-width: 980px) {
+        .mobile-nav-panel,
+        #mobileNav {
+          z-index: 10150 !important;
+          background: #fff !important;
+        }
+        .top-right-controls {
+          z-index: 10200 !important;
+          position: absolute !important;
+        }
+        .mobile-hamburger {
+          z-index: 10050 !important;
+          transition: opacity 180ms ease, transform 180ms ease;
+        }
+        body.mobile-nav-open .mobile-hamburger {
+          opacity: 0 !important;
+          pointer-events: none !important;
+          transform: translateX(-6px) !important;
+        }
+        #mobileNavOverlay {
+          z-index: 10090 !important;
+        }
+      }
+
+      /* hide login/register links inside mobile panel when logged in */
+      @media (max-width: 980px) {
+        body[data-logged-in="1"] .mobile-nav-panel a#loginLink,
+        body[data-logged-in="1"] .mobile-nav-panel a#registerLink,
+        body[data-logged-in="true"] .mobile-nav-panel a#loginLink,
+        body[data-logged-in="true"] .mobile-nav-panel a#registerLink,
+        body[data-logged-in="1"] #mobileNav a[href*="/login"],
+        body[data-logged-in="1"] #mobileNav a[href*="/register"],
+        body[data-logged-in="true"] #mobileNav a[href*="/login"],
+        body[data-logged-in="true"] #mobileNav a[href*="/register"] {
+          display: none !important;
+          visibility: hidden !important;
+          pointer-events: none !important;
+        }
+
+        /* make caregiver/family blocked modal fully visible on narrow screens */
+        #caregiverBlockedModal .cc-modal-card,
+        #familyBlockedModal .cc-modal-card {
+          box-sizing: border-box !important;
+          width: min(520px, calc(100% - 32px)) !important;
+          max-width: 92vw !important;
+          margin: 12px auto !important;
+          overflow: hidden !important;
+          padding: 12px !important;
+        }
+
+        #caregiverBlockedModal .cc-modal-content,
+        #familyBlockedModal .cc-modal-content {
+          width: 100% !important;
+          overflow-wrap: break-word !important;
+        }
+
+        #caregiverBlockedModal .cc-modal-actions,
+        #familyBlockedModal .cc-modal-actions {
+          gap: 8px !important;
+          justify-content: center !important;
+          flex-wrap: wrap !important;
+        }
+
+        @media (max-width: 520px) {
+          #caregiverBlockedModal .cc-modal-left,
+          #familyBlockedModal .cc-modal-left {
+            display: none !important;
+          }
+          #caregiverBlockedModal .cc-modal-card,
+          #familyBlockedModal .cc-modal-card {
+            padding: 10px 12px !important;
+            max-width: 96vw !important;
+          }
+        }
+      }
+
+      /* Global mobile defense */
+      html, body {
+        max-width: 100vw;
+        overflow-x: hidden !important;
+        touch-action: pan-y;
+        overscroll-behavior-x: none;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      /* prevent touch horizontal gestures on the carousel itself (if present) */
+      #arc-carousel,
+      #arc-carousel * {
+        touch-action: none;
+        -ms-touch-action: none;
+      }
+
+      /* subtle separator line under the off-white header */
+      .off-white-section {
+        border-bottom: 1px solid rgba(6,27,60,0.06);
+      }
+
+      /* ===== DESKTOP-SPECIFIC ADJUSTMENTS: keep mobile as-is =====
+         Move avatar to far right and keep mobile unchanged.
+         NOTE: call button will be hidden on desktop as requested.
+      */
+      @media (min-width: 761px) {
+        /* Make nav take available space so the controls sit at the far right */
+        .nav-menu {
+          display: flex;
+          flex: 1 1 auto;
+          margin-left: 20px;
+          gap: 12px;
+          align-items: center;
+        }
+
+        /* Position top-right-controls inline (not absolutely positioned) so it sits at the far right */
+        .top-right-controls {
+          position: static !important;
+          right: auto !important;
+          top: auto !important;
+          transform: none !important;
+          margin-left: 12px;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          z-index: 10;
+        }
+
+        /* Hide call button on desktop explicitly (per your request) */
+        .top-right-controls .call-btn {
+          display: none !important;
+        }
+
+        /* ensure profile dropdown aligns to the right */
+        .profile-dropdown { position: relative; }
+
+        /* keep avatar size pleasant on desktop header */
+        .profile-btn .avatar { width: 40px; height: 40px; border-radius: 999px; }
+
+        /* Make sure hamburger remains hidden on wider screens */
+        .mobile-hamburger { display: none !important; }
+      }
+
+    </style>
+
+    <!-- ===== Additional CSS to make login password tile match registration (mobile full-width + internal toggle) ===== -->
+    <style>
+      /* Password tile: show/hide toggle and mobile layout parity with register page */
+      .password-wrap { position: relative; width:100%; }
+      .password-wrap .field { box-sizing: border-box; padding-right: 88px; min-height:44px; }
+
+      /* Toggle button inside the input */
+      .password-wrap .toggle{
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 36px;
+        min-width: 52px;
+        padding: 6px 10px;
+        border-radius: 8px;
+        border: none;
+        background: transparent;
+        color: var(--ice);
+        font-weight:700;
+        cursor: pointer;
+        z-index: 10;
+        line-height: 1;
+        box-sizing: border-box;
+      }
+
+      /* small visual focus for accessibility */
+      .password-wrap .toggle:focus {
+        outline: 3px solid rgba(33,83,255,0.14);
+        outline-offset: 2px;
+        border-radius: 8px;
+      }
+
+      /* Make sure on small screens the row stacks and the password tile takes full width */
+      @media (max-width: 720px) {
+        .row-inline { flex-direction: column; align-items: stretch; gap: 8px; }
+        .row-inline > .cell { width: 100%; }
+        .forgot-link { align-self: flex-start; margin-top: 4px; }
+        /* keep the padding-right to avoid caret/toggle overlap */
+        .password-wrap .field { padding-right: 84px; }
+      }
+
+
+       @media (max-width: 760px) {
+  .top-banner,
+  .off-white-section{
+    display: none !important;
+  }
+
+  /* optional: tighten the page after removing the header area */
+  .page{
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+  }
+
+  .center-wrap{
+    margin-top: 0 !important;
+  }
+} 
+
+
+@media (max-width: 760px) {
+  .top-banner,
+  .off-white-section{
+    display: none !important;
+  }
+
+  .page{
+    margin-top: 0 !important;
+    padding-top: 0vh !important;
+    min-height: 100vh;
+  }
+
+  .center-wrap{
+    margin-top: 0 !important;
+    min-height: calc(100vh - 8vh);
+    align-items: center;
+  }
+}
+
+
+
+/* Loading Overlay */
+.loading-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.45);
+    display:none;
+    justify-content:center;
+    align-items:center;
+    z-index:99999;
+}
+
+.loading-overlay.show{
+    display:flex;
+}
+
+.loader{
+    width:55px;
+    height:55px;
+    border:6px solid rgba(255,255,255,.3);
+    border-top:6px solid #ffffff;
+    border-radius:50%;
+    animation:spin .8s linear infinite;
+}
+
+@keyframes spin{
+    to{
+        transform:rotate(360deg);
+    }
+}
+
+    </style>
+  </head>
+
+<body
+  data-logged-in="{{ 1 if session.get('user_id') else 0 }}"
+  data-user-role="{{ user.role if user else '' }}"
+  data-profile-published="{{ 1 if (user and user.profile and user.profile.published) else 0 }}"
+>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loader"></div>
+</div>
+
+    <main class="page" id="main">
+
+      <!-- TOP BANNER (copied exactly) -->
+      <header>
+        <div class="top-banner" role="banner">
+          Concerned about a senior loved one living alone? Care Companion connects families with trusted caregivers.
+        </div>
+
+        <!-- ***************** OFF-WHITE SECTION: desktop layout updated to put avatar at right (call hidden on desktop) ***************** -->
+        <section class="off-white-section" role="navigation" aria-label="Primary navigation">
+          <!-- logo -->
+          <div class="brand" style="align-items:center;">
+            <img id="siteLogo" src="{{ url_for('static', filename='images/caregiver_logo.png') }}" alt="Care Companion logo">
+          </div>
+
+          <!-- Mobile hamburger: visible only on small screens -->
+          <button id="mobileHamburger" class="mobile-hamburger" aria-controls="mobileNav" aria-expanded="false" aria-label="Open menu">
+            <!-- accessible modern hamburger (SVG) -->
+            <svg width="22" height="16" viewBox="0 0 22 16" aria-hidden="true" focusable="false">
+              <rect width="22" height="2" rx="1"></rect>
+              <rect y="7" width="22" height="2" rx="1" opacity="0.95"></rect>
+              <rect y="14" width="22" height="2" rx="1" opacity="0.85"></rect>
+            </svg>
+          </button>
+
+          <!-- Desktop nav (kept as-is; hidden on mobile via CSS) -->
+          <nav class="nav-menu" aria-label="Primary links">
+            <a href="{{ url_for('home') }}">Home</a>
+            <a id="navFindCaregiver" href="/find-caregiver">Find Caregiver</a>
+            <a id="navFindFamily" href="/find-family">Find Family</a>
+            <a href="{{ url_for('how_it_works') }}">How It Works</a>
+            <a href="{{ url_for('about') }}">About Us</a>
+            <a id="loginLink" href="{{ url_for('login') }}">Login</a>
+            <a id="registerLink" href="{{ url_for('register') }}">Sign Up</a>
+          </nav>
+
+          <!-- Right side controls: profile dropdown (call is hidden on desktop now) -->
+          <div class="top-right-controls" aria-hidden="false">
+            <!-- Call button (will show only on mobile via media query; hidden on desktop) -->
+            <button class="call-btn"
+                    type="button"
+                    aria-label="Call Care Companion +234 913 227 2022"
+                    onclick="window.location.href='tel:+2349132272022'">
+              <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M6.62 10.79a15.05 15.05 0 006.59 6.59l2.2-2.2a1 1 0 011.02-.24c1.12.37 2.33.57 3.59.57a1 1 0 011 1V20a1 1 0 01-1 1C10.07 21 3 13.93 3 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.26.2 2.47.57 3.59a1 1 0 01-.24 1.02l-2.21 2.18z" />
+              </svg>
+            </button>
+
+            <div class="profile-dropdown" id="profileDropdown">
+              <button id="profileBtn" class="profile-btn" aria-haspopup="true" aria-expanded="false" title="Open profile menu">
+                <img
+                  class="avatar"
+                  src="{{ url_for('uploaded_file', filename=(user.profile.profile_photo|basename)) if (user and user.profile and user.profile.profile_photo) else ( url_for('uploaded_file', filename=(user.profile_photo|basename)) if (user and user.profile_photo) else url_for('static', filename='images/avatar cc.jfif') ) }}"
+                  alt="Profile"
+                >
+                <span class="chev" aria-hidden="true">▾</span>
+              </button>
+
+              <div class="dropdown-menu" id="profileMenu" role="menu" aria-hidden="true">
+                 <a class="menu-item" href="{{ url_for('profile_setup') }}?suppress_overlay=1" role="menuitem">My profile</a>
+                <a class="menu-item" href="{{ url_for('contact') }}" role="menuitem">Contact Us</a>
+                <a id="logoutLink" class="menu-item" href="{{ url_for('logout') }}" role="menuitem" data-method="get">Log out</a>
+              </div>
+            </div>
+          </div>
+        </section>
+        <!-- ***************** END off-white section ***************** -->
+      </header>
+
+      <!-- Centered login card -->
+      <div class="center-wrap">
+        <div class="card" role="main" aria-labelledby="welcome">
+          <h1 id="welcome">Welcome back</h1>
+          <p class="lead">Sign in to your Care Companion account.</p>
+
+          {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+              {% for category, msg in messages %}
+                <div class="{{ 'errors' if category == 'error' else 'success' if category == 'success' else 'info' }}">{{ msg }}</div>
+              {% endfor %}
+            {% endif %}
+          {% endwith %}
+
+          <form method="POST" action="{{ url_for('login') }}" id="loginForm" novalidate>
+            <!-- Preserve any 'next' redirect across the POST -->
+            <input type="hidden" name="next" value="{{ next or '' }}">
+
+            <label class="muted" for="email" style="color:var(--muted)">Email</label>
+            <input class="field" id="email" name="email" type="email" placeholder="you@example.com" required
+                   value="{{ request.form.get('email', '') }}" autofocus>
+
+            <!-- ===== UPDATED PASSWORD TILE: now uses .password-wrap and internal Show toggle (matches registration) ===== -->
+            <div class="row-inline">
+              <div class="cell">
+                <div class="password-wrap">
+                  <label class="muted" for="password" style="color:var(--muted)">Password</label>
+                  <input
+                    class="field"
+                    id="password"
+                    name="password"
+                    type="password"
+                    placeholder="Your password"
+                    required
+                    autocomplete="current-password"
+                  >
+                  <button
+                    class="toggle"
+                    type="button"
+                    data-target="password"
+                    aria-label="Show password"
+                    aria-pressed="false"
+                    title="Show password"
+                  >Show</button>
+                </div>
+              </div>
+
+              <div style="display:flex;align-items:flex-end;">
+                <a class="forgot-link" href="{{ url_for('forgot_password') }}">Forgot?</a>
+              </div>
+            </div>
+
+            <button class="btn" id="loginBtn" type="submit">Log in</button>
+          </form>
+
+          <div class="meta">
+            Don't have an account? <a class="link" href="{{ url_for('register') }}">Sign up</a>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Defensive script to ensure links behave like normal navigation -->
+    <script>
+      (function(){
+        const login = document.getElementById('loginLink');
+        const register = document.getElementById('registerLink');
+
+        function goDirect(e){
+          // allow Ctrl/Cmd / middle-click to open new tab normally
+          if (e.ctrlKey || e.metaKey || e.button === 1) return;
+          const href = this && this.getAttribute && this.getAttribute('href');
+          if (!href) return;
+          // force navigation in case other script intercepts
+          e.preventDefault();
+          window.location.href = href;
+        }
+
+        if (login) login.addEventListener('click', goDirect);
+        if (register) register.addEventListener('click', goDirect);
+      })();
+    </script>
+
+    <!-- Replace existing caregiver modal block with this combined block (place before </body>) -->
+    <style>
+    /* Shared modal styles (kept from index-like file for consistency) */
+    .cc-modal-inline { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 20000; font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, Arial; }
+    .cc-modal-inline.show { display:flex; }
+    .cc-modal-card { width:100%; max-width:520px; margin:16px; border-radius:12px; background: linear-gradient(180deg,#fff,#f6f8ff); box-shadow: 0 20px 60px rgba(8,18,60,0.18); padding:18px; color:#072049; display:flex; gap:12px; align-items:flex-start; }
+    .cc-modal-left{width:56px;height:56px;border-radius:12px;background:linear-gradient(180deg,#e6e9ff,#cfcfff); display:flex;align-items:center;justify-content:center;font-weight:700;color:#24307a}
+    .cc-modal-content h3{margin:0 0 6px;font-size:18px}
+    .cc-modal-content p{margin:0;font-size:14px;color:#0b2a4a;opacity:.95}
+    .cc-modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:12px}
+    .cc-btn-primary{background:linear-gradient(90deg,#3b6cff,#6aa8ff);color:#fff;padding:10px 14px;border-radius:10px;border:0;font-weight:700;cursor:pointer}
+    .cc-btn-ghost{background:transparent;border:1px solid rgba(11,42,90,0.06);padding:10px 12px;border-radius:10px;color:#0b2a4a;font-weight:700;cursor:pointer}
+    @media(max-width:520px){.cc-modal-left{display:none}.cc-modal-actions{flex-direction:column}.cc-btn-primary,.cc-btn-ghost{width:100%}}
+    </style>
+
+    <!-- Caregiver-block modal -->
+    <div id="caregiverBlockedModal" class="cc-modal-inline" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="cc-modal-card" role="document" aria-labelledby="cbTitle" aria-describedby="cbDesc">
+        <div class="cc-modal-left" aria-hidden="true">i</div>
+        <div class="cc-modal-content" style="flex:1">
+          <h3 id="cbTitle">Access restricted</h3>
+          <p id="cbDesc">Sorry — caregivers cannot view the <strong>Find Caregiver</strong> page. You can browse families instead.</p>
+          <div class="cc-modal-actions">
+            <button id="cbCloseBtn" class="cc-btn-ghost" type="button">Close</button>
+            <button id="cbViewFamiliesBtn" class="cc-btn-primary" type="button">View Families</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Family-block modal -->
+    <div id="familyBlockedModal" class="cc-modal-inline" role="dialog" aria-modal="true" aria-hidden="true">
+      <div class="cc-modal-card" role="document" aria-labelledby="fbTitle" aria-describedby="fbDesc">
+        <div class="cc-modal-left" aria-hidden="true">i</div>
+        <div class="cc-modal-content" style="flex:1">
+          <h3 id="fbTitle">Access restricted</h3>
+          <p id="fbDesc">Sorry — families cannot view the <strong>Find Family</strong> page. You can browse caregivers instead.</p>
+          <div class="cc-modal-actions">
+            <button id="fbCloseBtn" class="cc-btn-ghost" type="button">Close</button>
+            <button id="fbViewCaregiversBtn" class="cc-btn-primary" type="button">View Caregivers</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<script>
+(function () {
+  // Read server flags from body data attributes (must exist)
+  function readFlags() {
+    const b = document.body;
+    const loggedAttr = String(b.getAttribute('data-logged-in') || '').toLowerCase();
+    const roleAttr = String(b.getAttribute('data-user-role') || '').toLowerCase();
+    const pubAttr = String(b.getAttribute('data-profile-published') || '').toLowerCase();
+    return {
+      isLogged: (loggedAttr === '1' || loggedAttr === 'true'),
+      role: roleAttr,
+      isPublished: (pubAttr === '1' || pubAttr === 'true')
+    };
+  }
+
+  function shouldBlockCaregiver() {
+    const f = readFlags();
+    return f.isLogged && f.role === 'caregiver' && f.isPublished;
+  }
+  function shouldBlockFamily() {
+    const f = readFlags();
+    return f.isLogged && f.role === 'family' && f.isPublished;
+  }
+
+  // Modal elements
+  const caregiverModal = document.getElementById('caregiverBlockedModal');
+  const caregiverClose = document.getElementById('cbCloseBtn');
+  const caregiverViewFamilies = document.getElementById('cbViewFamiliesBtn');
+
+  const familyModal = document.getElementById('familyBlockedModal');
+  const familyClose = document.getElementById('fbCloseBtn');
+  const familyViewCaregivers = document.getElementById('fbViewCaregiversBtn');
+
+  // Generic open/close helpers (works for either modal element)
+  function openModal(modalEl, primaryFocusEl) {
+    if (!modalEl) return;
+    modalEl.classList.add('show');
+    modalEl.setAttribute('aria-hidden', 'false');
+    // move focus to primary action
+    setTimeout(()=> { try { primaryFocusEl && primaryFocusEl.focus(); } catch(e){} }, 30);
+    document.addEventListener('keydown', onKeyDown);
+    modalEl._prevActive = document.activeElement;
+  }
+  function closeModal(modalEl) {
+    if (!modalEl) return;
+    modalEl.classList.remove('show');
+    modalEl.setAttribute('aria-hidden', 'true');
+    document.removeEventListener('keydown', onKeyDown);
+    try { if (modalEl._prevActive && typeof modalEl._prevActive.focus === 'function') modalEl._prevActive.focus(); } catch(e){}
+  }
+  function onKeyDown(e) {
+    if (e.key === 'Escape' || e.key === 'Esc') {
+      // close whichever modal is open
+      if (caregiverModal && caregiverModal.classList.contains('show')) closeModal(caregiverModal);
+      if (familyModal && familyModal.classList.contains('show')) closeModal(familyModal);
+    }
+    if (e.key === 'Tab') {
+      // trap focus inside whichever modal is open
+      const activeModal = caregiverModal.classList.contains('show') ? caregiverModal : (familyModal.classList.contains('show') ? familyModal : null);
+      if (!activeModal) return;
+      const focusables = Array.from(activeModal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')).filter(el=>el.offsetWidth || el.offsetHeight);
+      if (!focusables.length) return;
+      const first = focusables[0], last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  }
+
+  // Delegated click interception for both links/buttons
+  document.addEventListener('click', function (ev) {
+    // allow ctrl/cmd/new-tab and middle-click
+    if (ev.ctrlKey || ev.metaKey || ev.button === 1) return;
+    const el = ev.target;
+    if (!el) return;
+    const a = el.closest ? el.closest('a, button') : null;
+    if (!a) return;
+    const href = a.getAttribute && a.getAttribute('href') || '';
+    const id = a.id || '';
+    const classes = a.className || '';
+
+    const wantsCaregiver = (href.indexOf('/find-caregiver') !== -1 || id === 'navFindCaregiver' || (classes && classes.indexOf('find-care') !== -1));
+    const wantsFamily = (href.indexOf('/find-family') !== -1 || id === 'navFindFamily' || (classes && classes.indexOf('find-jobs') !== -1));
+
+    if (wantsCaregiver && shouldBlockCaregiver()) {
+      ev.preventDefault(); ev.stopPropagation();
+      openModal(caregiverModal, caregiverViewFamilies);
+      return;
+    }
+    if (wantsFamily && shouldBlockFamily()) {
+      ev.preventDefault(); ev.stopPropagation();
+      openModal(familyModal, familyViewCaregivers);
+      return;
+    }
+    // otherwise allow navigation
+  }, { capture: true });
+
+  // Wire modal buttons
+  if (caregiverClose) caregiverClose.addEventListener('click', ()=> closeModal(caregiverModal));
+  if (caregiverViewFamilies) caregiverViewFamilies.addEventListener('click', ()=> { window.location.href = '/find-family'; });
+
+  if (familyClose) familyClose.addEventListener('click', ()=> closeModal(familyModal));
+  if (familyViewCaregivers) familyViewCaregivers.addEventListener('click', ()=> { window.location.href = '/find-caregiver'; });
+
+})();
+</script>
+
+<!-- PROFILE DROPDOWN + MOBILE NAV HELPERS -->
+<script>
+(function () {
+  // Toggle handler for every profile button (handles duplicated markup)
+  function toggleDropdownForButton(btn) {
+    var dropdown = btn.closest('.profile-dropdown');
+    if (!dropdown) return;
+    var menu = dropdown.querySelector('.dropdown-menu');
+    if (!menu) return;
+
+    var isOpen = dropdown.classList.contains('open');
+    if (isOpen) {
+      dropdown.classList.remove('open');
+      btn.setAttribute('aria-expanded', 'false');
+      menu.setAttribute('aria-hidden', 'true');
+    } else {
+      // close any other open dropdowns on the page first
+      document.querySelectorAll('.profile-dropdown.open').forEach(function (d) {
+        if (d === dropdown) return;
+        d.classList.remove('open');
+        var b = d.querySelector('.profile-btn');
+        var m = d.querySelector('.dropdown-menu');
+        if (b) b.setAttribute('aria-expanded', 'false');
+        if (m) m.setAttribute('aria-hidden', 'true');
+      });
+
+      dropdown.classList.add('open');
+      btn.setAttribute('aria-expanded', 'true');
+      menu.setAttribute('aria-hidden', 'false');
+    }
+  }
+
+  // Attach click to all profile buttons
+  document.querySelectorAll('.profile-btn').forEach(function (btn) {
+    btn.addEventListener('click', function (ev) {
+      ev.stopPropagation();
+      toggleDropdownForButton(btn);
+    });
+  });
+
+  // Close dropdowns when clicking outside
+  document.addEventListener('click', function (ev) {
+    document.querySelectorAll('.profile-dropdown.open').forEach(function (d) {
+      var btn = d.querySelector('.profile-btn');
+      var menu = d.querySelector('.dropdown-menu');
+      if (!d.contains(ev.target)) {
+        d.classList.remove('open');
+        if (btn) btn.setAttribute('aria-expanded', 'false');
+        if (menu) menu.setAttribute('aria-hidden', 'true');
+      }
+    });
+  });
+
+  // Close on Escape
+  document.addEventListener('keydown', function (ev) {
+    if (ev.key === 'Escape' || ev.key === 'Esc') {
+      document.querySelectorAll('.profile-dropdown.open').forEach(function (d) {
+        var btn = d.querySelector('.profile-btn');
+        var menu = d.querySelector('.dropdown-menu');
+        d.classList.remove('open');
+        if (btn) btn.setAttribute('aria-expanded', 'false');
+        if (menu) menu.setAttribute('aria-hidden', 'true');
+      });
+    }
+  });
+})();
+
+// Mobile hamburger slide-panel helper — only active on small screens
+(function () {
+  try {
+    var ham = document.getElementById('mobileHamburger');
+    if (!ham) return;
+
+    // Helper to detect mobile breakpoint (match your CSS breakpoint)
+    function isMobileView() {
+      return window.matchMedia && window.matchMedia('(max-width: 980px)').matches;
+    }
+
+    // Defensive: ensure hamburger has a hit area when in mobile view
+    function ensureHamburgerVisibleIfMobile() {
+      if (!isMobileView()) return;
+      try {
+        var cs = window.getComputedStyle(ham);
+        var rect = ham.getBoundingClientRect();
+        if (cs.display === 'none' || rect.width === 0 || rect.height === 0) {
+          ham.style.setProperty('display', 'inline-flex', 'important');
+          ham.style.setProperty('width', '44px', 'important');
+          ham.style.setProperty('height', '44px', 'important');
+          ham.style.setProperty('padding', '6px', 'important');
+          ham.style.setProperty('alignItems', 'center', 'important');
+          ham.style.setProperty('justifyContent', 'center', 'important');
+          ham.style.setProperty('position', 'relative', 'important');
+          ham.style.setProperty('zIndex', '20050', 'important');
+          ham.style.setProperty('pointerEvents', 'auto', 'important');
+        }
+      } catch (e) { /* ignore */ }
+    }
+
+    // Find existing panel or create a fallback mobile panel
+    var nav = document.getElementById('mobileNav') || document.querySelector('.mobile-nav-panel');
+    var createdPanel = false;
+    if (!nav) {
+      createdPanel = true;
+      nav = document.createElement('nav');
+      nav.id = 'mobileNav';
+      nav.className = 'mobile-nav-panel';
+      nav.setAttribute('aria-hidden', 'true');
+      // set a CSS variable fallback so transforms work
+      nav.style.setProperty('--nav-width', '270px');
+
+      var inner = document.createElement('div');
+      inner.className = 'mobile-nav-inner mobile-links';
+      var src = document.querySelector('.nav-menu');
+      if (src) inner.innerHTML = src.innerHTML;
+      else inner.innerHTML = '<a href="/">Home</a><a href="/how-it-works">How It Works</a>';
+      nav.appendChild(inner);
+
+      // Insert panel at end of body so z-index ordering is predictable
+      document.body.appendChild(nav);
+
+      // guard styles if needed
+      if (!nav.style.position) nav.style.position = 'fixed';
+      if (!nav.style.top) nav.style.top = '0';
+      if (!nav.style.left) nav.style.left = '0';
+      if (!nav.style.height) nav.style.height = '100dvh';
+    }
+
+    // Create overlay if not present
+    var overlay = document.getElementById('mobileNavOverlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'mobileNavOverlay';
+      overlay.setAttribute('aria-hidden', 'true');
+      overlay.style.cssText = [
+        'position:fixed',
+        'inset:0',
+        'background:rgba(0,0,0,0.32)',
+        'opacity:0',
+        'pointer-events:none',
+        'transition:opacity .28s ease',
+        'z-index:10090'
+      ].join(';');
+      document.body.appendChild(overlay);
+    }
+
+    // Open / Close helpers — only actually open on mobile view
+    function openNav() {
+      if (!isMobileView()) return;
+      nav.classList.add('open');
+      nav.setAttribute('aria-hidden', 'false');
+      overlay.style.opacity = '1';
+      overlay.style.pointerEvents = 'auto';
+      ham.setAttribute('aria-expanded', 'true');
+      // prevent page scroll behind the nav on mobile
+      document.documentElement.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none';
+    }
+    function closeNav() {
+      nav.classList.remove('open');
+      nav.setAttribute('aria-hidden', 'true');
+      overlay.style.opacity = '0';
+      overlay.style.pointerEvents = 'none';
+      ham.setAttribute('aria-expanded', 'false');
+      document.documentElement.style.overflow = '';
+      document.body.style.touchAction = '';
+    }
+
+    // Attach click handler — toggles only when in mobile breakpoint
+    if (!ham.__mobileNavHandlerAttached) {
+      function onHamClick(ev) {
+        ev.stopPropagation();
+        ensureHamburgerVisibleIfMobile();
+        if (!isMobileView()) return; // do nothing on desktop
+        if (nav.classList.contains('open')) closeNav(); else openNav();
+      }
+      ham.addEventListener('click', onHamClick);
+      ham.__mobileNavHandlerAttached = true;
+    }
+
+    // Close when overlay clicked
+    overlay.addEventListener('click', function (ev) { ev.stopPropagation(); closeNav(); });
+
+    // Clicks outside close nav (only matters if nav is open)
+    document.addEventListener('click', function (ev) {
+      if (!nav.contains(ev.target) && !ham.contains(ev.target)) {
+        if (nav.classList.contains('open')) closeNav();
+      }
+    }, { passive: true });
+
+    // Escape closes
+    document.addEventListener('keydown', function (ev) {
+      if (ev.key === 'Escape' || ev.key === 'Esc') { if (nav.classList.contains('open')) closeNav(); }
+    });
+
+    // If nav created by us, close on link click
+    if (createdPanel) {
+      nav.addEventListener('click', function (ev) {
+        var a = ev.target.closest('a');
+        if (a) closeNav();
+      });
+    }
+
+    // Ensure nav is scrollable on mobile
+    if (!nav.style.overflowY) nav.style.overflowY = 'auto';
+    nav.style.webkitOverflowScrolling = 'touch';
+
+    // Sync initial aria states
+    ham.setAttribute('aria-expanded', String(nav.classList.contains('open')));
+    nav.setAttribute('aria-hidden', String(!nav.classList.contains('open')));
+
+    // Re-run ensureHamburgerVisibleIfMobile on viewport changes (useful if CSS toggles)
+    window.addEventListener('resize', function () {
+      ensureHamburgerVisibleIfMobile();
+    });
+  } catch (e) {
+    console && console.warn && console.warn('mobileNav helper error', e);
+  }
+})();
+</script>
+
+<script>
+(function(){
+  // find the panel, hamburger and the avatar area
+  const nav = document.getElementById('mobileNav') || document.querySelector('.mobile-nav-panel');
+  const ham = document.getElementById('mobileHamburger') || document.querySelector('.mobile-hamburger');
+  const topRight = document.querySelector('.top-right-controls');
+
+  if (!nav || !ham || !topRight) return;
+
+  // compute and set --nav-width so the panel stops before the avatar/phone area
+  function computeNavWidthRespectingAvatar() {
+    try {
+      const tr = topRight.getBoundingClientRect();
+      // left edge of avatar area (px from left of viewport)
+      const avatarLeft = Math.max(0, Math.floor(tr.left));
+      // keep a small gap between panel and avatar
+      const gap = 12; // px
+      // desired width is the space from left edge to avatarLeft minus gap
+      let desired = Math.max(160, avatarLeft - gap); // minimum reasonable width
+      // keep some maximum so nav isn't too wide on tablets
+      const maxAllowed = Math.round(window.innerWidth * 0.92);
+      desired = Math.min(desired, maxAllowed);
+
+      // Write CSS var used by your CSS transform rules (--nav-width)
+      nav.style.setProperty('--nav-width', desired + 'px');
+      // also directly set explicit width for CSS rules that use width: var(--nav-width)
+      nav.style.width = desired + 'px';
+    } catch (e) {
+      // fail silently — keep fallback widths already in CSS
+      console && console.warn && console.warn('computeNavWidth error', e);
+    }
+  }
+
+  // run now and on resize/orientation
+  computeNavWidthRespectingAvatar();
+  window.addEventListener('resize', computeNavWidthRespectingAvatar, { passive: true });
+  window.addEventListener('orientationchange', computeNavWidthRespectingAvatar, { passive: true });
+
+  // Observe open/close (class list changes) and toggle body class so CSS can hide the hamburger
+  const mo = new MutationObserver(() => {
+    if (nav.classList && nav.classList.contains('open')) {
+      document.body.classList.add('mobile-nav-open');
+      // ensure hamburger is visually hidden and not interactive (extra safety)
+      ham.style.pointerEvents = 'none';
+      ham.setAttribute('aria-hidden','true');
+    } else {
+      document.body.classList.remove('mobile-nav-open');
+      ham.style.pointerEvents = '';
+      ham.removeAttribute('aria-hidden');
+    }
+  });
+  mo.observe(nav, { attributes: true, attributeFilter: ['class'] });
+
+  // Also sync on page load if nav already open
+  if (nav.classList.contains('open')) {
+    document.body.classList.add('mobile-nav-open');
+    ham.style.pointerEvents = 'none';
+    ham.setAttribute('aria-hidden','true');
+  }
+
+  // small fix: ensure the computed variable is used immediately
+  setTimeout(computeNavWidthRespectingAvatar, 40);
+})();
+</script>
+
+<script>
+(function(){
+  // Safe small helper: if user is logged in, remove/hide login/register links inside mobileNav
+  try {
+    const logged = (String(document.body.getAttribute('data-logged-in') || '').toLowerCase() === '1')
+                || (String(document.body.getAttribute('data-logged-in') || '').toLowerCase() === 'true');
+
+    if (!logged) return; // nothing to do if not logged in
+
+    // Helper to remove/hide matching anchors inside a panel element
+    function hideLoginInPanel(panel) {
+      if (!panel) return;
+      // Prefer IDs if present
+      const byIdLogin = panel.querySelector('#loginLink');
+      const byIdReg = panel.querySelector('#registerLink');
+      if (byIdLogin) byIdLogin.style.display = 'none';
+      if (byIdReg) byIdReg.style.display = 'none';
+
+      // Fallback: remove anchors whose href contains '/login' or '/register'
+      const anchors = panel.querySelectorAll('a[href]');
+      anchors.forEach(a => {
+        try {
+          const href = (a.getAttribute('href') || '').toLowerCase();
+          if (href.indexOf('/login') !== -1 || href.indexOf('/register') !== -1 || href.indexOf('login') !== -1 && a.textContent.trim().toLowerCase() === 'login' || a.textContent.trim().toLowerCase() === 'sign up' || a.textContent.trim().toLowerCase() === 'signup') {
+            a.style.display = 'none';
+            a.style.pointerEvents = 'none';
+          }
+        } catch(e){}
+      });
+    }
+
+    // Panels to check (your created or server-side)
+    const panels = [];
+    const p1 = document.getElementById('mobileNav');
+    if (p1) panels.push(p1);
+    const p2 = document.querySelector('.mobile-nav-panel');
+    if (p2 && !panels.includes(p2)) panels.push(p2);
+    const p3 = document.querySelector('.mobile-nav-inner');
+    if (p3 && !panels.includes(p3)) panels.push(p3);
+
+    panels.forEach(hideLoginInPanel);
+
+    // If the panel is created dynamically later, observe the body for new #mobileNav and run again
+    const bodyObserver = new MutationObserver((mutations) => {
+      for (const m of mutations) {
+        if (m.addedNodes && m.addedNodes.length) {
+          m.addedNodes.forEach(node => {
+            try {
+              if (!(node instanceof HTMLElement)) return;
+              if (node.id === 'mobileNav' || node.classList && node.classList.contains('mobile-nav-panel')) {
+                hideLoginInPanel(node);
+              } else {
+                const found = node.querySelector && (node.querySelector('#mobileNav') || node.querySelector('.mobile-nav-panel') || node.querySelector('.mobile-nav-inner'));
+                if (found) hideLoginInPanel(found);
+              }
+            } catch(e){}
+          });
+        }
+      }
+    });
+    bodyObserver.observe(document.body, { childList: true, subtree: true });
+
+    // Extra: also hide any desktop nav aging in the cloned mobile panel on 'open' event
+    document.addEventListener('click', function (ev) {
+      const panel = document.getElementById('mobileNav') || document.querySelector('.mobile-nav-panel');
+      if (panel && panel.classList.contains('open')) hideLoginInPanel(panel);
+    }, { passive: true, capture: true });
+
+  } catch (err) {
+    console && console.warn && console.warn('hideLoginInPanel helper error', err);
+  }
+})();
+</script>
+
+<!-- Already-signed-out toast + behavior: paste before </body> -->
+<style>
+  /* simple accessible toast (appears bottom-center on mobile, top-right on desktop) */
+  #alreadySignedOutToast {
+    position: fixed;
+    z-index: 12050;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 18px;
+    min-width: 220px;
+    max-width: calc(100% - 32px);
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: linear-gradient(90deg,#243b6f,#3b6cff);
+    color: #fff;
+    font-weight: 700;
+    box-shadow: 0 10px 30px rgba(11,42,90,0.18);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    pointer-events: auto;
+  }
+
+  /* desktop: move to top-right to avoid covering header */
+  @media (min-width: 860px) {
+    #alreadySignedOutToast {
+      left: auto;
+      right: 18px;
+      transform: none;
+      top: 14px;
+      bottom: auto;
+      min-width: 200px;
+      max-width: 320px;
+    }
+  }
+
+  /* subtle show/hide animation */
+  #alreadySignedOutToast.show {
+    display: flex;
+    animation: toast-in 220ms cubic-bezier(.2,.9,.3,1);
+  }
+  @keyframes toast-in {
+    from { opacity: 0; transform: translateY(6px) scale(.995); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+</style>
+
+<div id="alreadySignedOutToast" role="status" aria-live="polite" aria-atomic="true">You're already signed out.</div>
+
+<script>
+(function () {
+  // Helper: show the toast message for ms (default 3000)
+  function showAlreadySignedOutToast(ms) {
+    ms = typeof ms === 'number' ? ms : 3000;
+    const t = document.getElementById('alreadySignedOutToast');
+    if (!t) return;
+    // Update content in case you want to change wording later
+    t.textContent = "You're already signed out.";
+    // show
+    t.classList.add('show');
+    t.setAttribute('aria-hidden', 'false');
+
+    // clear any existing removal timer
+    if (t._remTimer) { clearTimeout(t._remTimer); t._remTimer = null; }
+    t._remTimer = setTimeout(function () {
+      try { t.classList.remove('show'); t.setAttribute('aria-hidden', 'true'); } catch(e){}
+      t._remTimer = null;
+    }, ms);
+  }
+
+  // Utility: returns true if server indicated user logged in
+  function isLoggedIn() {
+    try {
+      const v = (document.body.getAttribute('data-logged-in') || '').toString().toLowerCase();
+      return v === '1' || v === 'true';
+    } catch (e) { return false; }
+  }
+
+  // Capture-phase delegated click listener so we can stop other handlers from running
+  document.addEventListener('click', function (ev) {
+    try {
+      // only consider real pointer/click events (ignore ctrl/meta/middle to preserve normal new-tab)
+      if (ev.ctrlKey || ev.metaKey || ev.button === 1) return;
+
+      const el = ev.target && ev.target.closest ? ev.target.closest('a, button') : null;
+      if (!el) return;
+
+      // Only target logout anchors/buttons:
+      const idMatches = el.id === 'logoutLink';
+      const isAnchor = el.tagName && el.tagName.toLowerCase() === 'a';
+      const href = (isAnchor && el.getAttribute('href')) ? String(el.getAttribute('href')) : '';
+      const hrefMatches = href && href.indexOf('/logout') !== -1;
+
+      if (!idMatches && !hrefMatches) return; // not a logout trigger
+
+      // If user already logged out, prevent further handlers & show toast
+      if (!isLoggedIn()) {
+        // prevent other handlers (including your unified logout handler) from opening modal/navigating
+        ev.preventDefault();
+        ev.stopPropagation();
+        showAlreadySignedOutToast(3000);
+        return;
+      }
+
+      // else: user is logged in -> allow normal flow (other handlers / modal will run)
+    } catch (err) {
+      // fail-safe: do nothing if anything breaks
+      console && console.warn && console.warn('alreadySignedOut guard error', err);
+    }
+  }, { capture: true, passive: false });
+
+})();
+</script>
+
+<!-- ===== NEW: Password Show/Hide wiring (keeps behavior identical to registration page) ===== -->
+<script>
+(function () {
+  // Wire any .toggle buttons inside .password-wrap
+  Array.from(document.querySelectorAll('.password-wrap .toggle')).forEach(btn => {
+    // ensure ARIA defaults
+    if (!btn.hasAttribute('aria-pressed')) btn.setAttribute('aria-pressed', 'false');
+    if (!btn.hasAttribute('aria-label')) {
+      const tgt = btn.getAttribute('data-target');
+      btn.setAttribute('aria-label', 'Show ' + (tgt === 'password' ? 'password' : tgt));
+    }
+
+    btn.addEventListener('click', function () {
+      const targetId = this.getAttribute('data-target');
+      const input = document.getElementById(targetId);
+      if (!input) return;
+      const wasHidden = input.type === 'password';
+      input.type = wasHidden ? 'text' : 'password';
+      this.textContent = wasHidden ? 'Hide' : 'Show';
+      this.setAttribute('aria-pressed', String(wasHidden));
+      this.setAttribute('aria-label', (wasHidden ? 'Hide ' : 'Show ') + (input.id === 'password' ? 'password' : input.id));
+      try { input.focus(); } catch(e) {}
+      try { input.setSelectionRange(input.value.length, input.value.length); } catch(e) {}
+    });
+  });
+})();
+</script>
+
+
+
+<script>
+(function () {
+  const params = new URLSearchParams(window.location.search);
+  const email = params.get('email');
+  if (!email) return;
+
+  const emailInput = document.querySelector('input[name="email"], input#email, input[type="email"]');
+  if (emailInput && !emailInput.value) {
+    emailInput.value = email;
+  }
+})();
+</script>
+
+
+<script>
+(function(){
+
+    const loginForm = document.getElementById('loginForm');
+    const loginBtn = document.getElementById('loginBtn');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+
+    if(!loginForm) return;
+
+
+    loginForm.addEventListener('submit', function(){
+
+        // Prevent multiple clicks
+        if(loginBtn){
+            loginBtn.disabled = true;
+            loginBtn.textContent = "Please wait...";
+        }
+
+        // Show spinner
+        if(loadingOverlay){
+            loadingOverlay.classList.add("show");
+        }
+
+    });
+
+})();
+</script>
+
+</body>
+</html>
