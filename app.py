@@ -66,6 +66,13 @@ from flask_socketio import SocketIO, join_room, leave_room, emit
 app = Flask(__name__)
 
 
+# URL generation for emails (verification, password reset, etc.)
+app.config["SERVER_NAME"] = os.environ.get(
+    "SERVER_NAME",
+    "findcarecompanion.com"
+)
+app.config["PREFERRED_URL_SCHEME"] = "https"
+
 
 @app.before_request
 def _debug_log_enable_actions():
