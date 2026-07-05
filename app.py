@@ -6687,6 +6687,14 @@ def notify_chat_recipient(sender_id, recipient_id, conversation_id, message_obj)
       1) a live Socket.IO event to the recipient's open page
       2) a Web Push notification to all subscribed devices/browsers for that recipient
     """
+
+    app.logger.warning(
+        "DEBUG: notify_chat_recipient() called | sender=%s recipient=%s conversation=%s",
+        sender_id,
+        recipient_id,
+        conversation_id,
+    )
+
     sender = db.session.get(User, int(sender_id))
     recipient = db.session.get(User, int(recipient_id))
 
@@ -6740,14 +6748,28 @@ def notify_chat_recipient(sender_id, recipient_id, conversation_id, message_obj)
             },
             room=f"user_{int(recipient_id)}",
         )
+
+        app.logger.warning(
+            "DEBUG: Socket.IO event emitted successfully."
+        )
+
     except Exception:
         app.logger.exception("Failed to emit message_received event")
 
+    app.logger.warning(
+        "DEBUG: About to call _send_push_to_user()"
+    )
+
     try:
-        _send_push_to_user(recipient_id, push_payload)
+        result = _send_push_to_user(recipient_id, push_payload)
+
+        app.logger.warning(
+            "DEBUG: _send_push_to_user() returned: %s",
+            result,
+        )
+
     except Exception:
         app.logger.exception("Failed to send push chat notification")
-
 
 def _send_push_to_user(user_id, payload):
     """
@@ -6757,7 +6779,14 @@ def _send_push_to_user(user_id, payload):
       - PushSubscription rows tied directly to user_id
       - BrowserPushSubscription rows linked to that user_id
     """
+
+    app.logger.warning(
+        "DEBUG: _send_push_to_user() STARTED for user=%s",
+        user_id,
+    )
+
     if webpush is None:
+        app.logger.warning("DEBUG: webpush is None!")
         raise RuntimeError("pywebpush is not installed or could not be imported.")
 
     uid = int(user_id)
@@ -6768,48 +6797,82 @@ def _send_push_to_user(user_id, payload):
     try:
         subs.extend(PushSubscription.query.filter_by(user_id=uid).all())
     except Exception:
-        pass
+        app.logger.exception("DEBUG: Failed reading PushSubscription table")
 
     try:
         browser_rows = BrowserPushSubscription.query.all()
+
         for row in browser_rows:
             linked_ids = _load_json_list(row.linked_user_ids_json)
             linked_ids = [int(x) for x in linked_ids if str(x).strip() != ""]
+
             if uid in linked_ids:
                 subs.append(row)
+
     except Exception:
-        pass
+        app.logger.exception("DEBUG: Failed reading BrowserPushSubscription table")
 
     seen_endpoints = set()
     unique_subs = []
+
     for sub in subs:
         endpoint = getattr(sub, "endpoint", None)
+
         if not endpoint or endpoint in seen_endpoints:
             continue
+
         seen_endpoints.add(endpoint)
         unique_subs.append(sub)
 
+    app.logger.warning(
+        "DEBUG: Found %s unique subscription(s) for user %s",
+        len(unique_subs),
+        uid,
+    )
+
     if not unique_subs:
         app.logger.warning("No push subscriptions found for user %s", uid)
-        return {"ok": False, "sent": 0, "failed": 0, "reason": "no_subscription"}
+        return {
+            "ok": False,
+            "sent": 0,
+            "failed": 0,
+            "reason": "no_subscription",
+        }
 
     sent = 0
     failed = 0
 
     for sub in unique_subs:
+
+        app.logger.warning(
+            "DEBUG: Processing endpoint: %s",
+            getattr(sub, "endpoint", None),
+        )
+
         try:
             subscription_info = json.loads(sub.subscription_json)
+
+            app.logger.warning("DEBUG: Calling webpush()")
 
             webpush(
                 subscription_info=subscription_info,
                 data=json.dumps(payload),
                 vapid_private_key=app.config["VAPID_PRIVATE_KEY_PATH"],
-                vapid_claims={"sub": app.config["VAPID_SUBJECT"]},
+                vapid_claims={
+                    "sub": app.config["VAPID_SUBJECT"]
+                },
             )
+
             sent += 1
 
+            app.logger.warning(
+                "DEBUG: webpush() SUCCESS"
+            )
+
         except Exception as exc:
+
             failed += 1
+
             app.logger.exception(
                 "Push send failed for user %s endpoint %s: %s",
                 uid,
@@ -6820,14 +6883,30 @@ def _send_push_to_user(user_id, payload):
             try:
                 response = getattr(exc, "response", None)
                 status = getattr(response, "status_code", None)
+
                 if status in (404, 410):
+                    app.logger.warning(
+                        "DEBUG: Removing expired subscription."
+                    )
+
                     db.session.delete(sub)
                     db.session.commit()
+
             except Exception:
                 db.session.rollback()
 
-    return {"ok": sent > 0, "sent": sent, "failed": failed}
+    result = {
+        "ok": sent > 0,
+        "sent": sent,
+        "failed": failed,
+    }
 
+    app.logger.warning(
+        "DEBUG: _send_push_to_user() FINISHED -> %s",
+        result,
+    )
+
+    return result
 
 @app.route("/api/push/consent", methods=["POST"])
 def api_push_consent():
@@ -8272,6 +8351,29 @@ chat_storage = {}  # { chat_ref: [ { who:'user'|'agent'|'bot', text: '...', ts: 
 
 from flask_socketio import join_room, emit
 
+
+
+
+
+@socketio.on('livechat_join')
+def handle_livechat_join(data):
+    try:
+        ref = data.get('chat_ref')
+        if not ref:
+            return
+
+        join_room(ref)
+
+        app.logger.info(
+            "LIVECHAT JOIN: SID=%s ROOM=%s",
+            request.sid,
+            ref
+        )
+
+    except Exception:
+        app.logger.exception("handle_livechat_join failed")
+
+
 # When visitor sends a message via socket, server should include chat_ref
 @socketio.on('visitor_message')
 def handle_visitor_message(data):
@@ -8293,10 +8395,24 @@ def handle_visitor_message(data):
 @socketio.on('visitor_typing')
 def handle_visitor_typing(data):
     try:
+        app.logger.info("=== VISITOR_TYPING RECEIVED === %s", data)
+
         ref = data.get('chat_ref')
         if not ref:
+            app.logger.warning("visitor_typing: Missing chat_ref")
             return
-        emit('visitor_typing', {'chat_ref': ref}, room=ref, include_self=False)
+
+        app.logger.info("Broadcasting visitor_typing to room: %s", ref)
+
+        emit(
+            'visitor_typing',
+            {'chat_ref': ref},
+            room=ref,
+            include_self=False
+        )
+
+        app.logger.info("visitor_typing broadcast complete")
+
     except Exception:
         app.logger.exception("handle_visitor_typing failed")
 
@@ -8304,10 +8420,22 @@ def handle_visitor_typing(data):
 @socketio.on('visitor_stop_typing')
 def handle_visitor_stop_typing(data):
     try:
+        app.logger.info("=== VISITOR_STOP_TYPING RECEIVED === %s", data)
+
         ref = data.get('chat_ref')
         if not ref:
+            app.logger.warning("visitor_stop_typing: Missing chat_ref")
             return
-        emit('visitor_stop_typing', {'chat_ref': ref}, room=ref, include_self=False)
+
+        emit(
+            'visitor_stop_typing',
+            {'chat_ref': ref},
+            room=ref,
+            include_self=False
+        )
+
+        app.logger.info("visitor_stop_typing broadcast complete")
+
     except Exception:
         app.logger.exception("handle_visitor_stop_typing failed")
 
@@ -8315,10 +8443,24 @@ def handle_visitor_stop_typing(data):
 @socketio.on('agent_typing')
 def handle_agent_typing(data):
     try:
+        app.logger.info("=== AGENT_TYPING RECEIVED === %s", data)
+
         ref = data.get('chat_ref')
         if not ref:
+            app.logger.warning("agent_typing: Missing chat_ref")
             return
-        emit('agent_typing', {'chat_ref': ref}, room=ref, include_self=False)
+
+        app.logger.info("Broadcasting agent_typing to room: %s", ref)
+
+        emit(
+            'agent_typing',
+            {'chat_ref': ref},
+            room=ref,
+            include_self=False
+        )
+
+        app.logger.info("agent_typing broadcast complete")
+
     except Exception:
         app.logger.exception("handle_agent_typing failed")
 
@@ -8326,13 +8468,24 @@ def handle_agent_typing(data):
 @socketio.on('agent_stop_typing')
 def handle_agent_stop_typing(data):
     try:
+        app.logger.info("=== AGENT_STOP_TYPING RECEIVED === %s", data)
+
         ref = data.get('chat_ref')
         if not ref:
+            app.logger.warning("agent_stop_typing: Missing chat_ref")
             return
-        emit('agent_stop_typing', {'chat_ref': ref}, room=ref, include_self=False)
+
+        emit(
+            'agent_stop_typing',
+            {'chat_ref': ref},
+            room=ref,
+            include_self=False
+        )
+
+        app.logger.info("agent_stop_typing broadcast complete")
+
     except Exception:
         app.logger.exception("handle_agent_stop_typing failed")
-
 
 
 
@@ -8343,10 +8496,32 @@ def handle_agent_join(data):
         ref = data.get('chat_ref')
         if not ref:
             return
+
         join_room(ref)
-        chat_storage.setdefault(ref, []).append({'who':'agent', 'text': f'Agent joined room', 'ts': datetime.utcnow().isoformat()})
-        # notify visitor/agents in room
-        emit('new_message', {'who':'agent', 'text': 'An agent joined the chat.'}, room=ref)
+
+        chat_storage.setdefault(ref, []).append({
+            'who': 'agent',
+            'text': 'Agent joined room',
+            'ts': datetime.utcnow().isoformat()
+        })
+
+        # Notify everyone that the agent joined
+        emit(
+            'agent_joined',
+            {'chat_ref': ref},
+            room=ref
+        )
+
+        # Also show a chat message
+        emit(
+            'new_message',
+            {
+                'who': 'agent',
+                'text': 'An agent has joined the chat.'
+            },
+            room=ref
+        )
+
     except Exception:
         app.logger.exception("handle_agent_join failed")
 
@@ -8441,7 +8616,7 @@ def live_chat():
     return render_template('live_chat.html', chat_ref=chat_ref, is_agent=is_agent)
 
 # allow sockets to join a room for visitor or other clients
-@socketio.on('join_room')
+@socketio.on('join_live_chat')
 def handle_join_room(data):
     """
     client should send { chat_ref: 'xxx' } to be added to the room so they receive 'new_message' emits.

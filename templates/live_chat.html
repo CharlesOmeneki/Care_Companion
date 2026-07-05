@@ -783,7 +783,7 @@
           socket = io();
           socket.on('connect', function(){
             dbg('socket connected');
-            socket.emit('join_room', { chat_ref: chatRef });
+            socket.emit('join_live_chat', { chat_ref: chatRef }); 
             if(IS_AGENT) socket.emit('agent_join', { chat_ref: chatRef });
           });
           socket.on('disconnect', function(){ dbg('socket disconnected'); });
