@@ -6169,7 +6169,7 @@ def support():
 # ------------------ ADMIN SECTION (replace this block) ------------------
 
 # Hard-coded admin password (change this string in app.py to update)
-ADMIN_PASSWORD = "Knowledge2020."
+ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")
 
 def admin_required():
     # simple guard: abort with 403 if not admin session
@@ -7751,7 +7751,7 @@ def notifications_page():
 # Add this after your notifications module. It uses session['notif_admin'] to avoid
 # touching your existing session['is_admin'] admin.
 
-NOTIF_ADMIN_PASSWORD = "Knowledge2020."  # same password you requested
+NOTIF_ADMIN_PASSWORD = os.environ.get("NOTIF_ADMIN_PASSWORD")
 
 def notif_admin_required():
     if not session.get("notif_admin"):
