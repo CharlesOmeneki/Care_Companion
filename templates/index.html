@@ -1470,7 +1470,7 @@ footer {
     document.body.style.overflowX = 'hidden';
 
     // nudge the page so layout-based widgets recalculate after rotation
-    window.dispatchEvent(new Event('resize'));
+    
 
     // if any carousel/slider uses JS sizing, this reflows it without reloading the page
     document.querySelectorAll('[class*="carousel"], [id*="carousel"], .arc-card-carousel').forEach(function (el) {
