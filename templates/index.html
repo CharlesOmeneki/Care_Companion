@@ -10829,6 +10829,64 @@ if ('serviceWorker' in navigator) {
 })();
 </script>
 
+<script>
+(function () {
+
+    function log(msg){
+        console.log("[CC DEBUG]", msg);
+    }
+
+    window.onerror=function(message,source,line,col,error){
+        console.log("[CC ERROR]");
+        console.log(message);
+        console.log(source);
+        console.log(line);
+        console.log(col);
+        console.log(error);
+    };
+
+    window.addEventListener("load",function(){
+
+        log("PAGE LOADED");
+
+        log("User Agent:");
+        console.log(navigator.userAgent);
+
+        log("Viewport:");
+        console.log(window.innerWidth,window.innerHeight);
+
+        log("Body overflow:");
+        console.log(getComputedStyle(document.body).overflow);
+
+        log("HTML overflow:");
+        console.log(getComputedStyle(document.documentElement).overflow);
+
+        log("Body position:");
+        console.log(getComputedStyle(document.body).position);
+
+        log("Body height:");
+        console.log(document.body.scrollHeight);
+
+        log("Window height:");
+        console.log(window.innerHeight);
+
+    });
+
+    window.addEventListener("scroll",function(){
+        console.log("[SCROLL]",window.scrollY);
+    });
+
+    window.addEventListener("touchmove",function(){
+        console.log("[TOUCH MOVE]");
+    },{passive:true});
+
+    window.addEventListener("orientationchange",function(){
+        console.log("[ROTATION]");
+    });
+
+})();
+</script>
+
 </body>
 </html> 
  
