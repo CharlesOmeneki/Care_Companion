@@ -10742,6 +10742,10 @@ if ('serviceWorker' in navigator) {
            window.navigator.standalone === true;
   }
 
+  function isIOS() {
+    return /iphone|ipad|ipod/i.test(navigator.userAgent);
+}
+
   function isInstalled() {
     const s = getState();
     return Boolean(s.installed) || isStandalone();
@@ -10749,6 +10753,19 @@ if ('serviceWorker' in navigator) {
 
   function refreshButton() {
     if (!btnNow) return;
+
+
+    
+   if (
+    btnNow.dataset.mode === 'help' ||
+    btnNow.dataset.mode === 'close' ||
+    btnNow.dataset.mode === 'ios-help' ||
+    btnNow.dataset.mode === 'ios-close'
+) {
+    return;
+} 
+
+
 
     if (isInstalled()) {
       btnNow.disabled = true;
@@ -10784,13 +10801,25 @@ if ('serviceWorker' in navigator) {
     e.preventDefault();
     deferredPrompt = e;
 
-    if (!isInstalled()) {
-      if (text) {
-        text.textContent = 'Install Care Companion for faster access, smoother navigation, and a better app-like experience on your phone or laptop.';
-      }
-      showCard();
-      refreshButton();
+   if (!isInstalled()) {
+
+    if (text) {
+        text.textContent =
+            'Install Care Companion for faster access, smoother navigation, and a better app-like experience on your phone or laptop.';
     }
+
+    if (btnNow) {
+        btnNow.style.display = '';
+        btnNow.disabled = false;
+        btnNow.textContent = 'Install';
+        btnNow.dataset.mode = '';
+        btnNow.style.opacity = '1';
+        btnNow.style.cursor = 'pointer';
+    }
+
+    showCard();
+    refreshButton();
+} 
   });
 
   window.addEventListener('appinstalled', () => {
@@ -10800,15 +10829,69 @@ if ('serviceWorker' in navigator) {
     hideCard();
   });
 
-  window.addEventListener('load', () => {
+window.addEventListener('load', () => {
+
+// iPhone: remember that the app has been opened after installation.
+if (isStandalone()) {
+    setState({ installed: true });
+}
+
     if (isInstalled()) {
-      hideCard();
-      return;
+        hideCard();
+        return;
+    }
+
+    refreshButton();
+
+    // Give the browser a few seconds to fire beforeinstallprompt.
+    setTimeout(() => {
+
+        // If Chrome has already fired the event, do nothing.
+        if (deferredPrompt || isInstalled()) {
+            return;
+        }
+
+        // Android fallback
+        if (isIOS()) {
+
+    if (text) {
+        text.textContent =
+            'Care Companion can be installed on your iPhone for faster access and a better app-like experience.';
+    }
+
+    if (btnNow) {
+        btnNow.style.display = '';
+        btnNow.disabled = false;
+        btnNow.textContent = 'How to install';
+        btnNow.dataset.mode = 'ios-help';
+        btnNow.style.opacity = '1';
+        btnNow.style.cursor = 'pointer';
     }
 
     showCard();
-    refreshButton();
-  });
+
+} else if (/android/i.test(navigator.userAgent)) { 
+
+           if (text) {
+    text.textContent =
+        'Care Companion can be installed on this browser for faster access and a better app-like experience.';
+} 
+
+            if (btnNow) {
+    btnNow.style.display = '';
+    btnNow.disabled = false;
+    btnNow.textContent = 'How to install';
+    btnNow.dataset.mode = 'help';
+    btnNow.style.opacity = '1';
+    btnNow.style.cursor = 'pointer';
+}
+
+showCard(); 
+        }
+
+    }, 4000);
+
+});  
 
   if (btnLater) {
     btnLater.addEventListener('click', () => {
@@ -10818,6 +10901,99 @@ if ('serviceWorker' in navigator) {
 
   if (btnNow) {
     btnNow.addEventListener('click', async () => {
+
+if (btnNow.dataset.mode === 'ios-help') {
+
+    text.innerHTML = `
+        <div style="text-align:left;">
+            <div style="font-size:16px;font-weight:700;margin-bottom:10px;">
+                📱 Install Care Companion on iPhone
+            </div>
+
+            <div style="line-height:1.7;">
+                1️⃣ Tap the <b>Share</b> button <b>􀈂</b> in Safari.<br><br>
+
+                2️⃣ Scroll down and tap <b>Add to Home Screen</b>.<br><br>
+
+                3️⃣ Tap <b>Add</b> in the top-right corner.<br><br>
+
+                You can then launch Care Companion like any normal app.
+            </div>
+        </div>
+    `;
+
+    btnNow.textContent = 'Got it';
+    btnNow.dataset.mode = 'ios-close';
+
+    return;
+}
+
+     if (btnNow.dataset.mode === 'help') {
+
+    text.innerHTML = `
+        <div style="text-align:left;">
+            <div style="font-size:16px;font-weight:700;margin-bottom:10px;">
+                📲 Install Care Companion
+            </div>
+
+            <div style="line-height:1.7;">
+                1️⃣ Tap the <b>⋮ Menu</b> at the top or bottom of your browser.<br><br>
+
+                2️⃣ Tap <b>Install app</b> or <b>Add to Home screen</b>.<br><br>
+
+                3️⃣ Confirm the installation when prompted.<br><br>
+
+                After installation, Care Companion will open like a normal app.
+            </div>
+        </div>
+    `;
+
+    btnNow.textContent = "Got it";
+
+    btnNow.dataset.mode = "close";
+
+    return;
+} 
+
+if (btnNow.dataset.mode === 'ios-close') {
+
+    hideCard();
+
+    btnNow.dataset.mode = '';
+
+    btnNow.textContent = 'How to install';
+    btnNow.disabled = false;
+btnNow.style.opacity = '1';
+btnNow.style.cursor = 'pointer';
+
+    if (text) {
+        text.textContent =
+            'Care Companion can be installed on your iPhone for faster access and a better app-like experience.';
+    }
+
+    return;
+}
+
+if (btnNow.dataset.mode === 'close') {
+
+    hideCard();
+
+    btnNow.dataset.mode = '';
+
+    btnNow.textContent = 'How to install';
+
+    btnNow.disabled = false;
+    btnNow.style.opacity = '1';
+    btnNow.style.cursor = 'pointer';
+
+    if (text) {
+        text.textContent =
+            'Care Companion can be installed on this browser for faster access and a better app-like experience.';
+    }
+
+    return;
+}
+
       if (isInstalled()) {
         hideCard();
         return;
@@ -10831,9 +11007,9 @@ if ('serviceWorker' in navigator) {
         deferredPrompt.prompt();
         const choice = await deferredPrompt.userChoice;
 
-        if (choice && choice.outcome === 'accepted') {
-          setState({ installed: true });
-        }
+       if (choice && choice.outcome === 'accepted') {
+    console.log('User accepted installation.');
+} 
       } catch (e) {
         console.error('Install prompt failed', e);
       } finally {
@@ -10848,63 +11024,6 @@ if ('serviceWorker' in navigator) {
 })();
 </script>
 
-<script>
-(function () {
-
-    function log(msg){
-        console.log("[CC DEBUG]", msg);
-    }
-
-    window.onerror=function(message,source,line,col,error){
-        console.log("[CC ERROR]");
-        console.log(message);
-        console.log(source);
-        console.log(line);
-        console.log(col);
-        console.log(error);
-    };
-
-    window.addEventListener("load",function(){
-
-        log("PAGE LOADED");
-
-        log("User Agent:");
-        console.log(navigator.userAgent);
-
-        log("Viewport:");
-        console.log(window.innerWidth,window.innerHeight);
-
-        log("Body overflow:");
-        console.log(getComputedStyle(document.body).overflow);
-
-        log("HTML overflow:");
-        console.log(getComputedStyle(document.documentElement).overflow);
-
-        log("Body position:");
-        console.log(getComputedStyle(document.body).position);
-
-        log("Body height:");
-        console.log(document.body.scrollHeight);
-
-        log("Window height:");
-        console.log(window.innerHeight);
-
-    });
-
-    window.addEventListener("scroll",function(){
-        console.log("[SCROLL]",window.scrollY);
-    });
-
-    window.addEventListener("touchmove",function(){
-        console.log("[TOUCH MOVE]");
-    },{passive:true});
-
-    window.addEventListener("orientationchange",function(){
-        console.log("[ROTATION]");
-    });
-
-})();
-</script>
 
 </body>
 </html> 
