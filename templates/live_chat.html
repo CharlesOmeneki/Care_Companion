@@ -844,6 +844,25 @@
             appendMessage('system','Agent left the chat.');
             agentPresent = false;
           });
+
+           socket.on('chat_ended', function(data){
+    if (chatEnded) return;
+
+    const endedBy = data.ended_by === 'agent' ? 'Agent' : 'Visitor';
+
+    stopWaitingAfterVisitor('chat ended');
+    removeAgentPlaceholder();
+
+    appendMessage(
+        'system',
+        endedBy + ' has ended the chat.'
+    );
+
+    setChatEndedUI(
+        endedBy + ' ended this chat.'
+    );
+}); 
+
           socket.on('agent_typing', function(){ showTyping('agent'); });
           socket.on('agent_stop_typing', function(){ hideTyping('agent'); });
           socket.on('visitor_typing', function(){ showTyping('user'); });

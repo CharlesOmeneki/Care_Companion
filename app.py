@@ -8608,6 +8608,28 @@ def api_chat_message():
         return jsonify({"ok": False, "error": "internal error"}), 500
 
 
+@app.route('/api/end_chat', methods=['POST'])
+def api_end_chat():
+    try:
+        data = request.get_json(silent=True) or {}
+
+        ref = data.get('chat_ref')
+        ended_by = data.get('ended_by', 'user')
+
+        if not ref:
+            return jsonify({"ok": False}), 400
+
+        chat_storage.setdefault(ref, []).append({
+            'who': 'system',
+            'text': f'{ended_by.capitalize()} ended the chat.',
+            'ts': datetime.utcnow().isoformat()
+        })
+
+        return jsonify({"ok": True})
+
+    except Exception:
+        app.logger.exception("api_end_chat failed")
+        return jsonify({"ok": False}), 500
 
 # ---------------- Live chat page route + small socket join handler ----------------
 from markupsafe import Markup
@@ -8643,6 +8665,36 @@ def handle_join_room(data):
     except Exception:
         app.logger.exception("handle_join_room failed")
 # -------------------------------------------------------------------------------
+
+@socketio.on('end_chat')
+def handle_end_chat(data):
+    try:
+        ref = data.get('chat_ref')
+        ended_by = data.get('ended_by', 'user')
+
+        if not ref:
+            return
+
+        # Save the event in the transcript
+        chat_storage.setdefault(ref, []).append({
+            'who': 'system',
+            'text': f'{ended_by.capitalize()} ended the chat.',
+            'ts': datetime.utcnow().isoformat()
+        })
+
+        # Notify everyone in the room (visitor and agent)
+        emit(
+            'chat_ended',
+            {
+                'chat_ref': ref,
+                'ended_by': ended_by
+            },
+            room=ref
+        )
+
+    except Exception:
+        app.logger.exception("handle_end_chat failed")
+
 
 
 @socketio.on("connect")
