@@ -8187,6 +8187,10 @@ self.addEventListener('activate', event => {
   event.waitUntil(self.clients.claim());
 });
 
+self.addEventListener('fetch', event => {
+  event.respondWith(fetch(event.request));
+});
+
 self.addEventListener('push', event => {
   let data = {};
   try {
@@ -8640,21 +8644,31 @@ def handle_join_room(data):
         app.logger.exception("handle_join_room failed")
 # -------------------------------------------------------------------------------
 
+
 @socketio.on("connect")
 def socket_connect():
-    me = get_current_user()
-    if not me:
-        return False
-
     try:
-        join_room(f"user_{me['id']}")
-        _set_user_online(me["id"])
-        app.logger.info("Socket connected for user_%s", me["id"])
+        me = get_current_user()
+
+        if me:
+            join_room(f"user_{me['id']}")
+            _set_user_online(me["id"])
+            app.logger.info(
+                "Authenticated socket connected: user_%s",
+                me["id"]
+            )
+        else:
+            # Allow anonymous live-chat visitors.
+            app.logger.info(
+                "Anonymous live-chat socket connected: %s",
+                request.sid
+            )
+
         return True
+
     except Exception:
         app.logger.exception("socket_connect failed")
         return False
-
 
 @socketio.on("disconnect")
 def socket_disconnect():
