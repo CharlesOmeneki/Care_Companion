@@ -8394,11 +8394,21 @@ def handle_visitor_message(data):
     try:
         ref = data.get('chat_ref')
         text = data.get('text', '')
+        client_msg_id = data.get('client_msg_id') 
         if not ref:
             return
         chat_storage.setdefault(ref, []).append({'who':'user', 'text': text, 'ts': datetime.utcnow().isoformat()})
         # forward message to room (agents)
-        emit('new_message', {'who':'user', 'text': text}, room=ref)
+        emit(
+            'new_message',
+            {
+                'who': 'user',
+                'text': text,
+                'client_msg_id': client_msg_id,
+                'ts': datetime.utcnow().isoformat()
+            },
+            room=ref
+        )        
     except Exception:
         app.logger.exception("handle_visitor_message failed")
 
