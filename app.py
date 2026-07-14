@@ -8552,10 +8552,28 @@ def handle_agent_message(data):
     try:
         ref = data.get('chat_ref')
         text = data.get('text', '')
+        client_msg_id = data.get('client_msg_id')
+
         if not ref:
             return
-        chat_storage.setdefault(ref, []).append({'who':'agent', 'text': text, 'ts': datetime.utcnow().isoformat()})
-        emit('new_message', {'who':'agent', 'text': text}, room=ref)
+
+        chat_storage.setdefault(ref, []).append({
+            'who': 'agent',
+            'text': text,
+            'ts': datetime.utcnow().isoformat()
+        })
+
+        emit(
+            'new_message',
+            {
+                'who': 'agent',
+                'text': text,
+                'client_msg_id': client_msg_id,
+                'ts': datetime.utcnow().isoformat()
+            },
+            room=ref
+        )
+
     except Exception:
         app.logger.exception("handle_agent_message failed")
 
