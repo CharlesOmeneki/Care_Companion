@@ -2686,7 +2686,7 @@ footer {
     /* show mobile carousel */
     #arc-carousel-mobile {
       display: block;
-      padding: 12px 0 20px;
+      padding: 12px 0 1px;
       background: transparent;
       z-index: 60;
       position: relative;
@@ -4610,7 +4610,7 @@ footer {
 
     #supernova-section .sc-wave {
       order: 2;
-      height: 42px;
+      height: 52px;
       margin: 0 !important;
     }
 
@@ -4704,12 +4704,7 @@ footer {
       display: none !important;
     }
 
-    /* Hide the blue dots / extra mobile controls if they are showing above this area */
-    #arc-carousel-mobile .mobile-nav,
-    #arc-carousel-mobile .mobile-dots {
-      display: none !important;
-    }
-  }
+    
 
   @media (max-width: 760px) {
    #supernova-section {
@@ -10716,6 +10711,7 @@ if ('serviceWorker' in navigator) {
 <script>
 (() => {
   const STORAGE_KEY = 'cc_install_prompt_state_v4';
+  const PROMPT_INTERVAL = 7 * 24 * 60 * 60 * 1000; // 7 days
   let deferredPrompt = null;
 
   const card = document.getElementById('cc-install-card');
@@ -10736,6 +10732,23 @@ if ('serviceWorker' in navigator) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
     return next;
   }
+
+  function shouldShowPrompt() {
+  const state = getState();
+
+  if (!state.lastPromptAt) {
+    return true;
+  }
+
+  return (Date.now() - state.lastPromptAt) >= PROMPT_INTERVAL;
+}
+
+function rememberPromptShown() {
+  setState({
+    lastPromptAt: Date.now()
+  });
+} 
+
 
   function isStandalone() {
     return window.matchMedia('(display-mode: standalone)').matches ||
@@ -10789,9 +10802,17 @@ if ('serviceWorker' in navigator) {
   }
 
   function showCard() {
-    if (card && !isInstalled()) card.style.display = 'block';
-    refreshButton();
+  if (!shouldShowPrompt()) {
+    return;
   }
+
+  if (card && !isInstalled()) {
+    card.style.display = 'block';
+    rememberPromptShown();
+  }
+
+  refreshButton();
+} 
 
   function hideCard() {
     if (card) card.style.display = 'none';

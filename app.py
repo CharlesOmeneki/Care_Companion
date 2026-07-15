@@ -8510,6 +8510,11 @@ def handle_agent_stop_typing(data):
 
 
 
+
+
+
+
+
 # Agent joins room
 @socketio.on('agent_join')
 def handle_agent_join(data):
