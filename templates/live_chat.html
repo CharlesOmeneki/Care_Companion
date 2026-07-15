@@ -791,10 +791,13 @@
           socket.on('new_message', function(payload){
             try {
               const text = payload.text || payload.message || '';
-              if((payload.who === 'system' || !payload.who) && /participant joined|joined the chat/i.test(text)){
-                dbg('ignored system join message:', text);
-                return;
-              }
+              if (
+    (payload.who === 'system' || !payload.who) &&
+    /participant joined/i.test(text)
+) {
+    dbg('ignored participant joined message:', text);
+    return;
+} 
 
               const who = payload.who === 'user' ? 'user' : (payload.who === 'agent' ? 'agent' : 'system');
 

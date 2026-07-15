@@ -8542,7 +8542,7 @@ def handle_agent_join(data):
         emit(
             'new_message',
             {
-                'who': 'agent',
+                'who': 'system',
                 'text': 'An agent has joined the chat.'
             },
             room=ref
