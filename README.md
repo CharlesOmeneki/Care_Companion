@@ -10,12 +10,16 @@ https://findcarecompanion.com
 
 - Secure user registration and login
 - Email verification and password reset
-- Real-time live chat using Flask-SocketIO
-- AI-powered chatbot
-- User and administrator dashboards
+- Role-based authentication (Users, Caregivers, Administrators)
 - Caregiver search and matching
+- User and administrator dashboards
+- Real-time live chat using Flask-SocketIO
+- AI-powered chatbot assistance
+- In-app notifications
+- Push notifications (Progressive Web App)
 - Contact forms with email notifications
-- Responsive design for desktop and mobile
+- Responsive mobile-first design
+- Progressive Web App (PWA) support
 
 ## 🛠️ Built With
 
@@ -34,11 +38,31 @@ https://findcarecompanion.com
 - DigitalOcean
 - Git & GitHub
 
+
+## 🚀 Deployment
+
+The application is deployed to a production Ubuntu Linux server hosted on DigitalOcean using:
+
+- Ubuntu Linux
+- Nginx
+- Gunicorn
+- systemd
+- PostgreSQL
+- Git & GitHub
+- SSH
+
+
 ## 👨‍💻 Developer
 
-Charles Omeneki
+**Charles Omeneki**
 
 Software Engineer | Full-Stack Python Developer
+
+LinkedIn:
+https://www.linkedin.com/in/charles-omeneki-936154145
+
+Portfolio:
+https://findcarecompanion.com
 
 
 
@@ -63,3 +87,19 @@ Software Engineer | Full-Stack Python Developer
 ### Admin Dashboard
 <img width="1192" height="406" alt="Admin dashboard" src="https://github.com/user-attachments/assets/17fc6870-4331-4667-a086-1a8f889960a0" />
 
+
+---
+
+## Future Improvements
+
+- Online payment integration
+- Caregiver availability scheduling
+- Ratings and reviews
+- Video consultation
+  
+
+---
+
+## License
+
+This project is for portfolio and demonstration purposes.
