@@ -16,10 +16,10 @@ https://findcarecompanion.com
 - Real-time live chat using Flask-SocketIO
 - AI-powered chatbot assistance
 - In-app notifications
-- Push notifications (Progressive Web App)
 - Contact forms with email notifications
 - Responsive mobile-first design
-- Progressive Web App (PWA) support
+- Progressive Web App (PWA) installation
+- Web Push Notifications
 
 ## 🛠️ Built With
 
@@ -50,6 +50,17 @@ The application is deployed to a production Ubuntu Linux server hosted on Digita
 - PostgreSQL
 - Git & GitHub
 - SSH
+
+
+## ✨ Highlights
+
+- Production-ready application deployed on DigitalOcean
+- Real-time communication with Flask-SocketIO
+- AI-powered chatbot integration
+- Secure authentication and authorization
+- Responsive mobile-first design
+- Progressive Web App (PWA)
+- Linux server deployment and maintenance
 
 
 ## 👨‍💻 Developer
