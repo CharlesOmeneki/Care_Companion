@@ -72,7 +72,7 @@ https://findcarecompanion.com
 <img width="1308" height="471" alt="Home" src="https://github.com/user-attachments/assets/2fc8502f-a714-495e-ad8e-678d1101a830" />
 
 
-### Caregiver Search
+### Caregiver Request & Matching
 <img width="630" height="545" alt="Caregiver listing-search" src="https://github.com/user-attachments/assets/dc7438a6-b575-483c-963f-10fdadda1817" />
 
 
