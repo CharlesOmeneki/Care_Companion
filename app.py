@@ -6,8 +6,6 @@ from dotenv import load_dotenv
 load_dotenv()
 print("Current working directory:", os.getcwd())
 print("App file directory:", os.path.dirname(os.path.abspath(__file__)))
-print("DATABASE_URL:", os.getenv("DATABASE_URL"))
-print("MAIL_USERNAME:", os.getenv("MAIL_USERNAME"))
 
 
 import time
