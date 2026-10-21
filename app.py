@@ -8806,7 +8806,7 @@ def api_push_logs():
 
 if __name__ == "__main__":
     # Use socketio.run to start the Socket.IO server
-    socketio.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)
+    socketio.run(app, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True, allow_unsafe_werkzeug=True,)
 
  
 

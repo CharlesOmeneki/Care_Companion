@@ -1,0 +1,23 @@
+services:
+  db:
+    image: postgres:16
+    container_name: care-companion-db
+    environment:
+      POSTGRES_DB: care_companion_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: local_dev_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  app:
+    image: care-companion:latest
+    container_name: care-companion-app
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:
