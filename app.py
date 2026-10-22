@@ -13,6 +13,7 @@ import json
 import re
 import uuid
 import base64
+import resend
 
 
 try:
@@ -2821,20 +2822,34 @@ app.jinja_env.filters["basename"] = lambda s: (os.path.basename(s) if s else s)
 
 def send_verification_email(to_email, token, first_name):
     try:
-        verify_url = url_for("verify_email", token=token, _external=True)
+        api_key = os.environ.get("RESEND_API_KEY")
+
+        if not api_key:
+            app.logger.error("RESEND_API_KEY is not configured")
+            return False
+
+        resend.api_key = api_key
+
+        verify_url = url_for(
+            "verify_email",
+            token=token,
+            _external=True
+        )
+
         html = render_template(
             "email_verification.html",
             verify_url=verify_url,
             first_name=first_name
         )
 
-        msg = MailMessage(
-            subject="Verify your Care Companion account",
-            recipients=[to_email],
-            html=html
-        )
-        mail.send(msg)
-        app.logger.info("Verification email sent successfully")
+        result = resend.Emails.send({
+            "from": "Care Companion <verify@findcarecompanion.com>",
+            "to": [to_email],
+            "subject": "Verify your Care Companion account",
+            "html": html
+        })
+
+        app.logger.info("Verification email accepted by Resend")
         return True
 
     except Exception:
