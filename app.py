@@ -65,10 +65,7 @@ app = Flask(__name__)
 
 
 # URL generation for emails (verification, password reset, etc.)
-app.config["SERVER_NAME"] = os.environ.get(
-    "SERVER_NAME",
-    "findcarecompanion.com"
-)
+app.config["SERVER_NAME"] = os.environ.get("SERVER_NAME") or None
 app.config["PREFERRED_URL_SCHEME"] = "https"
 
 
@@ -2821,21 +2818,29 @@ app.jinja_env.filters["basename"] = lambda s: (os.path.basename(s) if s else s)
 
 
 
-def send_verification_email(to_email, token, first_name):
-    verify_url = url_for("verify_email", token=token, _external=True)
-    html = render_template("email_verification.html", verify_url=verify_url, first_name=first_name)
-    try:
-        msg = MailMessage(subject="Verify your Care Companion account", recipients=[to_email], html=html)
-        mail.send(msg)
-    except Exception as e:
-       import traceback
 
-       print("\n===== EMAIL ERROR =====")
-       print("Recipient:", to_email)
-       print("Verify URL:", verify_url)
-       print("Error:", str(e))
-       traceback.print_exc()
-       print("=======================\n") 
+def send_verification_email(to_email, token, first_name):
+    try:
+        verify_url = url_for("verify_email", token=token, _external=True)
+        html = render_template(
+            "email_verification.html",
+            verify_url=verify_url,
+            first_name=first_name
+        )
+
+        msg = MailMessage(
+            subject="Verify your Care Companion account",
+            recipients=[to_email],
+            html=html
+        )
+        mail.send(msg)
+        app.logger.info("Verification email sent successfully")
+        return True
+
+    except Exception:
+        app.logger.exception("Failed to send verification email")
+        return False
+
 
 
 def generate_reset_token(email):
@@ -3347,10 +3352,15 @@ def register():
         db.session.add(new_user)
         db.session.commit()
 
+        
         token = ts.dumps(email, salt=app.config["SECURITY_PASSWORD_SALT"])
-        send_verification_email(email, token, first_name)
+        email_sent = send_verification_email(email, token, first_name)
 
-        flash("Registration successful - we sent a verification email. Check your inbox (and spam).", "info")
+        if email_sent:
+            flash("Registration successful. Check your inbox and spam folder for the verification email.", "info")
+        else:
+            flash("Your account was created, but the verification email could not be sent. Please try again later.", "error")
+
         return redirect(url_for("register", role=role, success="1"))
 
     return render_template("registration.html", role=role, form_data={}, success=success)
