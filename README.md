@@ -4,7 +4,7 @@ A production-ready full-stack caregiving platform that connects individuals and 
 
 ## 🌐 Live Website
 
-https://findcarecompanion.com
+https://care-companion-6bhw.onrender.com
 
 ## 🚀 Features
 
@@ -73,7 +73,7 @@ LinkedIn:
 https://www.linkedin.com/in/charles-omeneki-936154145
 
 Portfolio:
-https://findcarecompanion.com
+https://care-companion-6bhw.onrender.com
 
 
 
